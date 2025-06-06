@@ -1,8 +1,8 @@
 // mentos.js – Tracker-Logik über Backend-Routen
 
-// Das Frontend soll mit dem gleichen Backend wie beim Login
-// kommunizieren. Daher hier ebenfalls localhost verwenden.
-const BACKEND_URL = "";
+// Das Frontend kommuniziert mit dem Backend unter
+// https://rischis-kiosk-hdoi.onrender.com
+const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
 
 async function loadUserAndSessions() {
   try {

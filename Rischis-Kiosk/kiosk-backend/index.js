@@ -7,7 +7,11 @@ require('dotenv').config();
 
 const app = express(); // ✅ Muss vor app.use(...) stehen
 
-const allowedOrigins = ['http://localhost:8080', 'http://127.0.0.1:8080'];
+const allowedOrigins = [
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'https://rischis-kiosk-hdoi.onrender.com'
+];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -39,5 +43,5 @@ app.use('/api/admin/purchases', require('./routes/admin/purchases'));
 // Server starten
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Backend läuft auf http://localhost:${PORT}`);
+  console.log(`✅ Backend läuft auf https://rischis-kiosk-hdoi.onrender.com:${PORT}`);
 });
