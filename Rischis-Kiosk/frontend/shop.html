@@ -13,7 +13,6 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="shop.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
@@ -199,7 +198,6 @@ async function loadCategories() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) return showMessage("Fehler beim Laden des Nutzers.", 'error');
       currentUser = user;
-      setupActivityTracking(user.id);
       document.getElementById('user-email').textContent = user.email;
 
       const { data, error: balanceError } = await supabase.from('users').select('balance').eq('id', user.id).single();
