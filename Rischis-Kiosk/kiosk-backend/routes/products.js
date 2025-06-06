@@ -8,14 +8,33 @@ const supabase = createClient(
 );
 
 router.get('/', async (req, res) => {
+  let role = null;
+  const token = req.cookies['sb-access-token'];
+  if (token) {
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (user) {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      role = profile?.role || null;
+    }
+  }
+
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .eq('available', true)
     .order('price', { ascending: true });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  const sanitized = data.map(p => {
+    if (role !== 'admin') delete p.purchase_price;
+    return p;
+  });
+
+  res.json(sanitized);
 });
 
 module.exports = router;
