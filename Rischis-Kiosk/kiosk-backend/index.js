@@ -31,8 +31,7 @@ app.get('/env.js', (req, res) => {
   res.type('application/javascript');
   res.send(`window.ENV = ${JSON.stringify({
     SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-    SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY
   })};`);
 });
 
@@ -54,7 +53,7 @@ app.use('/feed', require('./routes/feed'));
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
+  process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_ANON_KEY
 );
 
 app.get('/auth/me', async (req, res) => {

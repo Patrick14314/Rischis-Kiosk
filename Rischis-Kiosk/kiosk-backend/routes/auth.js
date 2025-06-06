@@ -5,7 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 // Supabase-Client
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
+  process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_ANON_KEY
 );
 
 // 🔐 LOGIN
