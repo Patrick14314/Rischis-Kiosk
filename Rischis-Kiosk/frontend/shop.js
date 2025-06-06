@@ -1,5 +1,15 @@
-// shop.js – Produkte laden und kaufen
 const productList = document.getElementById('product-list');
+
+// Supabase-Session aus Cookie setzen
+const token = getCookie("sb-access-token");
+if (token) {
+  supabase.auth.setSession({
+    access_token: token,
+    refresh_token: "" // wird nicht benötigt, weil du kein Refresh im Cookie speicherst
+  }).then(() => {
+    console.log("Supabase Session gesetzt aus Cookie");
+  });
+}
 
 async function loadProducts() {
   const res = await fetch('/api/products', { credentials: 'include' });
@@ -40,4 +50,6 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-window.onload = loadProducts;
+window.onload = () => {
+  loadProducts();
+};
