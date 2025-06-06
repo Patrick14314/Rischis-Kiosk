@@ -2,7 +2,7 @@
 const productList = document.getElementById('product-list');
 
 async function loadProducts() {
-  const res = await fetch('http://localhost:3000/api/products', { credentials: 'include' });
+  const res = await fetch('/api/products', { credentials: 'include' });
   const products = await res.json();
 
   productList.innerHTML = '';
@@ -20,7 +20,7 @@ async function loadProducts() {
 }
 
 async function buyProduct(productId) {
-  const res = await fetch('http://localhost:3000/api/buy', {
+  const res = await fetch('/api/buy', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

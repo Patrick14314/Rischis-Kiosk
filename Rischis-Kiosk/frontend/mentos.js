@@ -2,7 +2,7 @@
 
 // Das Frontend soll mit dem gleichen Backend wie beim Login
 // kommunizieren. Daher hier ebenfalls localhost verwenden.
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = "";
 
 async function loadUserAndSessions() {
   try {

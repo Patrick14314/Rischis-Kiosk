@@ -1,6 +1,6 @@
 // admin.js – Admin-Übersicht für Produkte und Stats
 async function loadStats() {
-  const res = await fetch('http://localhost:3000/api/admin/stats', {
+  const res = await fetch('/api/admin/stats', {
     credentials: 'include',
     headers: {
       'Authorization': 'Bearer ' + getCookie('sb-access-token')
