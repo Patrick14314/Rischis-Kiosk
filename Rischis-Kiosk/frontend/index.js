@@ -44,6 +44,21 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (!res.ok) throw new Error(result.error || 'Login fehlgeschlagen');
 
     showMessage("Login erfolgreich! Weiterleitung...", true);
+    
+    // Supabase Session setzen
+    const token = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('sb-access-token='))
+      ?.split('=')[1];
+
+    if (token) {
+      const supabase = window.supabase.createClient(
+        "https://izkuiqjhzeeirmcikbef.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      );
+      await supabase.auth.setSession({ access_token: token, refresh_token: "" });
+    }
+
     setTimeout(() => {
       window.location.href = 'dashboard.html';
     }, 1000);
