@@ -1,11 +1,10 @@
-// kiosk-backend/index.js
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 require('dotenv').config();
 
-const app = express(); // ✅ Muss vor app.use(...) stehen
+const app = express();
 
 const allowedOrigins = [
   'http://localhost:8080',
@@ -27,7 +26,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Falls du das Frontend lokal servieren willst:
+// Static Frontend (optional)
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // API-Routen
@@ -39,8 +38,34 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin/products', require('./routes/admin/products'));
 app.use('/api/admin/stats', require('./routes/admin/stats'));
 app.use('/api/admin/purchases', require('./routes/admin/purchases'));
-// Mentos-Fütterungen
 app.use('/feed', require('./routes/feed'));
+
+// ➕ NEU: GET /auth/me (direkt hier eingebaut)
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+app.get('/auth/me', async (req, res) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.status(401).json({ loggedIn: false });
+  }
+
+  try {
+    const { data: userData, error } = await supabase.auth.getUser(token);
+
+    if (error || !userData?.user) {
+      return res.status(401).json({ loggedIn: false });
+    }
+
+    res.json({ loggedIn: true, user: userData.user });
+  } catch (err) {
+    res.status(500).json({ loggedIn: false });
+  }
+});
 
 // Server starten
 const PORT = process.env.PORT || 3000;
