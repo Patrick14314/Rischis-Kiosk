@@ -1,6 +1,9 @@
 // dashboard.js – Admin-Zugriff und Session-Check
 
-const BACKEND_URL = "https://rischis-kiosk.onrender.com";
+// Backend-URL auf localhost setzen, damit Login und Dashboard
+// gegen denselben Server laufen. Sonst wird das Cookie nicht
+// mitgeschickt und der User wirkt sofort ausgeloggt.
+const BACKEND_URL = "http://localhost:3000";
 
 async function checkUserAndRole() {
   console.log('🟡 Dashboard: Usercheck startet');
