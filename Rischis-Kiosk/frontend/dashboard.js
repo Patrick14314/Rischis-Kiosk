@@ -1,35 +1,45 @@
-// dashboard.js – Admin-Zugriff und Session-Check
+// dashboard.js – Session-Check mit optionaler Admin-Logik
+const BACKEND_URL = location.hostname.includes('localhost') ? 'http://localhost:3000' : '';
 
-// Das Backend befindet sich auf derselben Domain wie das Frontend,
-// daher reicht ein leerer Prefix für die API-Routen.
-const BACKEND_URL = "";
-
-async function checkUserAndRole() {
+// Session prüfen (über /auth/me)
+async function checkSessionAndRole() {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
-    const user = await res.json();
+    const res = await fetch(`${BACKEND_URL}/auth/me`, {
+      method: 'GET',
+      credentials: 'include'
+    });
 
-    if (!user?.id) {
+    const result = await res.json();
+
+    if (!result.loggedIn || !result.user) {
       window.location.href = 'index.html';
       return;
     }
 
-    if (user.role === 'admin') {
+    // Zeige Begrüßung
+    document.getElementById('welcome')!.textContent = `Willkommen, ${result.user.email}`;
+
+    // Falls du zusätzliche Rollenprüfung brauchst:
+    const userRes = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
+    const userInfo = await userRes.json();
+
+    if (userInfo.role === 'admin') {
       document.getElementById('admin-btn')?.classList.remove('hidden');
     }
   } catch (err) {
-    console.error("Fehler beim Laden des Nutzers", err);
+    console.error("Fehler beim Session-/Rollencheck:", err);
     window.location.href = 'index.html';
   }
 }
 
+// Darkmode beibehalten
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', isDark ? 'true' : 'false');
 }
-
 if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-window.addEventListener('DOMContentLoaded', checkUserAndRole);
+// Start
+window.addEventListener('DOMContentLoaded', checkSessionAndRole);
