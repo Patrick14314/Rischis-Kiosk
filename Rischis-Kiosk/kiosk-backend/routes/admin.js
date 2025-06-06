@@ -1,8 +1,8 @@
 // routes/admin.js
 const express = require('express');
 const router = express.Router();
-const supabaseAdmin = require('../supabaseAdmin');
 
+const supabaseAdmin = require('../supabaseAdmin'); // <-- sicher!
 
 // Route: GET /api/admin/purchases
 router.get('/purchases', async (req, res) => {
@@ -15,12 +15,14 @@ router.get('/purchases', async (req, res) => {
     toDate.setMonth(fromDate.getMonth() + 1);
   }
 
-  const query = supabase
+  const query = supabaseAdmin
     .from('purchases')
     .select('created_at, user_name, product_name, price, purchase_price');
 
   if (fromDate && toDate) {
-    query.gte('created_at', fromDate.toISOString()).lt('created_at', toDate.toISOString());
+    query
+      .gte('created_at', fromDate.toISOString())
+      .lt('created_at', toDate.toISOString());
   }
 
   const { data, error } = await query.order('created_at', { ascending: false });
