@@ -1,6 +1,9 @@
 // index.js – Login und Registrierung via Backend statt direkter Supabase-Nutzung
 
-const BACKEND_URL = "https://rischis-kiosk.onrender.com";
+// Das Backend läuft unter derselben Domain wie das Frontend,
+// daher wird hier kein fester Host angegeben. So bleiben
+// API-Aufrufe auch bei Domainänderungen funktionsfähig.
+const BACKEND_URL = "";
 
 function showMessage(text, success = false) {
   const message = document.getElementById('message');

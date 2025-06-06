@@ -1,6 +1,9 @@
 // shop.js – ersetzt Supabase-Zugriffe durch sichere API-Aufrufe an dein Backend
 
-const BACKEND_URL = "https://rischis-kiosk.onrender.com";
+// API-Aufrufe gehen an dieselbe Domain wie die Seite selbst.
+// Dadurch wird das Cookie korrekt mitgesendet, auch wenn sich
+// die Domain ändert.
+const BACKEND_URL = "";
 
 let currentUser = null;
 let userBalance = 0;
