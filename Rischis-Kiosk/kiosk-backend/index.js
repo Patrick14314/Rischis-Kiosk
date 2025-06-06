@@ -39,6 +39,8 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin/products', require('./routes/admin/products'));
 app.use('/api/admin/stats', require('./routes/admin/stats'));
 app.use('/api/admin/purchases', require('./routes/admin/purchases'));
+// Mentos-Fütterungen
+app.use('/feed', require('./routes/feed'));
 
 // Server starten
 const PORT = process.env.PORT || 3000;
