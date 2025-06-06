@@ -1,12 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_ANON_KEY;
 
-if (!serviceRoleKey) {
-  console.warn("⚠️ SUPABASE_SERVICE_ROLE ist nicht gesetzt!");
+if (!supabaseKey) {
+  console.warn("⚠️ Weder SUPABASE_SERVICE_ROLE noch SUPABASE_ANON_KEY gesetzt!");
 }
 
-const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 module.exports = supabaseAdmin;
