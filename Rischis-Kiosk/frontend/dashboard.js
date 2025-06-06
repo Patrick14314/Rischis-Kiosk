@@ -1,6 +1,8 @@
 // dashboard.js – Admin-Zugriff und Session-Check
 
-const BACKEND_URL = "https://rischis-kiosk.onrender.com";
+// Das Backend befindet sich auf derselben Domain wie das Frontend,
+// daher reicht ein leerer Prefix für die API-Routen.
+const BACKEND_URL = "";
 
 async function checkUserAndRole() {
   try {
