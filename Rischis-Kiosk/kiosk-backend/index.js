@@ -26,6 +26,16 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Endpoint to expose environment variables for the frontend
+app.get('/env.js', (req, res) => {
+  res.type('application/javascript');
+  res.send(`window.ENV = ${JSON.stringify({
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE
+  })};`);
+});
+
 // Static Frontend (optional)
 app.use(express.static(path.join(__dirname, '../frontend')));
 
