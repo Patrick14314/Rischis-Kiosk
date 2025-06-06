@@ -202,7 +202,11 @@ async function loadCategories() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) return showMessage("Fehler beim Laden des Nutzers.", 'error');
       currentUser = user;
-      setupActivityTracking(user.id);
+      if (typeof setupActivityTracking === 'function') {
+        setupActivityTracking(user.id);
+      } else {
+        console.warn('setupActivityTracking not available');
+      }
       document.getElementById('user-email').textContent = user.email;
 
       const { data, error: balanceError } = await supabase.from('users').select('balance').eq('id', user.id).single();
