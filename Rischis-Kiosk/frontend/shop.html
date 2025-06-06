@@ -14,6 +14,7 @@
     tailwind.config = { darkMode: 'class' };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="activity.js"></script>
   <script src="shop.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
@@ -147,15 +148,6 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
     );
 
-function setupActivityTracking(userId) {
-  supabase.from('activity_log').insert({
-    user_id: userId,
-    action: 'shop_opened'
-  }).then(({ error }) => {
-    if (error) console.error('Aktivitäts-Tracking fehlgeschlagen', error);
-    else console.log('Aktivität erfasst');
-  });
-}
 
 
       let currentUser = null;
