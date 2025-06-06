@@ -26,7 +26,14 @@ router.post('/login', async (req, res) => {
   });
 
 
-  res.json({ message: 'Login erfolgreich', user: data.user });
+  res.json({
+    message: 'Login erfolgreich',
+    user: data.user,
+    session: {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token
+    }
+  });
 });
 
 // Registrieren-Route

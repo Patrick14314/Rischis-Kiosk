@@ -8,6 +8,7 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -89,6 +90,11 @@
       document.documentElement.classList.add('dark');
     }
 
+    const supabase = window.supabase.createClient(
+      "https://izkuiqjhzeeirmcikbef.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
+    );
+
     const message = document.getElementById('message');
 
     function showMessage(text, success = false) {
@@ -119,6 +125,12 @@
 
       const data = await res.json();
       if (res.ok) {
+        if (data.session) {
+          await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token
+          });
+        }
         showMessage("Login erfolgreich! Weiterleitung...", true);
         setTimeout(() => window.location.href = 'dashboard.html', 1000);
       } else {
