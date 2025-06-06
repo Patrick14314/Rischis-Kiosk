@@ -19,11 +19,11 @@ router.post('/login', async (req, res) => {
 
   // Cookie setzen (nur Beispiel, echte Cookies benötigen zusätzliches Handling!)
   res.cookie('sb-access-token', data.session.access_token, {
-  httpOnly: true,
-  secure: false, // wichtig: FALSE für localhost
-  sameSite: 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
-});
+    httpOnly: true,
+    secure: true, // Cookies nur über HTTPS senden
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
+  });
 
 
   res.json({ message: 'Login erfolgreich', user: data.user });
