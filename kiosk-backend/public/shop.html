@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Rischis Kiosk">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="theme-color" content="#0f172a">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Rischis Kiosk" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#0f172a" />
   <title>Rischis Kiosk – Shop</title>
 
   <!-- Tailwind & Supabase -->
@@ -22,7 +22,7 @@
   <script src="shop.js" defer></script>
 
   <!-- Fonts und Styles -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet" />
   <style>
     html {
       scroll-behavior: smooth;
@@ -34,7 +34,8 @@
     }
     body {
       font-family: 'Inter', sans-serif;
-      max-width: 100vw; overflow-x: hidden;
+      max-width: 100vw;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
@@ -96,6 +97,8 @@
       <ul id="purchase-history" class="overflow-x-auto block space-y-2 text-sm"></ul>
     </div>
   </div>
+
+  <!-- Darkmode Toggle -->
   <script>
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
@@ -103,6 +106,40 @@
     }
     if (localStorage.getItem('darkMode') !== 'false') {
       document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <!-- Supabase Session + /activity call -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://izkuiqjhzeeirmcikbef.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0'
+    );
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+
+    if (!token) {
+      alert("Du bist nicht eingeloggt.");
+      // Optional: window.location.href = "/login.html";
+    } else {
+      const user = sessionData.session.user;
+      document.getElementById('user-email').textContent = user.email;
+
+      try {
+        await fetch('/activity', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({})
+        });
+      } catch (err) {
+        console.error("Fehler beim /activity-Aufruf:", err);
+      }
     }
   </script>
 </body>
