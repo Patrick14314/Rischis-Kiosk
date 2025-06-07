@@ -187,32 +187,47 @@ function loadMorePurchases() { loadPurchases(false); }
 async function loadUserPasswords() {
   const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
   const data = await res.json();
-  document.getElementById('user-manage-list').innerHTML = data.map(u => `
-    <li class="flex justify-between items-center gap-2">
-      <span>${u.name} (${u.email})</span>
-      <button onclick="editUser('${u.id}', '${u.name.replace(/'/g, "\'")}")" class="bg-blue-600 text-white px-2 rounded hover:bg-blue-700">Bearbeiten</button>
-    </li>`).join('');
+  const list = document.getElementById('user-manage-list');
+  list.innerHTML = '';
+  data.forEach(u => {
+    const li = document.createElement('li');
+    li.className = 'flex justify-between items-center gap-2';
+    const span = document.createElement('span');
+    span.textContent = `${u.name} (${u.email})`;
+    const btn = document.createElement('button');
+    btn.textContent = 'Bearbeiten';
+    btn.className = 'bg-blue-600 text-white px-2 rounded hover:bg-blue-700';
+    btn.addEventListener('click', () => editUser(u.id, u.name));
+    li.append(span, btn);
+    list.appendChild(li);
+  });
 }
 
 async function editUser(id, currentName) {
   const newName = prompt('Neuer Name:', currentName);
   if (newName && newName.trim() !== '') {
-    await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ name: newName.trim() })
     });
+    if (!res.ok) {
+      return alert('Fehler beim Speichern des Namens');
+    }
   }
   const newPw = prompt('Neues Passwort (mind. 6 Zeichen, leer lassen zum Überspringen):');
   if (newPw) {
     if (newPw.length < 6) return alert('Passwort zu kurz.');
-    await fetch(`${BACKEND_URL}/api/admin/users/${id}/password`, {
+    const resPw = await fetch(`${BACKEND_URL}/api/admin/users/${id}/password`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ password: newPw })
     });
+    if (!resPw.ok) {
+      return alert('Fehler beim Ändern des Passworts');
+    }
   }
   alert('Benutzerdaten gespeichert!');
   loadUserPasswords();
