@@ -44,6 +44,7 @@ app.use("/api/admin", require("./routes/admin"));
 app.use("/api/admin/products", require("./routes/admin/products"));
 app.use("/api/admin/purchases", require("./routes/admin/purchases"));
 app.use("/api/admin/stats", require("./routes/admin/stats"));
+app.use('/api/activity', require('./routes/activity'));
 
 
 // Server starten
