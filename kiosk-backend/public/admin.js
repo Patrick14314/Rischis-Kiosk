@@ -154,12 +154,6 @@ async function loadStats() {
     <p class="text-sm"><strong>Gesamtsaldo aller Nutzer:</strong> <span class="${totalBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${totalBalance.toFixed(2)} €</span></p>`;
 }
 
-async function confirmResetStats() {
-  if (!confirm('Bist du sicher, dass du alle Statistiken zurücksetzen möchtest?')) return;
-  await fetch(`${BACKEND_URL}/api/admin/stats/reset`, { method: 'POST', credentials: 'include' });
-  loadStats();
-  loadPurchases(true);
-}
 
 // ---------- Käufe ----------
 let purchasesVisible = false;

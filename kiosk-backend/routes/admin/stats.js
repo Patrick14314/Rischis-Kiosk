@@ -24,22 +24,5 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.post('/reset', async (req, res) => {
-  const { error: userError } = await supabase
-    .from('users')
-    .update({ balance: 0 })
-    .not('id', 'is', null);
-
-  const { error: purchaseError } = await supabase
-    .from('purchases')
-    .delete()
-    .not('id', 'is', null);
-
-  if (userError || purchaseError) {
-    return res.status(500).json({ error: userError?.message || purchaseError?.message });
-  }
-
-  res.status(200).json({ message: 'Statistiken zurückgesetzt' });
-});
 
 export default router;
