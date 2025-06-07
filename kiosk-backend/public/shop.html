@@ -15,8 +15,6 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <!-- Externe Scripts -->
   <script src="activity.js"></script>
   <script src="shop.js" defer></script>
@@ -109,38 +107,5 @@
     }
   </script>
 
-  <!-- Supabase Session + /activity call -->
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    const supabase = createClient(
-      'https://izkuiqjhzeeirmcikbef.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0'
-    );
-
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData?.session?.access_token;
-
-    if (!token) {
-      alert("Du bist nicht eingeloggt.");
-      // Optional: window.location.href = "/login.html";
-    } else {
-      const user = sessionData.session.user;
-      document.getElementById('user-email').textContent = user.email;
-
-      try {
-        await fetch('/activity', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({})
-        });
-      } catch (err) {
-        console.error("Fehler beim /activity-Aufruf:", err);
-      }
-    }
-  </script>
 </body>
 </html>

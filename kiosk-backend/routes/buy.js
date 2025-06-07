@@ -8,7 +8,11 @@ const supabase = createClient(
 );
 
 router.post('/', async (req, res) => {
-  const token = req.headers.authorization?.split('Bearer ')[1];
+  // Token bevorzugt aus dem Cookie lesen, Fallback auf Authorization-Header
+  let token = req.cookies?.['sb-access-token'];
+  if (!token) {
+    token = req.headers.authorization?.split('Bearer ')[1];
+  }
   if (!token) return res.status(401).json({ error: 'Kein Token übergeben' });
 
   const { product_id, quantity } = req.body;

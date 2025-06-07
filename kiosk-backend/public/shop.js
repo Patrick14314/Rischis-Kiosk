@@ -71,7 +71,7 @@ async function loadPurchaseHistory() {
   try {
     const sortOption = document.getElementById('sort-history')?.value || 'desc';
 
-    const res = await fetch(`${BACKEND_URL}/api/history?sort=${sortOption}`, {
+    const res = await fetch(`${BACKEND_URL}/api/purchases?sort=${sortOption}`, {
       credentials: 'include'
     });
     const history = await res.json();
