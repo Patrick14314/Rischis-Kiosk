@@ -18,11 +18,12 @@ router.post('/login', async (req, res) => {
   }
 
   // Zugriffstoken im Cookie setzen
+  // Token im Cookie speichern. Domain-Angabe entfernen, damit der Cookie
+  // direkt an die Backend-Domain gebunden ist und zuverlässig gesendet wird.
   res.cookie('sb-access-token', data.session.access_token, {
     httpOnly: true,
     secure: true,             // über HTTPS – für lokal ggf. false setzen
     sameSite: 'none',         // Cookie auch bei CORS-Anfragen senden
-    domain: '.onrender.com',  // Subdomain-übergreifend nutzbar
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
   });
 
@@ -81,11 +82,13 @@ router.post('/register', async (req, res) => {
 
 // 🧼 LOGOUT
 router.post('/logout', (req, res) => {
+  // Session-Cookie entfernen. Domain wird nicht gesetzt, damit das
+  // Löschen immer funktioniert, egal von welcher Subdomain der
+  // Aufruf kommt.
   res.clearCookie('sb-access-token', {
     httpOnly: true,
     secure: true,
-    sameSite: 'none',
-    domain: '.onrender.com'
+    sameSite: 'none'
   });
 
   res.json({ message: 'Logout erfolgreich' });
