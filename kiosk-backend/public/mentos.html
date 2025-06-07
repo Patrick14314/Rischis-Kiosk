@@ -13,7 +13,6 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="activity.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
@@ -109,10 +108,7 @@
       document.documentElement.classList.add('dark');
     }
 
-    const supabase = window.supabase.createClient(
-      "https://izkuiqjhzeeirmcikbef.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
-    );
+    const BACKEND_URL = "";
 
     let countdownInterval;
 
@@ -120,26 +116,21 @@
     const resetTimerBtn = document.getElementById('reset-timer-btn');
     const clearHistoryBtn = document.getElementById('clear-history-btn');
 
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data?.user) return;
-      setupActivityTracking(data.user.id);
-      const { data: profile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-      if (profile?.role === 'admin') {
-        adminButtons.classList.remove('hidden');
-      }
-    });
+    fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(user => {
+        if (user) {
+          setupActivityTracking(user.id);
+          if (user.role === 'admin') {
+            adminButtons.classList.remove('hidden');
+          }
+        }
+      });
 
     async function loadFeedings() {
-      const { data, error } = await supabase
-        .from('mentos_feedings')
-        .select('zeitstempel,futterart,gefuettert_von')
-        .order('zeitstempel', { ascending: false })
-        .limit(20);
-      if (error) return;
+      const res = await fetch(`${BACKEND_URL}/api/feedings`);
+      if (!res.ok) return;
+      const data = await res.json();
       updateTable(data);
       if (data.length) startCountdown(new Date(data[0].zeitstempel));
     }
@@ -172,9 +163,12 @@
     }
 
     async function addFeeding(type) {
-      const { data: auth } = await supabase.auth.getUser();
-      const name = auth?.user ? (auth.user.user_metadata?.name || auth.user.email.split('@')[0]) : null;
-      await supabase.from('mentos_feedings').insert({ futterart: type, gefuettert_von: name });
+      await fetch(`${BACKEND_URL}/api/feedings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ type })
+      });
       loadFeedings();
     }
 
@@ -189,10 +183,10 @@
       }
 
     async function clearFeedingHistory() {
-      await supabase
-        .from('mentos_feedings')
-        .delete()
-        .gt('zeitstempel', '1900-01-01');
+      await fetch(`${BACKEND_URL}/api/feedings`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
       resetTimerDisplay();
       loadFeedings();
     }
