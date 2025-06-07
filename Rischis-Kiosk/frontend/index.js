@@ -1,3 +1,7 @@
+// Basis-URL des Backends
+// Hier wird der Endpunkt genutzt, der auf Render als Backend
+// deployt ist. Alle API-Aufrufe des Frontends verwenden diese
+// Konstante, damit Frontend und Backend korrekt kommunizieren.
 const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
 
 // Meldung anzeigen
