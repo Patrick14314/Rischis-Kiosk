@@ -32,7 +32,13 @@ router.post('/login', async (req, res) => {
   if (process.env.COOKIE_DOMAIN) {
     cookieOptions.domain = process.env.COOKIE_DOMAIN;
   }
-  res.cookie('sb-access-token', data.session.access_token, cookieOptions);
+  res.cookie('sb-access-token', data.session.access_token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',  // Nur HTTPS in Produktion
+  sameSite: 'none',
+  maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
 
   res.json({
     message: 'Login erfolgreich',
