@@ -39,7 +39,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const password = document.getElementById('login-password').value;
 
   try {
-    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include', // wichtig für Cookies
@@ -70,7 +70,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   if (password !== repeat) return showMessage("Passwörter stimmen nicht überein.");
 
   try {
-    const res = await fetch(`${BACKEND_URL}/auth/register`, {
+    const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
