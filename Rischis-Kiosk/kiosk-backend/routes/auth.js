@@ -22,6 +22,7 @@ router.post('/login', async (req, res) => {
     httpOnly: true,
     secure: true,             // über HTTPS – für lokal ggf. false setzen
     sameSite: 'none',         // Cookie auch bei CORS-Anfragen senden
+    domain: '.onrender.com',  // Subdomain-übergreifend nutzbar
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
   });
 
@@ -83,7 +84,8 @@ router.post('/logout', (req, res) => {
   res.clearCookie('sb-access-token', {
     httpOnly: true,
     secure: true,
-    sameSite: 'none'
+    sameSite: 'none',
+    domain: '.onrender.com'
   });
 
   res.json({ message: 'Logout erfolgreich' });
