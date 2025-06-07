@@ -1,7 +1,21 @@
 // kiosk-backend/utils/getUser.js
-function getUser(req) {
-  const userId = req.headers['x-user-id']; // oder ein JWT auswerten etc.
-  return { id: userId };
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
+async function getUserFromRequest(req) {
+  const token = req.headers['authorization']?.replace('Bearer ', '');
+
+  if (!token) return null;
+
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+
+  if (error || !user) return null;
+
+  return user;
 }
 
-module.exports = getUser;
+module.exports = getUserFromRequest;
