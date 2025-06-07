@@ -1,26 +1,6 @@
-// admin.js – Adminlogik über gesicherte Backend-API
+const BACKEND_URL = '';
 
-// Basis-URL des Backends
-// Backend und Frontend laufen auf derselben Domain
-const BACKEND_URL = "";
-
-// Supabase Client initialisieren
-const supabase = window.supabase.createClient(
-  "https://izkuiqjhzeeirmcikbef.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
-);
-const adminClient = window.supabase.createClient(
-  "https://izkuiqjhzeeirmcikbef.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgwMDA5NCwiZXhwIjoyMDY0Mzc2MDk0fQ.yF2-AKGKcHFNpkIt-bg-YMhWjjLK74cLw6t3VfjDl8w"
-);
-
-function showMessage(msg, isError = false) {
-  const el = document.getElementById('product-result');
-  el.textContent = msg;
-  el.className = isError ? 'text-red-500 text-center mt-2' : 'text-green-600 text-center mt-2';
-  setTimeout(() => el.textContent = '', 4000);
-}
-
+// Darkmode
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', isDark ? 'true' : 'false');
@@ -33,293 +13,232 @@ function toggleSection(id) {
   document.getElementById(`${id}-container`)?.classList.toggle('hidden');
 }
 
-// Statistiken laden
-async function loadStats() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/admin/stats`, {
-      credentials: 'include'
-    });
-    const stats = await res.json();
-    if (!res.ok) throw new Error(stats.error);
-
-    document.getElementById('total-products').textContent = stats.total_products;
-    document.getElementById('total-stock').textContent = stats.total_stock;
-    document.getElementById('total-value').textContent = stats.total_value.toFixed(2) + ' €';
-    document.getElementById('total-profit').textContent = stats.total_profit.toFixed(2) + ' €';
-    document.getElementById('total-revenue').textContent = stats.total_revenue.toFixed(2) + ' €';
-  } catch (err) {
-    console.error(err);
-    showMessage("Fehler beim Laden der Statistik", true);
-  }
+// Hilfsfunktion für Datum
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) + ' ' +
+         d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin' });
 }
 
-// Kaufverlauf laden
-async function loadPurchases() {
-  try {
-    const month = document.getElementById('purchase-month')?.value;
-    const year = document.getElementById('purchase-year')?.value;
-    const query = month && year ? `?month=${month}&year=${year}` : '';
-
-    const res = await fetch(`${BACKEND_URL}/api/admin/purchases${query}`, {
-      credentials: 'include'
-    });
-    const purchases = await res.json();
-    if (!res.ok) throw new Error(purchases.error);
-
-    const table = document.getElementById('purchase-table');
-    table.innerHTML = '';
-
-    purchases.forEach(p => {
-      const tr = document.createElement('tr');
-      tr.className = 'border-b border-gray-200 dark:border-gray-700';
-      tr.innerHTML = `
-        <td class="p-2">${new Date(p.created_at).toLocaleString()}</td>
-        <td class="p-2">${p.user?.email || '-'}</td>
-        <td class="p-2">${p.product?.name || '-'}</td>
-        <td class="p-2">${p.price.toFixed(2)} €</td>
-        <td class="p-2">${p.purchase_price.toFixed(2)} €</td>
-      `;
-      table.appendChild(tr);
-    });
-  } catch (err) {
-    showMessage("Fehler beim Laden der Käufe", true);
-  }
-}
-
-// CSV exportieren
-async function exportCSV() {
-  const month = document.getElementById('purchase-month')?.value;
-  const year = document.getElementById('purchase-year')?.value;
-  const query = month && year ? `?month=${month}&year=${year}` : '';
-  const res = await fetch(`${BACKEND_URL}/api/admin/purchases${query}`, {
-    credentials: 'include'
-  });
-  const purchases = await res.json();
-  if (!res.ok) return alert('Fehler beim CSV Export');
-
-  const csv = ['Datum;Nutzer;Produkt;VK;EK'];
-  purchases.forEach(p => {
-    csv.push(`${new Date(p.created_at).toLocaleString()};${p.user?.email || '-'};${p.product?.name || '-'};${p.price.toFixed(2)};${p.purchase_price.toFixed(2)}`);
-  });
-
-  const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'käufe.csv';
-  link.click();
-}
-
-// Produkte laden
+// -------- Produkte --------
 async function loadProducts() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/admin/products`, { credentials: 'include' });
-    const products = await res.json();
-
-    const filter = document.getElementById('category-filter')?.value || 'all';
-    const list = document.getElementById('product-list');
-    list.innerHTML = '';
-
-    products.filter(p => filter === 'all' || p.category === filter).forEach(p => {
-      const li = document.createElement('li');
-      li.className = 'border p-4 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow';
-      li.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div>
-            <p class="font-semibold">${p.name}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">${p.price.toFixed(2)} € – Bestand: ${p.stock}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="toggleAvailability('${p.id}', ${p.available})" class="bg-yellow-500 text-white px-2 py-1 rounded">${p.available ? 'Verstecken' : 'Anzeigen'}</button>
-            <button onclick="editProduct('${p.id}', '${p.name}', ${p.price}, ${p.purchase_price}, ${p.stock}, '${p.category}')" class="bg-blue-600 text-white px-2 py-1 rounded">Bearbeiten</button>
-            <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-white px-2 py-1 rounded">Löschen</button>
-          </div>
+  const category = document.getElementById('category-filter')?.value || 'all';
+  const res = await fetch(`${BACKEND_URL}/api/admin/products`, { credentials: 'include' });
+  const data = await res.json();
+  const list = document.getElementById('product-list');
+  list.innerHTML = '';
+  data.filter(p => category === 'all' || p.category === category).forEach(p => {
+    const li = document.createElement('li');
+    li.className = 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md hover:shadow-lg transition-all';
+    li.innerHTML = `
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <p class="text-base font-semibold">${p.name}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">Preis: <strong>${p.price.toFixed(2)} €</strong> – Bestand: <strong>${p.stock}</strong> – Kategorie: <strong>${p.category || '-'}</strong></p>
         </div>
-      `;
-      list.appendChild(li);
-    });
-  } catch (err) {
-    console.error(err);
-    showMessage("Fehler beim Laden der Produkte", true);
-  }
+        <div class="flex flex-row gap-1 sm:ml-4">
+          <button onclick="toggleAvailability('${p.id}', ${p.available})" class="bg-yellow-500 text-white text-xs px-2 py-1 rounded shadow hover:bg-yellow-600 focus:outline-none">
+            ${p.available ? 'Verstecken' : 'Anzeigen'}
+          </button>
+          <button onclick="editProduct('${p.id}')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded shadow hover:bg-blue-700 focus:outline-none">
+            Bearbeiten
+          </button>
+          <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-white text-xs px-2 py-1 rounded shadow hover:bg-red-700 focus:outline-none">
+            Löschen
+          </button>
+        </div>
+      </div>`;
+    list.appendChild(li);
+  });
 }
 
-// Neues Produkt hinzufügen
+document.getElementById('category-filter')?.addEventListener('change', loadProducts);
+
 async function addProduct(e) {
   e.preventDefault();
   const name = document.getElementById('product-name').value.trim();
-  const price = parseFloat(document.getElementById('product-price').value);
-  const purchase = parseFloat(document.getElementById('product-purchase').value);
+  const price = parseFloat(document.getElementById('product-price').value.replace(',', '.'));
+  const purchase_price = parseFloat(document.getElementById('product-purchase').value.replace(',', '.'));
   const stock = parseInt(document.getElementById('product-stock').value);
   const category = document.getElementById('product-category').value;
-
-  if (!name || isNaN(price) || isNaN(purchase) || isNaN(stock) || !category) {
-    return showMessage("Bitte alle Felder korrekt ausfüllen", true);
-  }
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/admin/products`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ name, price, purchase_price: purchase, stock, category })
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-    showMessage("Produkt gespeichert");
+  const res = await fetch(`${BACKEND_URL}/api/admin/products`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ name, price, purchase_price, stock, category })
+  });
+  const result = await res.json();
+  document.getElementById('product-result').textContent = res.ok ? 'Produkt gespeichert!' : `Fehler: ${result.error}`;
+  if (res.ok) {
     e.target.reset();
+    loadStats();
     loadProducts();
-  } catch (err) {
-    showMessage("Fehler beim Speichern", true);
   }
 }
 
-// Produkt bearbeiten
-function editProduct(id, name, price, purchase, stock, category) {
-  document.getElementById('product-name').value = name;
-  document.getElementById('product-price').value = price;
-  document.getElementById('product-purchase').value = purchase;
-  document.getElementById('product-stock').value = stock;
-  document.getElementById('product-category').value = category;
+document.getElementById('add-product')?.addEventListener('submit', addProduct);
 
-  document.getElementById('add-product').onsubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const updated = {
-        name: document.getElementById('product-name').value.trim(),
-        price: parseFloat(document.getElementById('product-price').value),
-        purchase_price: parseFloat(document.getElementById('product-purchase').value),
-        stock: parseInt(document.getElementById('product-stock').value),
-        category: document.getElementById('product-category').value
-      };
-
-      const res = await fetch(`${BACKEND_URL}/api/admin/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(updated)
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error);
-      showMessage("Produkt aktualisiert");
-      e.target.reset();
-      loadProducts();
-    } catch (err) {
-      showMessage("Fehler beim Aktualisieren", true);
-    }
-  };
-}
-
-// Verfügbarkeit umschalten
-async function toggleAvailability(id, available) {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/admin/products/${id}/available`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ available: !available })
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-    loadProducts();
-  } catch (err) {
-    showMessage("Fehler beim Umschalten der Verfügbarkeit", true);
-  }
-}
-
-// Produkt löschen
-async function deleteProduct(id) {
-  if (!confirm("Wirklich löschen? Auch die dazugehörigen Käufe!")) return;
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/admin/products/${id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-    showMessage("Produkt gelöscht");
-    loadProducts();
-  } catch (err) {
-    showMessage("Fehler beim Löschen", true);
-  }
-}
-
-
-// Erweiterte Statistik & Käufe laden
-async function loadAdvancedStatsAndPurchases() {
-  const { data: purchases } = await // ersetzt durch API-Call
-await fetch('/api/admin/purchases').select('created_at, user_name, product_name, price, purchase_price');
-
-  // Statistik berechnen
-  const products = await await (await fetch('/api/admin/products')).json();
-  const stats = {
-    totalProducts: products.data.length,
-    totalStock: products.data.reduce((sum, p) => sum + (p.stock || 0), 0),
-    totalValue: products.data.reduce((sum, p) => sum + ((p.stock || 0) * (p.purchase_price || 0)), 0),
-    totalRevenue: purchases.reduce((sum, p) => sum + (p.price || 0), 0),
-    totalProfit: purchases.reduce((sum, p) => sum + ((p.price || 0) - (p.purchase_price || 0)), 0)
-  };
-
-  document.getElementById('total-products').textContent = stats.totalProducts;
-  document.getElementById('total-stock').textContent = stats.totalStock;
-  document.getElementById('total-value').textContent = stats.totalValue.toFixed(2) + " €";
-  document.getElementById('total-revenue').textContent = stats.totalRevenue.toFixed(2) + " €";
-  document.getElementById('total-profit').textContent = stats.totalProfit.toFixed(2) + " €";
-
-  // Kaufverlauf-Tabelle befüllen
-  const tbody = document.getElementById('purchase-table');
-  tbody.innerHTML = "";
-  purchases.forEach(p => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td class="p-2">${formatDateTime(p.created_at)}</td>
-      <td class="p-2">${p.user_name}</td>
-      <td class="p-2">${p.product_name}</td>
-      <td class="p-2">${p.price.toFixed(2)} €</td>
-      <td class="p-2">${p.purchase_price?.toFixed(2) ?? '-'}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-// CSV Export
-document.getElementById('purchase-export')?.addEventListener('click', async () => {
-  const month = parseInt(document.getElementById('purchase-month').value);
-  const year = parseInt(document.getElementById('purchase-year').value);
-  const { data } = await // ersetzt durch API-Call
-await fetch('/api/admin/purchases').select('created_at, user_name, product_name, price, purchase_price');
-
-  const filtered = data.filter(p => {
-    const date = new Date(p.created_at);
-    return (!month || date.getMonth() + 1 === month) && (!year || date.getFullYear() === year);
-  });
-
-  const csv = [
-    ["Datum", "Nutzer", "Produkt", "VK", "EK"],
-    ...filtered.map(p => [
-      formatDateTime(p.created_at),
-      p.user_name,
-      p.product_name,
-      p.price.toFixed(2).replace('.', ','),
-      p.purchase_price?.toFixed(2).replace('.', ',') ?? '-'
-    ])
-  ].map(r => r.join(";")).join("\n");
-
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `Käufe_${month || 'alle'}-${year || 'alle'}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-});
-
-window.addEventListener('DOMContentLoaded', () => {
-  // Authentifizierung sollte über Session oder Token erfolgen – Supabase entfernt.then(({ data }) => {
-    if (data?.user) setupActivityTracking(data.user.id);
+async function editProduct(id) {
+  const res = await fetch(`${BACKEND_URL}/api/admin/products` , { credentials: 'include' });
+  const products = await res.json();
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const newName = prompt('Neuen Produktnamen eingeben:', p.name);
+  const newPrice = prompt('Neuen Verkaufspreis in € eingeben:', p.price);
+  const newStock = prompt('Neuen Bestand eingeben:', p.stock);
+  if (!newName || !newPrice || !newStock) return;
+  await fetch(`${BACKEND_URL}/api/admin/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ name:newName, price:parseFloat(newPrice), stock:parseInt(newStock) })
   });
   loadProducts();
   loadStats();
-  loadAdvancedStatsAndPurchases();
-  document.getElementById('add-product')?.addEventListener('submit', addProduct);
-  document.getElementById('category-filter')?.addEventListener('change', loadProducts);
+}
+
+async function toggleAvailability(id, current) {
+  await fetch(`${BACKEND_URL}/api/admin/products/${id}/available`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ available: !current })
+  });
+  loadProducts();
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Produkt inklusive Käufen löschen?')) return;
+  await fetch(`${BACKEND_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
+  loadProducts();
+  loadStats();
+  loadPurchases(true);
+}
+
+// ---------- Statistik ----------
+async function loadStats() {
+  const res = await fetch(`${BACKEND_URL}/api/admin/stats`, { credentials: 'include' });
+  if (!res.ok) return;
+  const { users, totalBalance, shopValue, totalRevenue, totalCost, profit } = await res.json();
+  document.getElementById('stats').innerHTML = `
+    <p class="mt-4 text-sm"><strong>Produkte im Shop:</strong> ${users.length}</p>
+    <p class="text-sm"><strong>Shop-Warenwert:</strong> ${shopValue.toFixed(2)} €</p>
+    <hr class="my-3" />
+    <p class="text-sm"><strong>Verkaufserlöse:</strong> ${totalRevenue.toFixed(2)} €</p>
+    <p class="text-sm"><strong>Einkaufskosten:</strong> ${totalCost.toFixed(2)} €</p>
+    <p class="text-sm"><strong>Gewinn / Verlust:</strong> <span class="${profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${profit.toFixed(2)} €</span></p>
+    <hr class="my-3" />
+    <p class="text-sm"><strong>Gesamtsaldo aller Nutzer:</strong> <span class="${totalBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${totalBalance.toFixed(2)} €</span></p>`;
+}
+
+async function confirmResetStats() {
+  if (!confirm('Bist du sicher, dass du alle Statistiken zurücksetzen möchtest?')) return;
+  await fetch(`${BACKEND_URL}/api/admin/stats/reset`, { method: 'POST', credentials: 'include' });
+  loadStats();
+  loadPurchases(true);
+}
+
+// ---------- Käufe ----------
+let purchasesVisible = false;
+let purchaseOffset = 0;
+const purchaseLimit = 20;
+
+function togglePurchases() {
+  const c = document.getElementById('purchase-container');
+  purchasesVisible = !purchasesVisible;
+  if (purchasesVisible) {
+    c.classList.remove('hidden');
+    purchaseOffset = 0;
+    loadPurchases(true);
+  } else {
+    c.classList.add('hidden');
+    document.getElementById('purchase-history').innerHTML = '';
+  }
+}
+
+async function loadPurchases(initial = false) {
+  const res = await fetch(`${BACKEND_URL}/api/admin/purchases?offset=${purchaseOffset}&limit=${purchaseLimit}`, { credentials: 'include' });
+  const data = await res.json();
+  const list = document.getElementById('purchase-history');
+  const items = data.map(e => `<li>${formatDateTime(e.created_at)} – <strong>${e.user_name}</strong> kaufte <strong>${e.quantity || 1}x ${e.product_name}</strong> für ${e.price.toFixed(2)} €</li>`).join('');
+  if (initial) list.innerHTML = items; else list.innerHTML += items;
+  purchaseOffset += purchaseLimit;
+}
+
+function loadMorePurchases() { loadPurchases(false); }
+
+// ---------- Benutzer & Guthaben ----------
+async function loadUserPasswords() {
+  const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
+  const data = await res.json();
+  document.getElementById('user-manage-list').innerHTML = data.map(u => `
+    <li class="flex justify-between items-center gap-2">
+      <span>${u.name} (${u.email})</span>
+      <button onclick="editUser('${u.id}', '${u.name.replace(/'/g, "\'")}")" class="bg-blue-600 text-white px-2 rounded hover:bg-blue-700">Bearbeiten</button>
+    </li>`).join('');
+}
+
+async function editUser(id, currentName) {
+  const newName = prompt('Neuer Name:', currentName);
+  if (newName && newName.trim() !== '') {
+    await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ name: newName.trim() })
+    });
+  }
+  const newPw = prompt('Neues Passwort (mind. 6 Zeichen, leer lassen zum Überspringen):');
+  if (newPw) {
+    if (newPw.length < 6) return alert('Passwort zu kurz.');
+    await fetch(`${BACKEND_URL}/api/admin/users/${id}/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ password: newPw })
+    });
+  }
+  alert('Benutzerdaten gespeichert!');
+  loadUserPasswords();
+}
+
+async function loadUserBalances() {
+  const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
+  const data = await res.json();
+  document.getElementById('balance-control-list').innerHTML = data.map(u => {
+    const cls = u.balance < 0 ? 'text-red-600 dark:text-red-400 font-bold' : 'text-green-600 dark:text-green-400';
+    return `<li class="flex flex-wrap items-center gap-2">
+      <span class="flex-1">${u.name}: <span class="${cls}">${u.balance.toFixed(2)} €</span></span>
+      <input type="number" id="bal-${u.id}" class="w-20 border px-2 py-1" step="0.01" />
+      <button onclick="updateBalance('${u.id}', 'add')" class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">+</button>
+      <button onclick="updateBalance('${u.id}', 'subtract')" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">-</button>
+    </li>`;
+  }).join('');
+}
+
+async function updateBalance(id, action) {
+  const val = parseFloat(document.getElementById('bal-' + id).value);
+  if (isNaN(val)) return alert('Ungültiger Betrag.');
+  const res = await fetch(`${BACKEND_URL}/api/admin/users/${id}`, { credentials: 'include' });
+  const user = await res.json();
+  let newBalance = user.balance;
+  if (action === 'add') newBalance += val; else newBalance -= val;
+  await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ balance: newBalance })
+  });
+  alert('Guthaben aktualisiert.');
+  loadUserBalances();
+  loadStats();
+}
+
+// ---------- Initialisierung ----------
+window.addEventListener('DOMContentLoaded', () => {
+  loadStats();
+  loadProducts();
+  loadPurchases(true);
+  loadUserPasswords();
+  loadUserBalances();
 });

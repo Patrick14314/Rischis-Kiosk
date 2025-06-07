@@ -18,6 +18,7 @@ import purchases from './routes/purchases.js';
 import adminProducts from './routes/admin/products.js';
 import adminPurchases from './routes/admin/purchases.js';
 import adminStats from './routes/admin/stats.js';
+import adminUsers from './routes/admin/users.js';
 import activity from './routes/activity.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -62,6 +63,7 @@ app.use('/api/purchases', purchases);
 app.use('/api/admin/products', adminProducts);
 app.use('/api/admin/purchases', adminPurchases);
 app.use('/api/admin/stats', adminStats);
+app.use('/api/admin/users', adminUsers);
 app.use('/api/activity', activity);
 
 // Server starten
