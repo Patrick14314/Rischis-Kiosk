@@ -1,7 +1,7 @@
 // shop.js – ersetzt Supabase-Zugriffe durch sichere API-Aufrufe an dein Backend
 
 // Backend und Frontend laufen auf derselben Domain
-const BACKEND_URL = "";
+const BACKEND_URL = window.location.origin;
 
 let currentUser = null;
 let userBalance = 0;
