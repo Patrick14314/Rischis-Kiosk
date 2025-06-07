@@ -67,6 +67,35 @@ async function loadProducts() {
   }
 }
 
+async function loadPurchaseHistory() {
+  try {
+    const sortOption = document.getElementById('sort-history')?.value || 'desc';
+
+    const res = await fetch(`${BACKEND_URL}/api/history?sort=${sortOption}`, {
+      credentials: 'include'
+    });
+    const history = await res.json();
+
+    if (!Array.isArray(history)) throw new Error("Ungültige Antwort");
+
+    const list = document.getElementById('purchase-history');
+    list.innerHTML = '';
+
+    history.forEach(entry => {
+      const li = document.createElement('li');
+      const date = new Date(entry.created_at).toLocaleString('de-DE', {
+        timeZone: 'Europe/Berlin'
+      });
+      li.textContent = `${date}: ${entry.quantity || 1}x ${entry.product_name} – ${entry.price.toFixed(2)} €`;
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error(err);
+    showMessage("Fehler beim Laden des Kaufverlaufs", 'error');
+  }
+}
+
+
 async function buyProduct(productId, qtyInputId, productName, unitPrice) {
   const qty = parseInt(document.getElementById(qtyInputId)?.value || "1");
   if (!Number.isInteger(qty) || qty <= 0) return showMessage("Ungültige Menge", "error");
@@ -95,7 +124,11 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
 }
 
 // Start beim Laden
-window.addEventListener('DOMContentLoaded', () => {
-  loadUser();
-  loadProducts();
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadUser();
+  await loadProducts();
+  await loadPurchaseHistory();
 });
+
+document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
+
