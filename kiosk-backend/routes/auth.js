@@ -1,12 +1,6 @@
-const express = require('express');
+import express from 'express';
+import supabase from '../utils/supabase.js';
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
-
-// Supabase-Client
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
-);
 
 // 🔐 LOGIN
 router.post('/login', async (req, res) => {
@@ -110,4 +104,4 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logout erfolgreich' });
 });
 
-module.exports = router;
+export default router;

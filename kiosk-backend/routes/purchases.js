@@ -1,7 +1,7 @@
 // routes/purchases.js
-const express = require('express');
+import express from 'express';
+import supabase from '../utils/supabase.js';
 const router = express.Router();
-const supabase = require('../utils/supabase');
 
 // GET /api/purchases?sort=desc|asc|price_asc|price_desc
 router.get('/', async (req, res) => {
@@ -33,4 +33,4 @@ router.get('/', async (req, res) => {
   res.json(data);
 });
 
-module.exports = router;
+export default router;

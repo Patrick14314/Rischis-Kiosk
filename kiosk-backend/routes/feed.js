@@ -1,11 +1,6 @@
-const express = require('express');
+import express from 'express';
+import supabase from '../utils/supabase.js';
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
-);
 
 async function getUser(req) {
   const token = req.cookies['sb-access-token'];
@@ -38,4 +33,4 @@ router.post('/', async (req, res) => {
   res.json({ success: true });
 });
 
-module.exports = router;
+export default router;

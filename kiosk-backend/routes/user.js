@@ -1,11 +1,6 @@
-const express = require('express');
+import express from 'express';
+import supabase from '../utils/supabase.js';
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
-);
 
 router.get('/', async (req, res) => {
   const token = req.cookies['sb-access-token']; // <- Cookie statt Header
@@ -30,4 +25,4 @@ router.get('/', async (req, res) => {
   res.json({ ...data, online: session?.online || false });
 });
 
-module.exports = router;
+export default router;

@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
+import supabase from '../utils/supabase.js';
+import getUserFromRequest from '../utils/getUser.js';
 const router = express.Router();
-const supabase = require('../utils/supabase');
-const getUserFromRequest = require('../utils/getUser');
 
 router.post('/', async (req, res) => {
   const user = await getUserFromRequest(req);
@@ -16,4 +16,4 @@ router.post('/', async (req, res) => {
   res.json({ success: true });
 });
 
-module.exports = router;
+export default router;

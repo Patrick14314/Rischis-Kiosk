@@ -1,12 +1,12 @@
 // kiosk-backend/utils/getUser.js
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE
 );
 
-async function getUserFromRequest(req) {
+export default async function getUserFromRequest(req) {
   // Zuerst nach einem Bearer-Token im Authorization-Header suchen
   let token = req.headers['authorization']?.replace('Bearer ', '');
 
@@ -23,5 +23,3 @@ async function getUserFromRequest(req) {
 
   return user;
 }
-
-module.exports = getUserFromRequest;
