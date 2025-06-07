@@ -1,7 +1,7 @@
 // admin.js – Adminlogik über gesicherte Backend-API
 
 // Basis-URL des Backends
-const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
+const BACKEND_URL = "https://rischis-kiosk-t2uv.onrender.com";
 
 function showMessage(msg, isError = false) {
   const el = document.getElementById('product-result');

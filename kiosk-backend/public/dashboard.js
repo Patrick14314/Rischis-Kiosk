@@ -1,7 +1,7 @@
 // dashboard.js – Admin-Zugriff und Session-Check
 
 // Adresse des Backends
-const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
+const BACKEND_URL = "https://rischis-kiosk-t2uv.onrender.com";
 
 async function checkUserAndRole() {
   try {

@@ -1,8 +1,8 @@
 // mentos.js – Tracker-Logik über Backend-Routen
 
 // Das Frontend kommuniziert mit dem Backend unter
-// https://rischis-kiosk-hdoi.onrender.com
-const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
+// https://rischis-kiosk-t2uv.onrender.com
+const BACKEND_URL = "https://rischis-kiosk-t2uv.onrender.com";
 
 async function loadUserAndSessions() {
   try {
