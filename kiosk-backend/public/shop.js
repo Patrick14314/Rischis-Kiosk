@@ -1,7 +1,7 @@
 // shop.js – ersetzt Supabase-Zugriffe durch sichere API-Aufrufe an dein Backend
 
 // URL des Node-Backends auf Render
-const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
+const BACKEND_URL = "https://rischis-kiosk-t2uv.onrender.com";
 
 let currentUser = null;
 let userBalance = 0;
