@@ -36,7 +36,8 @@ async function loadUser() {
 
 async function loadProducts() {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/products`);
+    const sortOption = document.getElementById('sort-products')?.value || 'price_asc';
+    const res = await fetch(`${BACKEND_URL}/api/products?sort=${sortOption}`);
     const products = await res.json();
     const list = document.getElementById('product-list');
     list.innerHTML = '';
@@ -129,6 +130,7 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
 
 
 document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
+document.getElementById('sort-products')?.addEventListener('change', loadProducts);
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadUser();
@@ -136,4 +138,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadPurchaseHistory();
 
   document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
+  document.getElementById('sort-products')?.addEventListener('change', loadProducts);
 });
