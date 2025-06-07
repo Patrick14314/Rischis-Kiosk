@@ -1,13 +1,13 @@
-function setupActivityTracking(userId) {
-  if (typeof supabase === 'undefined') {
-    console.error('Supabase client not initialized');
-    return;
-  }
-  supabase.from('activity_log').insert({
-    user_id: userId,
-    action: 'shop_opened'
-  }).then(({ error }) => {
-    if (error) console.error('Aktivit\xe4ts-Tracking fehlgeschlagen', error);
-    else console.log('Aktivit\xe4t erfasst');
+function setupActivityTracking() {
+  fetch('/api/activity', {
+    method: 'POST',
+    credentials: 'include'
+  }).then(res => {
+    if (!res.ok) throw new Error("Fehler beim Tracking");
+    return res.json();
+  }).then(() => {
+    console.log("🟢 Aktivität gesendet");
+  }).catch(err => {
+    console.error("🔴 Tracking-Fehler:", err);
   });
 }
