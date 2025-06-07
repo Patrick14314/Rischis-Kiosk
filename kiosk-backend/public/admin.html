@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Rischis Kiosk">
   <meta name="format-detection" content="telephone=no">
@@ -14,9 +13,8 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="admin.js" defer></script>
-  <script src="activity.js"></script>
+  <!-- Supabase-Skript entfernt, stattdessen fetch() API-Aufrufe -->
+  <script src="session.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
   html { 
@@ -171,84 +169,6 @@
       </div>
     </section>
 
-        <!-- Kaufverlauf mit Filter & Export -->
-    <section id="purchases-container" class="my-8">
-      <h2 class="text-xl font-bold mb-2">Kaufverlauf</h2>
-      <div class="flex flex-wrap gap-2 mb-2">
-        <input id="purchase-month" type="number" min="1" max="12" placeholder="Monat" class="border p-2 rounded w-28">
-        <input id="purchase-year" type="number" min="2024" placeholder="Jahr" class="border p-2 rounded w-32">
-        <button id="purchase-export" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">CSV Export</button>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm border border-gray-300 dark:border-gray-600">
-          <thead class="bg-gray-100 dark:bg-gray-700">
-            <tr>
-              <th class="p-2 text-left">Datum</th>
-              <th class="p-2 text-left">Nutzer</th>
-              <th class="p-2 text-left">Produkt</th>
-              <th class="p-2 text-left">VK</th>
-              <th class="p-2 text-left">EK</th>
-            </tr>
-          </thead>
-          <tbody id="purchase-table"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </div>
-</section>
-
-<script>
-// Neues: Kaufverlauf laden + CSV Export
-async function loadPurchaseTable() {
-  const year = document.getElementById('purchase-year').value;
-  const month = document.getElementById('purchase-month').value;
-  const params = new URLSearchParams();
-  if (year) params.append('year', year);
-  if (month) params.append('month', month);
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/admin/purchases?${params.toString()}`, {
-      credentials: 'include'
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-
-    const table = document.getElementById('purchase-table');
-    table.innerHTML = result.map(p => `
-      <tr>
-        <td class="p-2">${new Date(p.created_at).toLocaleDateString('de-DE')}</td>
-        <td class="p-2">${p.user_name}</td>
-        <td class="p-2">${p.product_name}</td>
-        <td class="p-2">${p.price.toFixed(2)} €</td>
-        <td class="p-2">${p.purchase_price.toFixed(2)} €</td>
-      </tr>
-    `).join('');
-  } catch (err) {
-    alert("Fehler beim Laden der Käufe: " + err.message);
-  }
-}
-
-document.getElementById('purchase-export').addEventListener('click', downloadCsv);
-function downloadCsv() {
-  const rows = Array.from(document.querySelectorAll('#purchase-table tr'));
-  const csv = ['Datum,Nutzer,Produkt,VK,EK'];
-  rows.forEach(tr => {
-    const cols = Array.from(tr.querySelectorAll('td')).map(td => td.textContent);
-    csv.push(cols.join(','));
-  });
-  const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `kaeufe_${Date.now()}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-
-</script>
-
     <!-- Produkte -->
     <section id="section-products" class="mb-8">
       <button onclick="toggleSection('products')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
@@ -270,53 +190,6 @@ function downloadCsv() {
 
       </div>
     </section>
-
-<!-- Adminbereich mit Statistik und Kaufverlauf -->
-<section id="section-advanced-stats" class="mb-8">
-  <button onclick="toggleSection('advanced-stats')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-    Erweiterte Statistik & Käufe anzeigen / ausblenden
-  </button>
-  <div id="advanced-stats-container" class="mt-4 hidden">
-
-    <!-- Statistik-Bereich -->
-    <section id="stats-container" class="my-8">
-      <h2 class="text-xl font-bold mb-2">Statistik</h2>
-      <ul class="space-y-1">
-        <li>Produkte: <span id="total-products"></span></li>
-        <li>Bestand: <span id="total-stock"></span></li>
-        <li>Lagerwert: <span id="total-value"></span></li>
-        <li>Umsatz: <span id="total-revenue"></span></li>
-        <li>Gewinn: <span id="total-profit"></span></li>
-      </ul>
-    </section>
-
-    <!-- Kaufverlauf mit Filter & Export -->
-    <section id="purchases-container" class="my-8">
-      <h2 class="text-xl font-bold mb-2">Kaufverlauf</h2>
-      <div class="flex flex-wrap gap-2 mb-2">
-        <input id="purchase-month" type="number" min="1" max="12" placeholder="Monat" class="border p-2 rounded w-28">
-        <input id="purchase-year" type="number" min="2024" placeholder="Jahr" class="border p-2 rounded w-32">
-        <button id="purchase-export" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">CSV Export</button>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm border border-gray-300 dark:border-gray-600">
-          <thead class="bg-gray-100 dark:bg-gray-700">
-            <tr>
-              <th class="p-2 text-left">Datum</th>
-              <th class="p-2 text-left">Nutzer</th>
-              <th class="p-2 text-left">Produkt</th>
-              <th class="p-2 text-left">VK</th>
-              <th class="p-2 text-left">EK</th>
-            </tr>
-          </thead>
-          <tbody id="purchase-table"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </div>
-</section>
-
 
     <!-- Käufe -->
     <section id="section-purchases" class="mb-8">
@@ -368,7 +241,19 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
+  
+    // Supabase entfernt – Zugriff über fetch()(
+      "https://izkuiqjhzeeirmcikbef.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
+    );
+    // Supabase entfernt – Zugriff über Backend(
+      "https://izkuiqjhzeeirmcikbef.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgwMDA5NCwiZXhwIjoyMDY0Mzc2MDk0fQ.yF2-AKGKcHFNpkIt-bg-YMhWjjLK74cLw6t3VfjDl8w"
+    );
 
+    // Authentifizierung über Session/Backend prüfen – getUser entfernt.then(({ data }) => {
+      if (data?.user) setupActivityTracking(data.user.id);
+    });
 
     // Produkt hinzufügen
     document.getElementById('add-product').addEventListener('submit', async (e) => {
@@ -378,7 +263,7 @@ if (localStorage.getItem('darkMode') !== 'false') {
       const purchase = parseFloat(document.getElementById('product-purchase').value.replace(',', '.'));
       const stock = parseInt(document.getElementById('product-stock').value);
       const category = document.getElementById('product-category').value;
-      const userResult = await supabase.auth.getUser();
+      const userResult = await // Authentifizierung über Session/Backend prüfen – getUser entfernt;
       const user = userResult?.data?.user;
 
       if (!user) return document.getElementById('product-result').textContent = 'Fehler: Nutzer nicht eingeloggt.';
@@ -407,9 +292,9 @@ const { error } = await supabase.from('products').insert({
     }
 
     async function loadStats() {
-      const { data: users } = await supabase.from('users').select('name, balance');
-      const { data: products } = await supabase.from('products').select('id, name, price, purchase_price, stock');
-      const { data: purchases } = await supabase.from('purchases').select('product_id, price, quantity');
+      const { data: users } = await (await fetch('/api/admin/users')).json();
+      const { data: products } = await (await fetch('/api/admin/products')).json();
+      const { data: purchases } = await (await fetch('/api/admin/purchases')).json();
 
       const userList = users.map(u => {
         const cls = u.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
@@ -441,7 +326,7 @@ const { error } = await supabase.from('products').insert({
     async function loadProducts() {
   const selectedCategory = document.getElementById('category-filter')?.value || 'all';
 
-  const { data } = await supabase.from('products').select('id, name, price, stock, available, category');
+  const { data } = await (await fetch('/api/admin/products')).json();
 
   const filtered = selectedCategory === 'all'
     ? data
@@ -471,7 +356,7 @@ const { error } = await supabase.from('products').insert({
 
 
     async function editProduct(productId) {
-      const { data: product } = await supabase.from('products').select('id, name, price, purchase_price, stock').eq('id', productId).single();
+      const { data: product } = await (await fetch('/api/admin/products')).json().eq('id', productId).single();
       
       const newName = prompt("Neuen Produktnamen eingeben:", product.name);
       const newPrice = prompt("Neuen Verkaufspreis in € eingeben:", product.price);
@@ -532,12 +417,12 @@ const { error } = await supabase.from('products').insert({
     }
 
     async function loadPurchases() {
-      const { data } = await supabase.from('purchases').select('user_name, product_name, price, quantity, created_at').order('created_at', { ascending: false }).limit(20);
+      const { data } = await (await fetch('/api/admin/purchases')).json().order('created_at', { ascending: false }).limit(20);
       document.getElementById('purchase-history').innerHTML = data.map(e => `<li>${e.created_at?.slice(0, 10)} – ${e.user_name} kaufte ${e.quantity || 1}x ${e.product_name} für ${e.price.toFixed(2)} €</li>`).join('');
     }
 
     async function loadUserPasswords() {
-      const { data } = await supabase.from('users').select('id, email, name');
+      const { data } = await (await fetch('/api/admin/users')).json();
       document.getElementById('user-manage-list').innerHTML = data.map(u => `
         <li class="flex justify-between items-center gap-2">
           <span>${u.name} (${u.email})</span>
@@ -564,7 +449,7 @@ const { error } = await supabase.from('products').insert({
     }
 
     async function loadUserBalances() {
-      const { data } = await supabase.from('users').select('id, name, balance');
+      const { data } = await (await fetch('/api/admin/users')).json();
       document.getElementById('balance-control-list').innerHTML = data.map(u => {
         const balanceColor = u.balance < 0
           ? 'text-red-600 dark:text-red-400 font-bold'
@@ -583,7 +468,7 @@ const { error } = await supabase.from('products').insert({
       const value = parseFloat(document.getElementById('bal-' + id).value);
       if (isNaN(value)) return alert("Ungültiger Betrag.");
 
-      const { data: user } = await supabase.from('users').select('balance').eq('id', id).single();
+      const { data: user } = await (await fetch('/api/admin/users')).json().eq('id', id).single();
       let newBalance = user.balance;
 
       if (action === 'add') {
