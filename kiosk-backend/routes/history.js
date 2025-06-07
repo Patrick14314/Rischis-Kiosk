@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
+import supabase from '../utils/supabase.js';
+import getUserFromRequest from '../utils/getUser.js';
 const router = express.Router();
-const supabase = require("../utils/supabase"); // ggf. Pfad anpassen
-const getUserFromRequest = require("../utils/getUser"); // Session-Check
 
 // GET /api/history?sort=desc|asc|price_asc|price_desc
 router.get("/history", async (req, res) => {
@@ -40,4 +40,4 @@ router.get("/history", async (req, res) => {
   res.json(data);
 });
 
-module.exports = router;
+export default router;

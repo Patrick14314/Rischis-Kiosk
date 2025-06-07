@@ -1,12 +1,7 @@
-// routes/admin.js
-const express = require('express');
-const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
+import express from 'express';
+import supabase from '../utils/supabase.js';
 
-const supabase = createClient(
-  'https://izkuiqjhzeeirmcikbef.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgwMDA5NCwiZXhwIjoyMDY0Mzc2MDk0fQ.yF2-AKGKcHFNpkIt-bg-YMhWjjLK74cLw6t3VfjDl8w'
-);
+const router = express.Router();
 
 // Route: GET /api/admin/purchases
 router.get('/purchases', async (req, res) => {
@@ -37,4 +32,4 @@ router.get('/purchases', async (req, res) => {
   res.json(data);
 });
 
-module.exports = router;
+export default router;
