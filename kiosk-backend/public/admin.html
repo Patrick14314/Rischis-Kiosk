@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Rischis Kiosk">
   <meta name="format-detection" content="telephone=no">
@@ -13,6 +14,7 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="admin.js" defer></script>
   <script src="activity.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -244,8 +246,7 @@ function downloadCsv() {
   document.body.removeChild(link);
 }
 
-loadStats();
-loadPurchaseTable();
+
 </script>
 
     <!-- Produkte -->
@@ -367,19 +368,7 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-  
-    const supabase = window.supabase.createClient(
-      "https://izkuiqjhzeeirmcikbef.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
-    );
-    const adminClient = window.supabase.createClient(
-      "https://izkuiqjhzeeirmcikbef.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgwMDA5NCwiZXhwIjoyMDY0Mzc2MDk0fQ.yF2-AKGKcHFNpkIt-bg-YMhWjjLK74cLw6t3VfjDl8w"
-    );
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setupActivityTracking(data.user.id);
-    });
 
     // Produkt hinzufügen
     document.getElementById('add-product').addEventListener('submit', async (e) => {

@@ -4,6 +4,16 @@
 // Backend und Frontend laufen auf derselben Domain
 const BACKEND_URL = "";
 
+// Supabase Client initialisieren
+const supabase = window.supabase.createClient(
+  "https://izkuiqjhzeeirmcikbef.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
+);
+const adminClient = window.supabase.createClient(
+  "https://izkuiqjhzeeirmcikbef.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgwMDA5NCwiZXhwIjoyMDY0Mzc2MDk0fQ.yF2-AKGKcHFNpkIt-bg-YMhWjjLK74cLw6t3VfjDl8w"
+);
+
 function showMessage(msg, isError = false) {
   const el = document.getElementById('product-result');
   el.textContent = msg;
@@ -302,6 +312,9 @@ document.getElementById('purchase-export')?.addEventListener('click', async () =
 });
 
 window.addEventListener('DOMContentLoaded', () => {
+  supabase.auth.getUser().then(({ data }) => {
+    if (data?.user) setupActivityTracking(data.user.id);
+  });
   loadProducts();
   loadStats();
   loadAdvancedStatsAndPurchases();
