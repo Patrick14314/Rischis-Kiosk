@@ -114,7 +114,8 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
 
     if (!res.ok) throw new Error(result.error || 'Unbekannter Fehler');
 
-    showMessage("Kauf erfolgreich!", 'success');
+    const totalPrice = (unitPrice * qty).toFixed(2);
+    showMessage(`Erfolgreich ${qty}x ${productName} für ${totalPrice} € gekauft!`, 'success');
     await loadUser();
     await loadProducts();
     await loadPurchaseHistory();
