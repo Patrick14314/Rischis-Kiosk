@@ -35,4 +35,16 @@ router.get('/', async (req, res) => {
   res.json(data);
 });
 
+router.delete('/:product_id', async (req, res) => {
+  const { product_id } = req.params;
+
+  const { error } = await supabase
+    .from('purchases')
+    .delete()
+    .eq('product_id', product_id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(204).send();
+});
+
 module.exports = router;
