@@ -90,7 +90,8 @@
     }
 
     // Backend läuft unter derselben Domain wie das Frontend
-    const BACKEND_URL = "";
+    // Einheitliche Definition für alle Frontend-Skripte
+    const BACKEND_URL = window.location.origin;
 
     const message = document.getElementById('message');
 

@@ -1,7 +1,8 @@
 // mentos.js – Tracker-Logik über Backend-Routen
 
 // Backend und Frontend laufen auf derselben Domain
-const BACKEND_URL = "";
+// Einheitliche Definition für alle Frontend-Skripte
+const BACKEND_URL = window.location.origin;
 
 async function loadUserAndSessions() {
   try {
