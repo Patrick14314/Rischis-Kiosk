@@ -8,3 +8,13 @@ services:
     startCommand: npm start
     autoDeploy: true
     region: frankfurt
+
+  - type: web
+    name: rischis-kiosk-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: ""
+    staticPublishPath: .
+    autoDeploy: true
+    region: frankfurt
