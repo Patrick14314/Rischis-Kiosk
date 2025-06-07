@@ -267,6 +267,49 @@ async function updateBalance(id, action) {
   loadStats();
 }
 
+// -------- Produkt für Nutzer kaufen --------
+async function loadBuyUsers() {
+  const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
+  const data = await res.json();
+  const select = document.getElementById('buy-user');
+  if (!select) return;
+  select.innerHTML = data.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+}
+
+async function loadBuyProducts() {
+  const res = await fetch(`${BACKEND_URL}/api/admin/products`, { credentials: 'include' });
+  const data = await res.json();
+  const select = document.getElementById('buy-product');
+  if (!select) return;
+  select.innerHTML = data
+    .filter(p => p.available && p.stock > 0)
+    .map(p => `<option value="${p.id}">${p.name} (${p.stock})</option>`)
+    .join('');
+}
+
+async function buyForUser(e) {
+  e.preventDefault();
+  const userId = document.getElementById('buy-user')?.value;
+  const productId = document.getElementById('buy-product')?.value;
+  const qty = parseInt(document.getElementById('buy-qty')?.value || '1');
+  if (!userId || !productId || isNaN(qty) || qty <= 0) return;
+  const res = await fetch(`${BACKEND_URL}/api/admin/buy`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ user_id: userId, product_id: productId, quantity: qty })
+  });
+  const result = await res.json();
+  const msgEl = document.getElementById('buy-for-user-result');
+  msgEl.textContent = res.ok ? 'Kauf durchgeführt' : result.error || 'Fehler';
+  if (res.ok) {
+    loadStats();
+    loadProducts();
+    loadUserBalances();
+    loadBuyProducts();
+  }
+}
+
 // ---------- Initialisierung ----------
 window.addEventListener('DOMContentLoaded', () => {
   loadCurrentUser();
@@ -275,4 +318,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadPurchases(true);
   loadUserPasswords();
   loadUserBalances();
+  loadBuyUsers();
+  loadBuyProducts();
+  document.getElementById('buy-for-user-form')?.addEventListener('submit', buyForUser);
 });
