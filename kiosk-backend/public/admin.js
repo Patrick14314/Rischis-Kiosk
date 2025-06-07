@@ -246,10 +246,11 @@ async function deleteProduct(id) {
 
 // Erweiterte Statistik & Käufe laden
 async function loadAdvancedStatsAndPurchases() {
-  const { data: purchases } = await supabase.from('purchases').select('created_at, user_name, product_name, price, purchase_price');
+  const { data: purchases } = await // ersetzt durch API-Call
+await fetch('/api/admin/purchases').select('created_at, user_name, product_name, price, purchase_price');
 
   // Statistik berechnen
-  const products = await supabase.from('products').select('stock, price, purchase_price');
+  const products = await await (await fetch('/api/admin/products')).json();
   const stats = {
     totalProducts: products.data.length,
     totalStock: products.data.reduce((sum, p) => sum + (p.stock || 0), 0),
@@ -284,7 +285,8 @@ async function loadAdvancedStatsAndPurchases() {
 document.getElementById('purchase-export')?.addEventListener('click', async () => {
   const month = parseInt(document.getElementById('purchase-month').value);
   const year = parseInt(document.getElementById('purchase-year').value);
-  const { data } = await supabase.from('purchases').select('created_at, user_name, product_name, price, purchase_price');
+  const { data } = await // ersetzt durch API-Call
+await fetch('/api/admin/purchases').select('created_at, user_name, product_name, price, purchase_price');
 
   const filtered = data.filter(p => {
     const date = new Date(p.created_at);
@@ -312,7 +314,7 @@ document.getElementById('purchase-export')?.addEventListener('click', async () =
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-  supabase.auth.getUser().then(({ data }) => {
+  // Authentifizierung sollte über Session oder Token erfolgen – Supabase entfernt.then(({ data }) => {
     if (data?.user) setupActivityTracking(data.user.id);
   });
   loadProducts();
