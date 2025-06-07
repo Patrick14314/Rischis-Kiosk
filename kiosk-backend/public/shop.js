@@ -39,17 +39,26 @@ async function loadUser() {
 async function loadProducts() {
   try {
     const sortOption = document.getElementById('sort-products')?.value || 'price_asc';
-    const productPromise = fetch(`${BACKEND_URL}/api/products?sort=${sortOption}`);
-    const recentPromise = !userSortedProducts
-      ? fetch(`${BACKEND_URL}/api/purchases?sort=desc&limit=3`, { credentials: 'include' })
+
+    const productSort = sortOption === 'recent' ? 'price_asc' : sortOption;
+    const productPromise = fetch(`${BACKEND_URL}/api/products?sort=${productSort}`);
+
+    const needRecent = sortOption === 'recent' || !userSortedProducts;
+    const recentLimit = sortOption === 'recent' ? '' : '&limit=3';
+    const recentPromise = needRecent
+      ? fetch(`${BACKEND_URL}/api/purchases?sort=desc${recentLimit}`, { credentials: 'include' })
       : null;
 
     const [productRes, recentRes] = await Promise.all([productPromise, recentPromise]);
     const products = await productRes.json();
     const recent = recentRes ? await recentRes.json() : [];
-    const recentIds = recent.map(r => r.product_id);
 
-    if (!userSortedProducts && recentIds.length) {
+    const recentIds = [];
+    recent.forEach(r => {
+      if (!recentIds.includes(r.product_id)) recentIds.push(r.product_id);
+    });
+
+    if (needRecent && recentIds.length) {
       products.forEach(p => {
         if (recentIds.includes(p.id)) p.recent = true;
       });
@@ -63,6 +72,7 @@ async function loadProducts() {
         return 0;
       });
     }
+
     allProducts = products;
     populateCategories(products);
     filterAndRenderProducts();
