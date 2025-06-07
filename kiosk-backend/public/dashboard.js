@@ -1,10 +1,23 @@
 // dashboard.js – Admin-Zugriff und Session-Check
 
 // Adresse des Backends
-const BACKEND_URL = "https://rischis-kiosk-t2uv.onrender.com";
+// Backend und Frontend laufen auf derselben Domain
+const BACKEND_URL = "";
 
 async function checkUserAndRole() {
   try {
+    // Erst prüfen, ob eine gültige Session existiert
+    const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+      credentials: 'include'
+    });
+    const { loggedIn } = await meRes.json();
+
+    if (!meRes.ok || !loggedIn) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Danach Benutzerdaten laden
     const res = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
     const user = await res.json();
 
