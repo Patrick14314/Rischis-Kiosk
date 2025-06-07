@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: rischis-kiosk
+    env: node
+    rootDir: kiosk-backend
+    buildCommand: npm install
+    startCommand: node index.js
+    autoDeploy: true
+    region: frankfurt
