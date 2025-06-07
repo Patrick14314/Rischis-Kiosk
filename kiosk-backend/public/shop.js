@@ -6,6 +6,7 @@ const BACKEND_URL = window.location.origin;
 let currentUser = null;
 let userBalance = 0;
 let userSortedProducts = false;
+let allProducts = [];
 
 function showMessage(text, type = 'info') {
   const el = document.getElementById('message');
@@ -62,37 +63,67 @@ async function loadProducts() {
         return 0;
       });
     }
-    const list = document.getElementById('product-list');
-    list.innerHTML = '';
-
-    products.forEach(product => {
-      const li = document.createElement('li');
-      li.className = 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md hover:shadow-lg transition text-gray-800 dark:text-white';
-      if (product.recent) {
-        li.className += ' border-yellow-400';
-      }
-
-      li.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <p class="text-base font-medium">${product.name}</p>
-            ${product.recent ? '<p class="text-xs text-yellow-600 dark:text-yellow-400">Zuletzt gekauft</p>' : ''}
-            <p class="text-sm text-gray-600 dark:text-gray-300">${product.price.toFixed(2)} € – Bestand: ${product.stock}</p>
-          </div>
-          ${product.stock > 0 ?
-            `<div class="flex items-center gap-2">
-              <input type="number" min="1" max="${product.stock}" value="1" id="qty-${product.id}" class="w-12 text-center bg-transparent focus:outline-none border rounded dark:text-white">
-              <button class="bg-green-600 text-white text-sm px-3 py-1 rounded-md shadow hover:bg-green-700" onclick="buyProduct('${product.id}', 'qty-${product.id}', '${product.name}', ${product.price})">Kaufen</button>
-            </div>` : '<span class="text-red-500">Ausverkauft</span>'
-          }
-        </div>
-      `;
-      list.appendChild(li);
-    });
+    allProducts = products;
+    populateCategories(products);
+    filterAndRenderProducts();
   } catch (err) {
     console.error(err);
     showMessage("Fehler beim Laden der Produkte", 'error');
   }
+}
+
+function populateCategories(products) {
+  const select = document.getElementById('category-filter');
+  if (!select) return;
+  const current = select.value;
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+  select.innerHTML = '<option value="">Alle Kategorien</option>';
+  categories.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+  if (current) select.value = current;
+}
+
+function filterAndRenderProducts() {
+  const searchTerm = document.getElementById('search')?.value.toLowerCase() || '';
+  const category = document.getElementById('category-filter')?.value || '';
+  const filtered = allProducts.filter(p => {
+    const matchCat = !category || p.category === category;
+    const matchSearch = !searchTerm || p.name.toLowerCase().includes(searchTerm);
+    return matchCat && matchSearch;
+  });
+  renderProductList(filtered);
+}
+
+function renderProductList(products) {
+  const list = document.getElementById('product-list');
+  list.innerHTML = '';
+  products.forEach(product => {
+    const li = document.createElement('li');
+    li.className = 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md hover:shadow-lg transition text-gray-800 dark:text-white';
+    if (product.recent) {
+      li.className += ' border-yellow-400';
+    }
+    li.innerHTML = `
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p class="text-base font-medium">${product.name}</p>
+          ${product.recent ? '<p class="text-xs text-yellow-600 dark:text-yellow-400">Zuletzt gekauft</p>' : ''}
+          <p class="text-sm text-gray-600 dark:text-gray-300">${product.price.toFixed(2)} € – Bestand: ${product.stock}</p>
+        </div>
+        ${product.stock > 0 ?
+          `<div class="flex items-center gap-2">
+            <input type="number" min="1" max="${product.stock}" value="1" id="qty-${product.id}" class="w-12 text-center bg-transparent focus:outline-none border rounded dark:text-white">
+            <button class="bg-green-600 text-white text-sm px-3 py-1 rounded-md shadow hover:bg-green-700" onclick="buyProduct('${product.id}', 'qty-${product.id}', '${product.name}', ${product.price})">Kaufen</button>
+          </div>` : '<span class="text-red-500">Ausverkauft</span>'
+        }
+      </div>
+    `;
+    list.appendChild(li);
+  });
 }
 
 async function loadPurchaseHistory() {
@@ -161,6 +192,8 @@ document.getElementById('sort-products')?.addEventListener('change', () => {
   userSortedProducts = true;
   loadProducts();
 });
+document.getElementById('search')?.addEventListener('input', filterAndRenderProducts);
+document.getElementById('category-filter')?.addEventListener('change', filterAndRenderProducts);
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadUser();
@@ -172,4 +205,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     userSortedProducts = true;
     loadProducts();
   });
+  document.getElementById('search')?.addEventListener('input', filterAndRenderProducts);
+  document.getElementById('category-filter')?.addEventListener('change', filterAndRenderProducts);
 });
