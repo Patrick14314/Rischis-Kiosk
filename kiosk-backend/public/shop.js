@@ -6,6 +6,14 @@ const BACKEND_URL = "";
 let currentUser = null;
 let userBalance = 0;
 
+function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+}
+if (localStorage.getItem('darkMode') !== 'false') {
+  document.documentElement.classList.add('dark');
+}
+
 function showMessage(text, type = 'info') {
   const el = document.getElementById('message');
   el.textContent = text;
