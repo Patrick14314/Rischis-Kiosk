@@ -93,8 +93,9 @@
 
     <!-- Produkt hinzufügen -->
     <section id="section-add" class="mb-8">
-      <button onclick="toggleSection('add')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Produkt hinzufügen anzeigen / ausblenden
+      <button id="toggle-add" onclick="toggleSection('add')" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Produkt hinzufügen</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="add-container" class="mt-4 hidden">
 <form class="space-y-4" id="add-product">
@@ -157,8 +158,9 @@
 
     <!-- Statistik -->
     <section id="section-stats" class="mb-8">
-      <button onclick="toggleSection('stats')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Statistik anzeigen / ausblenden
+      <button id="toggle-stats" onclick="toggleSection('stats')" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Statistik</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="stats-container" class="mt-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between items-center">
@@ -171,8 +173,9 @@
 
     <!-- Produkte -->
     <section id="section-products" class="mb-8">
-      <button onclick="toggleSection('products')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Produkte anzeigen / ausblenden
+      <button id="toggle-products" onclick="toggleSection('products')" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Produkte</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="products-container" class="mt-4 hidden">
 <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
@@ -193,8 +196,9 @@
 
     <!-- Käufe -->
     <section id="section-purchases" class="mb-8">
-      <button onclick="togglePurchases()" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Käufe anzeigen / ausblenden
+      <button id="toggle-purchases" onclick="togglePurchases()" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Käufe</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="purchase-container" class="mt-4 hidden max-h-80 overflow-y-auto overflow-x-auto border rounded-lg bg-gray-50 dark:bg-gray-700 p-4">
         <ul id="purchase-history" class="space-y-2 text-sm text-gray-700 dark:text-white"></ul>
@@ -204,8 +208,9 @@
 
     <!-- Benutzernamen und Passwörter -->
     <section id="section-users" class="mb-8">
-      <button onclick="toggleSection('users')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Benutzer anzeigen / ausblenden
+      <button id="toggle-users" onclick="toggleSection('users')" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Benutzer</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="users-container" class="mt-4 hidden">
         <h2 class="text-lg sm:text-xl font-semibold mb-4">Benutzernamen und Passwörter verwalten</h2>
@@ -215,8 +220,9 @@
 
     <!-- Guthaben -->
     <section id="section-balance" class="mb-8">
-      <button onclick="toggleSection('balance')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Guthaben anzeigen / ausblenden
+      <button id="toggle-balance" onclick="toggleSection('balance')" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Guthaben</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="balance-container" class="mt-4 hidden">
         <h2 class="text-lg sm:text-xl font-semibold mb-4">Guthaben verwalten</h2>
@@ -226,8 +232,9 @@
 
     <!-- Produkt für Nutzer kaufen -->
     <section id="section-buy-for-user" class="mb-8">
-      <button onclick="toggleSection('buy-for-user')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
-        Produkt für Nutzer kaufen anzeigen / ausblenden
+      <button id="toggle-buy-for-user" onclick="toggleSection('buy-for-user')" class="w-full relative flex justify-center bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        <span>Produkt für Nutzer kaufen</span>
+        <span class="absolute right-4 arrow">▼</span>
       </button>
       <div id="buy-for-user-container" class="mt-4 hidden">
         <form id="buy-for-user-form" class="flex flex-col sm:flex-row items-center gap-2">
