@@ -90,6 +90,8 @@
       document.documentElement.classList.add('dark');
     }
 
+    const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
+
     const supabase = window.supabase.createClient(
       "https://izkuiqjhzeeirmcikbef.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
@@ -116,7 +118,7 @@
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
 
-      const res = await fetch('/auth/login', {
+      const res = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -146,7 +148,7 @@
 
       if (password !== repeat) return showMessage("Passwörter stimmen nicht überein.");
 
-      const res = await fetch('/auth/register', {
+      const res = await fetch(`${BACKEND_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
