@@ -1,5 +1,8 @@
 const BACKEND_URL = '';
 
+// Aktuell eingeloggter Benutzer
+let currentUserId = null;
+
 // Darkmode
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
@@ -18,6 +21,19 @@ function formatDateTime(iso) {
   const d = new Date(iso);
   return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) + ' ' +
          d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin' });
+}
+
+// Eingeloggten Benutzer laden
+async function loadCurrentUser() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
+    if (res.ok) {
+      const user = await res.json();
+      currentUserId = user.id;
+    }
+  } catch (err) {
+    console.error('Fehler beim Laden des Benutzers', err);
+  }
 }
 
 // -------- Produkte --------
@@ -65,7 +81,7 @@ async function addProduct(e) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ name, price, purchase_price, stock, category })
+    body: JSON.stringify({ name, price, purchase_price, stock, category, created_by: currentUserId })
   });
   const result = await res.json();
   document.getElementById('product-result').textContent = res.ok ? 'Produkt gespeichert!' : `Fehler: ${result.error}`;
@@ -236,6 +252,7 @@ async function updateBalance(id, action) {
 
 // ---------- Initialisierung ----------
 window.addEventListener('DOMContentLoaded', () => {
+  loadCurrentUser();
   loadStats();
   loadProducts();
   loadPurchases(true);
