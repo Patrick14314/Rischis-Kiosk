@@ -22,13 +22,17 @@ router.post('/login', async (req, res) => {
   // direkt an die Backend-Domain gebunden ist und zuverlässig gesendet wird.
   // Cookie sicher setzen. Ohne Domain bleibt er hostgebunden und wird so
   // zuverlässig auch hinter einem Proxy übertragen.
-  res.cookie('sb-access-token', data.session.access_token, {
+  const cookieOptions = {
     httpOnly: true,
-    secure: true,             // über HTTPS – auf Render zwingend erforderlich
-    sameSite: 'none',         // für Cross‑Site Cookies notwendig
-    path: '/',                // auf alle Routen anwendbar
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
-  });
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  };
+  if (process.env.COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+  }
+  res.cookie('sb-access-token', data.session.access_token, cookieOptions);
 
   res.json({
     message: 'Login erfolgreich',
@@ -85,15 +89,17 @@ router.post('/register', async (req, res) => {
 
 // 🧼 LOGOUT
 router.post('/logout', (req, res) => {
-  // Session-Cookie entfernen. Domain wird nicht gesetzt, damit das
-  // Löschen immer funktioniert, egal von welcher Subdomain der
-  // Aufruf kommt.
-  res.clearCookie('sb-access-token', {
+  // Session-Cookie entfernen. Ohne Domain bleibt der Cookie hostgebunden
+  const cookieOptions = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'none',
     path: '/'
-  });
+  };
+  if (process.env.COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+  }
+  res.clearCookie('sb-access-token', cookieOptions);
 
   res.json({ message: 'Logout erfolgreich' });
 });
