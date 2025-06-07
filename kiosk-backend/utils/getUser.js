@@ -7,7 +7,13 @@ const supabase = createClient(
 );
 
 async function getUserFromRequest(req) {
-  const token = req.headers['authorization']?.replace('Bearer ', '');
+  // Zuerst nach einem Bearer-Token im Authorization-Header suchen
+  let token = req.headers['authorization']?.replace('Bearer ', '');
+
+  // Falls kein Header vorhanden ist, das Cookie verwenden
+  if (!token) {
+    token = req.cookies?.['sb-access-token'];
+  }
 
   if (!token) return null;
 
