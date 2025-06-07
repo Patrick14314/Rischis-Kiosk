@@ -1,20 +1,15 @@
 services:
   - type: web
-    name: rischis-kiosk
-    env: node
-    plan: free
-    rootDir: kiosk-backend
-    buildCommand: npm install
-    startCommand: npm start
-    autoDeploy: true
-    region: frankfurt
+    name: kiosk-frontend
+    env: static
+    rootDir: frontend
+    staticPublishPath: .
+    buildCommand: ""
+    startCommand: ""
 
   - type: web
-    name: rischis-kiosk-frontend
-    env: static
-    plan: free
-    rootDir: frontend
-    buildCommand: ""
-    staticPublishPath: .
-    autoDeploy: true
-    region: frankfurt
+    name: kiosk-backend
+    env: node
+    rootDir: kiosk-backend
+    buildCommand: "npm install"
+    startCommand: "node index.js"
