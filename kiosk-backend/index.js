@@ -56,7 +56,7 @@ app.get('/', (req, res) => {
 // API-Routen
 app.use('/api/feedings', feed);
 app.use('/api/products', products);
-app.use('/api', buy);
+app.use('/api/buy', buy);
 app.use('/api/user', user);
 app.use('/api/auth', auth);
 app.use('/api/purchases', purchases);
