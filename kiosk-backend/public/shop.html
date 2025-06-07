@@ -133,5 +133,270 @@
     </div>
   </div>
 
+  <script>
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+    }
+    // Darkmode bleibt aktiv, solange der Nutzer ihn nicht deaktiviert
+    if (localStorage.getItem('darkMode') !== 'false') {
+      document.documentElement.classList.add('dark');
+    }
+
+    const supabase = window.supabase.createClient(
+      "https://izkuiqjhzeeirmcikbef.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6a3VpcWpoemVlaXJtY2lrYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDAwOTQsImV4cCI6MjA2NDM3NjA5NH0.mPu0jQYnt0uGoLgehNFDHZprEcmrzGJ667D31sLSbj0"
+    );
+
+
+
+      let currentUser = null;
+      let userBalance = 0;
+      let sortUsed = false;
+
+    function showMessage(text, type = 'info') {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = type === 'error' ? 'text-red-600' : 'text-green-600';
+      setTimeout(() => { el.textContent = ''; }, 4000);
+    }
+
+async function loadCategories() {
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('category')
+    .neq('category', null);
+
+  if (error) return showMessage("Fehler beim Laden der Kategorien.", 'error');
+
+  const uniqueCategories = [...new Set(products.map(p => p.category))];
+  const select = document.getElementById('category-filter');
+  uniqueCategories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    select.appendChild(opt);
+  });
+}
+
+
+    function showLoader() {
+      document.getElementById('loader').classList.remove('hidden');
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').classList.add('hidden');
+    }
+
+    function adjustQty(id, delta, max) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      let value = parseInt(input.value) || 1;
+      value += delta;
+      if (value < 1) value = 1;
+      if (max && value > max) value = max;
+      input.value = value;
+    }
+
+    async function loadUserData() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return showMessage("Fehler beim Laden des Nutzers.", 'error');
+      currentUser = user;
+      setupActivityTracking(user.id);
+      document.getElementById('user-email').textContent = user.email;
+
+      const { data, error: balanceError } = await supabase.from('users').select('balance').eq('id', user.id).single();
+      if (balanceError) return showMessage("Fehler beim Laden des Guthabens.", 'error');
+      userBalance = data.balance;
+
+      const balanceElement = document.getElementById('user-balance');
+      balanceElement.textContent = `${userBalance.toFixed(2)} €`;
+      balanceElement.className = userBalance < 0
+        ? 'text-red-600 dark:text-red-400 font-bold'
+        : 'text-green-600 dark:text-green-400 font-bold';
+    }
+
+      async function loadProducts() {
+    showLoader();
+    const searchTerm = document.getElementById('search')?.value?.toLowerCase() || '';
+    const selectedCategory = document.getElementById('category-filter')?.value || '';
+    const sortOption = document.getElementById('sort-products')?.value || 'price_asc';
+
+    let query = supabase.from('products').select('*').eq('available', true);
+    if (selectedCategory) {
+      query = query.eq('category', selectedCategory);
+    }
+
+    if (sortOption === 'price_desc') {
+      query = query.order('price', { ascending: false });
+    } else {
+      query = query.order('price', { ascending: true });
+    }
+
+    const { data: products, error } = await query;
+    const list = document.getElementById('product-list');
+    list.innerHTML = '';
+    hideLoader();
+
+    if (error || !products) {
+      return showMessage("Fehler beim Laden der Produkte.", 'error');
+    }
+
+    let filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+
+    if (!sortUsed && currentUser?.id) {
+      const { data: recent } = await supabase
+        .from('purchases')
+        .select('product_id')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (recent) {
+        const ids = [];
+        recent.forEach(r => { if (!ids.includes(r.product_id)) ids.push(r.product_id); });
+        filtered.sort((a, b) => {
+          const ia = ids.indexOf(a.id);
+          const ib = ids.indexOf(b.id);
+          if (ia === -1 && ib === -1) return 0;
+          if (ia === -1) return 1;
+          if (ib === -1) return -1;
+          return ia - ib;
+        });
+      }
+    }
+
+    filtered.forEach(product => {
+    const li = document.createElement('li');
+    li.className = 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md hover:shadow-lg transition text-gray-800 dark:text-white';
+
+    li.innerHTML = `
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p class="text-base font-medium">${product.name}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">${product.price.toFixed(2)} € – Bestand: ${product.stock}
+            ${product.stock <= 0 ? '<span class="text-red-500 ml-1">(ausverkauft)</span>' : ''}
+          </p>
+        </div>
+        ${product.stock > 0 ?
+          `<div class="flex items-center gap-2">
+            <div class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
+              <button class="px-2 text-gray-600 dark:text-gray-300" onclick="adjustQty('qty-${product.id}', -1, ${product.stock})">-</button>
+              <input type="number" min="1" max="${product.stock}" value="1" id="qty-${product.id}" class="w-12 text-center bg-transparent focus:outline-none dark:text-white">
+              <button class="px-2 text-gray-600 dark:text-gray-300" onclick="adjustQty('qty-${product.id}', 1, ${product.stock})">+</button>
+            </div>
+            <button class="bg-green-600 text-white text-sm px-3 py-1 rounded-md shadow hover:bg-green-700 transition" onclick="buyProduct('${product.id}', 'qty-${product.id}', '${product.name}', ${product.price})">Kaufen</button>
+          </div>` : ''
+        }
+      </div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+
+    async function buyProduct(productId, qtyInputId, productName, unitPrice) {
+      try {
+        const qty = parseInt(document.getElementById(qtyInputId)?.value || "1");
+        if (!Number.isInteger(qty) || qty <= 0) return showMessage("Ungültige Menge", "error");
+
+        const confirmText = `Möchtest du wirklich ${qty}x ${productName} für ${(unitPrice * qty).toFixed(2)} € kaufen?`;
+        if (!confirm(confirmText)) return;
+
+        const { data: userCheck } = await supabase.auth.getUser();
+        if (!userCheck?.user) return alert("Nicht eingeloggt");
+
+        const { data: dbUser } = await supabase.from('users').select('*').eq('id', userCheck.user.id).single();
+        const { data: product } = await supabase.from('products').select('*').eq('id', productId).single();
+
+        if (!product || product.stock < qty) return showMessage("Nicht genügend Bestand.", 'error');
+
+        const newBalance = dbUser.balance - (unitPrice * qty);
+
+        const { error: purchaseError } = await supabase.from('purchases').insert({
+          user_id: dbUser.id,
+          user_name: dbUser.name,
+          product_id: productId,
+          product_name: product.name,
+          price: unitPrice * qty,
+          quantity: qty
+        });
+
+        const { error: balanceError } = await supabase.from('users')
+          .update({ balance: newBalance })
+          .eq('id', dbUser.id);
+
+        const { error: stockError } = await supabase.from('products')
+          .update({ stock: product.stock - qty })
+          .eq('id', product.id);
+
+        if (purchaseError || balanceError || stockError) throw new Error("Fehler beim Kaufprozess");
+
+        userBalance = newBalance;
+        const balanceElement = document.getElementById('user-balance');
+        balanceElement.textContent = `${userBalance.toFixed(2)} €`;
+        balanceElement.className = userBalance < 0
+          ? 'text-red-600 dark:text-red-400 font-bold'
+          : 'text-green-600 dark:text-green-400 font-bold';
+        showMessage("Kauf erfolgreich!", 'success');
+        await loadProducts();
+        await loadPurchaseHistory();
+      } catch (err) {
+        console.error(err);
+        showMessage("Fehler beim Kauf.", 'error');
+      }
+    }
+
+    async function loadPurchaseHistory() {
+      if (!currentUser?.id) return;
+
+      const sortOption = document.getElementById('sort-history')?.value || 'desc';
+      let query = supabase.from('purchases')
+        .select('price, quantity, created_at, product_name')
+        .eq('user_id', currentUser.id);
+
+      if (sortOption === 'asc') {
+        query = query.order('created_at', { ascending: true });
+      } else if (sortOption === 'desc') {
+        query = query.order('created_at', { ascending: false });
+      } else if (sortOption === 'price_asc') {
+        query = query.order('price', { ascending: true });
+      } else if (sortOption === 'price_desc') {
+        query = query.order('price', { ascending: false });
+      }
+
+      const { data: history, error } = await query;
+      if (error || !history) return;
+
+      const sorted = history;
+
+      const list = document.getElementById('purchase-history');
+      list.innerHTML = '';
+      sorted.forEach(entry => {
+        const li = document.createElement('li');
+        const date = new Date(entry.created_at).toLocaleString('de-DE', {
+          timeZone: 'Europe/Berlin'
+        });
+        li.textContent = `${date}: ${entry.quantity || 1}x ${entry.product_name} – ${entry.price.toFixed(2)} €`;
+        list.appendChild(li);
+      });
+    }
+
+    loadUserData().then(() => {
+  loadCategories().then(() => {
+    loadProducts();
+    if (currentUser?.id) loadPurchaseHistory();
+  });
+});
+
+
+    document.getElementById('search').addEventListener('input', loadProducts);
+    document.getElementById('category-filter').addEventListener('change', loadProducts);
+      document.getElementById('sort-products').addEventListener('change', () => {
+        sortUsed = true;
+        loadProducts();
+      });
+    document.getElementById('sort-history').addEventListener('change', loadPurchaseHistory);
+  </script>
   </body>
 </html>
