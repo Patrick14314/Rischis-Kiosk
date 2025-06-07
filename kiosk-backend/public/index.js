@@ -3,7 +3,8 @@
 // deployt ist. Alle API-Aufrufe des Frontends verwenden diese
 // Konstante, damit Frontend und Backend korrekt kommunizieren.
 // Backend und Frontend laufen auf derselben Domain
-const BACKEND_URL = "";
+// Einheitliche Definition für alle Frontend-Skripte
+const BACKEND_URL = window.location.origin;
 
 // Meldung anzeigen
 function showMessage(text, success = false) {

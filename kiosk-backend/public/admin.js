@@ -1,4 +1,6 @@
-const BACKEND_URL = '';
+// Backend und Frontend laufen auf derselben Domain
+// Einheitliche Definition für alle Frontend-Skripte
+const BACKEND_URL = window.location.origin;
 
 // Aktuell eingeloggter Benutzer
 let currentUserId = null;
