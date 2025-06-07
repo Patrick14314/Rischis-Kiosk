@@ -1,6 +1,6 @@
 // index.js – Login und Registrierung via Backend statt direkter Supabase-Nutzung
 
-const BACKEND_URL = "https://rischis-kiosk.onrender.com";
+const BACKEND_URL = "https://rischis-kiosk-hdoi.onrender.com";
 
 function showMessage(text, success = false) {
   const message = document.getElementById('message');
