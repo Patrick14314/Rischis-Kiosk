@@ -15,7 +15,12 @@ if (localStorage.getItem('darkMode') !== 'false') {
 }
 
 function toggleSection(id) {
-  document.getElementById(`${id}-container`)?.classList.toggle('hidden');
+  const container = document.getElementById(`${id}-container`);
+  container?.classList.toggle('hidden');
+  const arrow = document.querySelector(`#toggle-${id} .arrow`);
+  if (container && arrow) {
+    arrow.textContent = container.classList.contains('hidden') ? '▼' : '▲';
+  }
 }
 
 // Hilfsfunktion für Datum
@@ -168,9 +173,13 @@ function togglePurchases() {
     c.classList.remove('hidden');
     purchaseOffset = 0;
     loadPurchases(true);
+    const arrow = document.querySelector('#toggle-purchases .arrow');
+    if (arrow) arrow.textContent = '▲';
   } else {
     c.classList.add('hidden');
     document.getElementById('purchase-history').innerHTML = '';
+    const arrow = document.querySelector('#toggle-purchases .arrow');
+    if (arrow) arrow.textContent = '▼';
   }
 }
 
