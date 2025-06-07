@@ -5,6 +5,7 @@ const BACKEND_URL = window.location.origin;
 
 let currentUser = null;
 let userBalance = 0;
+let userSortedProducts = false;
 
 function showMessage(text, type = 'info') {
   const el = document.getElementById('message');
@@ -37,19 +38,45 @@ async function loadUser() {
 async function loadProducts() {
   try {
     const sortOption = document.getElementById('sort-products')?.value || 'price_asc';
-    const res = await fetch(`${BACKEND_URL}/api/products?sort=${sortOption}`);
-    const products = await res.json();
+    const productPromise = fetch(`${BACKEND_URL}/api/products?sort=${sortOption}`);
+    const recentPromise = !userSortedProducts
+      ? fetch(`${BACKEND_URL}/api/purchases?sort=desc&limit=3`, { credentials: 'include' })
+      : null;
+
+    const [productRes, recentRes] = await Promise.all([productPromise, recentPromise]);
+    const products = await productRes.json();
+    const recent = recentRes ? await recentRes.json() : [];
+    const recentIds = recent.map(r => r.product_id);
+
+    if (!userSortedProducts && recentIds.length) {
+      products.forEach(p => {
+        if (recentIds.includes(p.id)) p.recent = true;
+      });
+
+      products.sort((a, b) => {
+        const ia = recentIds.indexOf(a.id);
+        const ib = recentIds.indexOf(b.id);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return 0;
+      });
+    }
     const list = document.getElementById('product-list');
     list.innerHTML = '';
 
     products.forEach(product => {
       const li = document.createElement('li');
       li.className = 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md hover:shadow-lg transition text-gray-800 dark:text-white';
+      if (product.recent) {
+        li.className += ' border-yellow-400';
+      }
 
       li.innerHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p class="text-base font-medium">${product.name}</p>
+            ${product.recent ? '<p class="text-xs text-yellow-600 dark:text-yellow-400">Zuletzt gekauft</p>' : ''}
             <p class="text-sm text-gray-600 dark:text-gray-300">${product.price.toFixed(2)} € – Bestand: ${product.stock}</p>
           </div>
           ${product.stock > 0 ?
@@ -130,7 +157,10 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
 
 
 document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
-document.getElementById('sort-products')?.addEventListener('change', loadProducts);
+document.getElementById('sort-products')?.addEventListener('change', () => {
+  userSortedProducts = true;
+  loadProducts();
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadUser();
@@ -138,5 +168,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadPurchaseHistory();
 
   document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
-  document.getElementById('sort-products')?.addEventListener('change', loadProducts);
+  document.getElementById('sort-products')?.addEventListener('change', () => {
+    userSortedProducts = true;
+    loadProducts();
+  });
 });

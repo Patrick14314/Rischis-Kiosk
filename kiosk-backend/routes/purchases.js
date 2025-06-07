@@ -3,7 +3,7 @@ import express from 'express';
 import supabase from '../utils/supabase.js';
 const router = express.Router();
 
-// GET /api/purchases?sort=desc|asc|price_asc|price_desc
+// GET /api/purchases?sort=desc|asc|price_asc|price_desc&limit=3
 router.get('/', async (req, res) => {
   const token = req.cookies?.['sb-access-token'];
   if (!token) return res.status(401).json({ error: 'Nicht eingeloggt' });
@@ -12,9 +12,10 @@ router.get('/', async (req, res) => {
   if (authError || !authData?.user) return res.status(401).json({ error: 'Ungültiger Token' });
 
   const sort = req.query.sort || 'desc';
+  const limit = parseInt(req.query.limit);
   let query = supabase
     .from('purchases')
-    .select('price, quantity, created_at, product_name')
+    .select('price, quantity, created_at, product_name, product_id')
     .eq('user_id', authData.user.id);
 
   if (sort === 'asc') {
@@ -25,6 +26,10 @@ router.get('/', async (req, res) => {
     query = query.order('price', { ascending: false });
   } else {
     query = query.order('created_at', { ascending: false });
+  }
+
+  if (Number.isInteger(limit) && limit > 0) {
+    query = query.limit(limit);
   }
 
   const { data, error } = await query;
