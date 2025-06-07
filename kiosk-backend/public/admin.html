@@ -223,6 +223,22 @@
         <ul id="balance-control-list" class="space-y-2 text-sm"></ul>
       </div>
     </section>
+
+    <!-- Produkt für Nutzer kaufen -->
+    <section id="section-buy-for-user" class="mb-8">
+      <button onclick="toggleSection('buy-for-user')" class="w-full text-left bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 px-4 py-3 rounded-lg font-semibold text-gray-800 dark:text-white transition">
+        Produkt für Nutzer kaufen anzeigen / ausblenden
+      </button>
+      <div id="buy-for-user-container" class="mt-4 hidden">
+        <form id="buy-for-user-form" class="flex flex-col sm:flex-row items-center gap-2">
+          <select id="buy-user" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 flex-1"></select>
+          <select id="buy-product" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 flex-1"></select>
+          <input type="number" id="buy-qty" value="1" min="1" class="p-2 border rounded w-20 dark:bg-gray-700 dark:border-gray-600" />
+          <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700">Kaufen</button>
+        </form>
+        <p id="buy-for-user-result" class="mt-2 text-sm"></p>
+      </div>
+    </section>
   </div>
 
 </body>

@@ -19,6 +19,7 @@ import adminProducts from './routes/admin/products.js';
 import adminPurchases from './routes/admin/purchases.js';
 import adminStats from './routes/admin/stats.js';
 import adminUsers from './routes/admin/users.js';
+import adminBuyForUser from './routes/admin/buy_for_user.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -63,6 +64,7 @@ app.use('/api/admin/products', adminProducts);
 app.use('/api/admin/purchases', adminPurchases);
 app.use('/api/admin/stats', adminStats);
 app.use('/api/admin/users', adminUsers);
+app.use('/api/admin/buy', adminBuyForUser);
 
 // Server starten
 app.listen(PORT, () => {
