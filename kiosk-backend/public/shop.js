@@ -117,6 +117,7 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
     showMessage("Kauf erfolgreich!", 'success');
     await loadUser();
     await loadProducts();
+    await loadPurchaseHistory();
   } catch (err) {
     console.error(err);
     showMessage("Fehler beim Kauf", 'error');
