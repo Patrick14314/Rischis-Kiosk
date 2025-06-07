@@ -128,22 +128,7 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
 
 document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
 
-function setupActivityTracking() {
-  fetch('/api/activity', {
-    method: 'POST',
-    credentials: 'include'
-  }).then(res => {
-    if (!res.ok) throw new Error("Fehler beim Tracking");
-    return res.json();
-  }).then(() => {
-    console.log("🟢 Aktivität gesendet");
-  }).catch(err => {
-    console.error("🔴 Tracking-Fehler:", err);
-  });
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  setupActivityTracking(); // Shop-Öffnung wird getrackt
   await loadUser();
   await loadProducts();
   await loadPurchaseHistory();

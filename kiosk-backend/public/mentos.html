@@ -13,7 +13,6 @@
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
-  <script src="activity.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
     html {
@@ -121,7 +120,6 @@
       .then(r => r.ok ? r.json() : null)
       .then(user => {
         if (user) {
-          setupActivityTracking(user.id);
           if (user.role === 'admin') {
             adminButtons.classList.remove('hidden');
           }
