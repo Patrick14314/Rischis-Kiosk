@@ -1,23 +1,22 @@
-require("dotenv").config();
+require("dotenv").config(); // .env laden
 const express = require("express");
 const cors = require("cors");
-
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const app = express();
+
+const app = express(); // Muss vor app.use() stehen!
 const PORT = process.env.PORT || 10000;
 
 // Middleware
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: true,          // oder exakte URL, z. B. "https://rischis-kiosk-t2uv.onrender.com"
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Static routes for HTML entry points
+// Static Routes
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
@@ -34,17 +33,18 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// API routes
+// API-Routen
 app.use("/api", require("./routes/feed"));
 app.use("/api", require("./routes/products"));
 app.use("/api", require("./routes/buy"));
-app.use("/api", require("./routes/user"));
+app.use("/api/user", require("./routes/user")); // für Klarheit: nur /user hier
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/admin/products", require("./routes/admin/products"));
 app.use("/api/admin/purchases", require("./routes/admin/purchases"));
 app.use("/api/admin/stats", require("./routes/admin/stats"));
 
+// Server starten
 app.listen(PORT, () => {
-  console.log(`Server läuft auf http://localhost:${PORT}`);
+  console.log(`✅ Server läuft auf Port ${PORT}`);
 });
