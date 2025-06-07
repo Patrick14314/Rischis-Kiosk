@@ -132,3 +132,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
 
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadUser();
+  await loadProducts();
+  await loadPurchaseHistory();
+
+  document.getElementById('sort-history')?.addEventListener('change', loadPurchaseHistory);
+});
