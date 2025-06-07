@@ -11,11 +11,19 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+  console.log(req.body);
   const { name, price, purchase_price, stock, category, created_by } = req.body;
+
+  if (!name || price === undefined || purchase_price === undefined || stock === undefined || !category || !created_by) {
+    return res.status(400).json({ error: 'Fehlende Felder' });
+  }
+
   const { error } = await supabase
     .from('products')
     .insert({ name, price, purchase_price, stock, category, available: true, created_by });
+
   if (error) return res.status(500).json({ error: error.message });
+
   res.status(201).json({ message: 'Produkt gespeichert' });
 });
 
