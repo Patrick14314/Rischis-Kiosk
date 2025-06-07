@@ -38,6 +38,18 @@ router.put('/:id', async (req, res) => {
   res.json({ message: 'Produkt aktualisiert' });
 });
 
+// Verfügbarkeit eines Produkts umschalten
+router.put('/:id/available', async (req, res) => {
+  const { id } = req.params;
+  const { available } = req.body;
+  const { error } = await supabase
+    .from('products')
+    .update({ available })
+    .eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ message: 'Produkt aktualisiert' });
+});
+
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   const { error: delPurchases } = await supabase
