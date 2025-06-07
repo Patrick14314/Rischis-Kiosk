@@ -1,11 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -31,7 +33,7 @@ app.use("/api", require("./routes/feed"));
 app.use("/api", require("./routes/products"));
 app.use("/api", require("./routes/buy"));
 app.use("/api", require("./routes/user"));
-app.use("/api", require("./routes/auth"));
+app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/admin/products", require("./routes/admin/products"));
 app.use("/api/admin/purchases", require("./routes/admin/purchases"));
