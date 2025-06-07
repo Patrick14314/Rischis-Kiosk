@@ -20,10 +20,13 @@ router.post('/login', async (req, res) => {
   // Zugriffstoken im Cookie setzen
   // Token im Cookie speichern. Domain-Angabe entfernen, damit der Cookie
   // direkt an die Backend-Domain gebunden ist und zuverlässig gesendet wird.
+  // Cookie sicher setzen. Ohne Domain bleibt er hostgebunden und wird so
+  // zuverlässig auch hinter einem Proxy übertragen.
   res.cookie('sb-access-token', data.session.access_token, {
     httpOnly: true,
-    secure: true,             // über HTTPS – für lokal ggf. false setzen
-    sameSite: 'none',         // Cookie auch bei CORS-Anfragen senden
+    secure: true,             // über HTTPS – auf Render zwingend erforderlich
+    sameSite: 'none',         // für Cross‑Site Cookies notwendig
+    path: '/',                // auf alle Routen anwendbar
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
   });
 
@@ -88,7 +91,8 @@ router.post('/logout', (req, res) => {
   res.clearCookie('sb-access-token', {
     httpOnly: true,
     secure: true,
-    sameSite: 'none'
+    sameSite: 'none',
+    path: '/'
   });
 
   res.json({ message: 'Logout erfolgreich' });

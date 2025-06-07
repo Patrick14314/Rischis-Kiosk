@@ -1,7 +1,8 @@
 // admin.js – Adminlogik über gesicherte Backend-API
 
 // Basis-URL des Backends
-const BACKEND_URL = "https://rischis-kiosk-t2uv.onrender.com";
+// Backend und Frontend laufen auf derselben Domain
+const BACKEND_URL = "";
 
 function showMessage(msg, isError = false) {
   const el = document.getElementById('product-result');
