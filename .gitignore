@@ -1,3 +1,3 @@
 # Ignore logs
-Rischis-Kiosk/frontend/frontend.log
-Rischis-Kiosk/kiosk-backend/backend.log
+frontend/frontend.log
+kiosk-backend/backend.log
