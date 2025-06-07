@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 
 // API-Routen
 app.use("/api", require("./routes/feed"));
-app.use("/api", require("./routes/products"));
+app.use("/api/products", require("./routes/products"));
 app.use("/api", require("./routes/buy"));
 app.use("/api/user", require("./routes/user")); // für Klarheit: nur /user hier
 app.use("/api/auth", require("./routes/auth"));
