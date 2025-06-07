@@ -46,3 +46,16 @@ if (localStorage.getItem('darkMode') !== 'false') {
 }
 
 window.addEventListener('DOMContentLoaded', checkUserAndRole);
+
+async function logout() {
+  try {
+    await fetch(`${BACKEND_URL}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (err) {
+    console.error('Fehler beim Logout', err);
+  } finally {
+    window.location.href = 'index.html';
+  }
+}
