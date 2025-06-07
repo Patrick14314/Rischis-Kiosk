@@ -40,7 +40,6 @@ app.use("/api", require("./routes/buy"));
 app.use("/api/user", require("./routes/user"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/purchases", require("./routes/purchases")); // ✅ HIER NEU
-app.use("/api/admin", require("./routes/admin"));
 app.use("/api/admin/products", require("./routes/admin/products"));
 app.use("/api/admin/purchases", require("./routes/admin/purchases"));
 app.use("/api/admin/stats", require("./routes/admin/stats"));
