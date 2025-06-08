@@ -1,6 +1,6 @@
 import express from 'express';
-import supabase from '../../utils/supabase.js';
 import purchaseProduct from '../../utils/purchaseProduct.js';
+import getUserAndProduct from '../../utils/getUserAndProduct.js';
 const router = express.Router();
 
 router.post('/', async (req, res) => {
@@ -9,16 +9,7 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Ungültige Eingaben' });
   }
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user_id)
-    .single();
-  const { data: product } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', product_id)
-    .single();
+  const { user, product } = await getUserAndProduct(user_id, product_id);
 
   if (!user || !product || product.stock < quantity) {
     return res
