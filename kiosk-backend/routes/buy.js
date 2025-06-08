@@ -1,7 +1,6 @@
 import express from 'express';
 import getUserFromRequest from '../utils/getUser.js';
-import purchaseProduct from '../utils/purchaseProduct.js';
-import getUserAndProduct from '../utils/getUserAndProduct.js';
+import { buyProduct } from '../services/purchaseService.js';
 import { validateBuy } from '../middleware/validate.js';
 const router = express.Router();
 
@@ -12,15 +11,7 @@ router.post('/', validateBuy, async (req, res, next) => {
 
     const { product_id, quantity } = req.body;
 
-    const { user: dbUser, product } = await getUserAndProduct(
-      user.id,
-      product_id,
-    );
-
-    if (!product || product.stock < quantity)
-      return res.status(400).json({ error: 'Nicht gen\u00fcgend Bestand' });
-
-    const { error, success } = await purchaseProduct(dbUser, product, quantity);
+    const { error, success } = await buyProduct(user.id, product_id, quantity);
 
     if (!success) {
       return res.status(500).json({ error });
