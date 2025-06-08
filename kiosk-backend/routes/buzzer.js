@@ -1,6 +1,7 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { validateBuzzerRound } from '../middleware/validate.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 const router = express.Router();
@@ -42,6 +43,7 @@ router.get(
 router.post(
   '/round',
   requireAdmin,
+  validateBuzzerRound,
   asyncHandler(async (req, res) => {
     const { bet, points_limit } = req.body;
     const { data, error } = await supabase
