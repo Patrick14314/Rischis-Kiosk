@@ -5,6 +5,20 @@
 // Einheitliche Definition für alle Frontend-Skripte
 const BACKEND_URL = window.location.origin;
 
+let csrfToken;
+async function getCsrfToken() {
+  if (!csrfToken) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/csrf-token`, { credentials: 'include' });
+      const data = await res.json();
+      csrfToken = data.csrfToken;
+    } catch (err) {
+      console.error('CSRF-Token konnte nicht geladen werden', err);
+    }
+  }
+  return csrfToken;
+}
+
 async function checkUserAndRole() {
   try {
     // Erst prüfen, ob eine gültige Session existiert
@@ -49,9 +63,11 @@ window.addEventListener('DOMContentLoaded', checkUserAndRole);
 
 async function logout() {
   try {
+    const token = await getCsrfToken();
     await fetch(`${BACKEND_URL}/api/auth/logout`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: { 'x-csrf-token': token }
     });
   } catch (err) {
     console.error('Fehler beim Logout', err);

@@ -6,6 +6,23 @@
 // Einheitliche Definition für alle Frontend-Skripte
 const BACKEND_URL = window.location.origin;
 
+let csrfToken;
+
+async function getCsrfToken() {
+  if (!csrfToken) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      csrfToken = data.csrfToken;
+    } catch (err) {
+      console.error('CSRF-Token konnte nicht geladen werden', err);
+    }
+  }
+  return csrfToken;
+}
+
 // Meldung anzeigen
 function showMessage(text, success = false) {
   const message = document.getElementById('message');
@@ -41,9 +58,13 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const password = document.getElementById('login-password').value;
 
   try {
+    const token = await getCsrfToken();
     const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': token,
+      },
       credentials: 'include', // wichtig für Cookies
       body: JSON.stringify({ email, password })
     });
@@ -72,9 +93,13 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   if (password !== repeat) return showMessage("Passwörter stimmen nicht überein.");
 
   try {
+    const token = await getCsrfToken();
     const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': token,
+      },
       credentials: 'include',
       body: JSON.stringify({ email, password })
     });

@@ -8,6 +8,22 @@ let userBalance = 0;
 let userSortedProducts = false;
 let allProducts = [];
 
+let csrfToken;
+async function getCsrfToken() {
+  if (!csrfToken) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      csrfToken = data.csrfToken;
+    } catch (err) {
+      console.error('CSRF-Token konnte nicht geladen werden', err);
+    }
+  }
+  return csrfToken;
+}
+
 function showMessage(text, type = 'info') {
   const el = document.getElementById('message');
   el.textContent = text;
@@ -193,9 +209,13 @@ async function buyProduct(productId, qtyInputId, productName, unitPrice) {
   if (!confirm(confirmText)) return;
 
   try {
+    const token = await getCsrfToken();
     const res = await fetch(`${BACKEND_URL}/api/buy`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': token,
+      },
       credentials: 'include',
       body: JSON.stringify({ product_id: productId, quantity: qty }),
     });
