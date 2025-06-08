@@ -1,47 +1,34 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
+import { setAuthCookie, clearAuthCookie } from '../utils/authCookies.js';
 const router = express.Router();
 
 // 🔐 LOGIN
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  try {
+    const { email, password } = req.body;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error || !data.session) {
-    return res.status(401).json({ error: 'Login fehlgeschlagen' });
-  }
-
-  // Zugriffstoken im Cookie setzen
-  // Token im Cookie speichern. Domain-Angabe entfernen, damit der Cookie
-  // direkt an die Backend-Domain gebunden ist und zuverlässig gesendet wird.
-  // Cookie sicher setzen. Ohne Domain bleibt er hostgebunden und wird so
-  // zuverlässig auch hinter einem Proxy übertragen.
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  };
-  if (process.env.COOKIE_DOMAIN) {
-    cookieOptions.domain = process.env.COOKIE_DOMAIN;
-  }
-  res.cookie('sb-access-token', data.session.access_token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',  // Nur HTTPS in Produktion
-  sameSite: 'none',
-  maxAge: 7 * 24 * 60 * 60 * 1000
-  });
-
-
-  res.json({
-    message: 'Login erfolgreich',
-    user: data.user,
-    session: {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token
+    if (error || !data.session) {
+      return res.status(401).json({ error: 'Login fehlgeschlagen' });
     }
-  });
+
+    setAuthCookie(res, data.session.access_token);
+
+    res.json({
+      message: 'Login erfolgreich',
+      user: data.user,
+      session: {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Serverfehler' });
+  }
 });
 
 // 🆕 LOGIN-STATUS PRÜFEN
@@ -67,40 +54,32 @@ router.get('/me', async (req, res) => {
 
 // 🧾 REGISTRIEREN
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  try {
+    const { email, password } = req.body;
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
-  const user = data?.user;
-  if (error || !user) {
-    return res.status(400).json({ error: 'Registrierung fehlgeschlagen' });
+    const user = data?.user;
+    if (error || !user) {
+      return res.status(400).json({ error: 'Registrierung fehlgeschlagen' });
+    }
+
+    await supabase.from('users').insert({
+      id: user.id,
+      name: email.split('@')[0],
+      email,
+      role: 'buyer',
+      balance: 0,
+    });
+
+    res.json({ message: 'Registrierung erfolgreich' });
+  } catch (err) {
+    res.status(500).json({ error: 'Serverfehler' });
   }
-
-  // Neuen Benutzer in eigene Tabelle einfügen
-  await supabase.from('users').insert({
-    id: user.id,
-    name: email.split('@')[0],
-    email,
-    role: 'buyer',
-    balance: 0
-  });
-
-  res.json({ message: 'Registrierung erfolgreich' });
 });
 
 // 🧼 LOGOUT
 router.post('/logout', (req, res) => {
-  // Session-Cookie entfernen. Ohne Domain bleibt der Cookie hostgebunden
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
-    path: '/'
-  };
-  if (process.env.COOKIE_DOMAIN) {
-    cookieOptions.domain = process.env.COOKIE_DOMAIN;
-  }
-  res.clearCookie('sb-access-token', cookieOptions);
-
+  clearAuthCookie(res);
   res.json({ message: 'Logout erfolgreich' });
 });
 
