@@ -52,15 +52,23 @@ async function loadRound() {
   const infoEl = document.getElementById('round-info');
   const joinBtn = document.getElementById('join-btn');
   const endBtn = document.getElementById('end-round-btn');
+  const lockBtn = document.getElementById('lock-round-btn');
 
   if (round) {
     infoEl.textContent = `Einsatz: ${round.bet} €, Limit: ${round.points_limit}`;
-    joinBtn.classList.remove('hidden');
+    if (round.joinable === false) {
+      joinBtn.classList.add('hidden');
+      lockBtn?.classList.add('hidden');
+    } else {
+      joinBtn.classList.remove('hidden');
+      if (currentUser?.role === 'admin') lockBtn?.classList.remove('hidden');
+    }
     if (currentUser?.role === 'admin') endBtn?.classList.remove('hidden');
   } else {
     infoEl.textContent = 'Keine laufende Runde';
     joinBtn.classList.add('hidden');
     endBtn?.classList.add('hidden');
+    lockBtn?.classList.add('hidden');
   }
 }
 
@@ -110,6 +118,9 @@ async function init() {
     document
       .getElementById('end-round-btn')
       ?.addEventListener('click', endRound);
+    document
+      .getElementById('lock-round-btn')
+      ?.addEventListener('click', lockRound);
   }
   await loadRound();
   await loadParticipants();
@@ -139,6 +150,27 @@ async function joinRound() {
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Beitreten';
+  }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
+}
+
+async function lockRound(e) {
+  e.preventDefault();
+  const token = await getCsrfToken();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/round/lock`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
+  });
+  const msgEl = document.getElementById('admin-message');
+  if (res.ok) {
+    msgEl.textContent = 'Runde geschlossen';
+    await loadRound();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    msgEl.textContent = data.error || 'Fehler beim Schliessen';
   }
   setTimeout(() => {
     msgEl.textContent = '';
