@@ -1,10 +1,6 @@
 // buzzer.js – einfache Steuerung der Buzzer-Seite
 
-const SUPABASE_URL = 'SUPABASE_URL'; // TODO: anpassen
-const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY'; // TODO: anpassen
-
 const BACKEND_URL = window.location.origin;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
@@ -29,11 +25,11 @@ async function checkUser() {
 }
 
 async function loadRound() {
-  const { data: round } = await supabase
-    .from('buzzer_rounds')
-    .select('*')
-    .eq('active', true)
-    .single();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/round`, {
+    credentials: 'include',
+  });
+  if (!res.ok) return;
+  const { round } = await res.json();
 
   const infoEl = document.getElementById('round-info');
   const joinBtn = document.getElementById('join-btn');
@@ -48,9 +44,11 @@ async function loadRound() {
 }
 
 async function loadGeneralInfo() {
-  const { data: online } = await supabase
-    .from('user_sessions')
-    .select('username, online, users(role)');
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/sessions`, {
+    credentials: 'include',
+  });
+  if (!res.ok) return;
+  const { sessions: online } = await res.json();
   const container = document.getElementById('general-info');
   container.innerHTML = '';
   online?.forEach((u) => {
