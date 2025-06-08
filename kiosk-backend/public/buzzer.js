@@ -233,6 +233,7 @@ async function createRound(e) {
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Start';
+    if (data.detail) msgEl.textContent += `: ${data.detail}`;
   }
   setTimeout(() => {
     msgEl.textContent = '';
