@@ -31,38 +31,18 @@ function parse(schema, data) {
   return result.data;
 }
 
-export function validateLogin(req, res, next) {
-  try {
-    req.body = parse(loginSchema, req.body);
-    next();
-  } catch (err) {
-    next(err);
-  }
+function createValidator(schema) {
+  return (req, res, next) => {
+    try {
+      req.body = parse(schema, req.body);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
-export function validateRegister(req, res, next) {
-  try {
-    req.body = parse(registerSchema, req.body);
-    next();
-  } catch (err) {
-    next(err);
-  }
-}
-
-export function validateBuy(req, res, next) {
-  try {
-    req.body = parse(buySchema, req.body);
-    next();
-  } catch (err) {
-    next(err);
-  }
-}
-
-export function validateAdminBuy(req, res, next) {
-  try {
-    req.body = parse(adminBuySchema, req.body);
-    next();
-  } catch (err) {
-    next(err);
-  }
-}
+export const validateLogin = createValidator(loginSchema);
+export const validateRegister = createValidator(registerSchema);
+export const validateBuy = createValidator(buySchema);
+export const validateAdminBuy = createValidator(adminBuySchema);

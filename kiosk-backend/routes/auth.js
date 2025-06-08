@@ -3,11 +3,15 @@ import supabase from '../utils/supabase.js';
 import { setAuthCookie, clearAuthCookie } from '../utils/authCookies.js';
 import { validateLogin, validateRegister } from '../middleware/validate.js';
 import { loginLimiter } from '../middleware/rateLimiter.js';
+import asyncHandler from '../utils/asyncHandler.js';
 const router = express.Router();
 
 // 🔐 LOGIN
-router.post('/login', loginLimiter, validateLogin, async (req, res, next) => {
-  try {
+router.post(
+  '/login',
+  loginLimiter,
+  validateLogin,
+  asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -28,20 +32,19 @@ router.post('/login', loginLimiter, validateLogin, async (req, res, next) => {
         refresh_token: data.session.refresh_token,
       },
     });
-  } catch (err) {
-    next(err);
-  }
-});
+  }),
+);
 
 // 🆕 LOGIN-STATUS PRÜFEN
-router.get('/me', async (req, res, next) => {
-  const token = req.cookies?.['sb-access-token'];
+router.get(
+  '/me',
+  asyncHandler(async (req, res) => {
+    const token = req.cookies?.['sb-access-token'];
 
-  if (!token) {
-    return res.status(401).json({ loggedIn: false });
-  }
+    if (!token) {
+      return res.status(401).json({ loggedIn: false });
+    }
 
-  try {
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data?.user) {
@@ -49,14 +52,14 @@ router.get('/me', async (req, res, next) => {
     }
 
     res.json({ loggedIn: true, user: data.user });
-  } catch (err) {
-    next(err);
-  }
-});
+  }),
+);
 
 // 🧾 REGISTRIEREN
-router.post('/register', validateRegister, async (req, res, next) => {
-  try {
+router.post(
+  '/register',
+  validateRegister,
+  asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signUp({ email, password });
 
@@ -74,10 +77,8 @@ router.post('/register', validateRegister, async (req, res, next) => {
     });
 
     res.json({ message: 'Registrierung erfolgreich' });
-  } catch (err) {
-    next(err);
-  }
-});
+  }),
+);
 
 // 🧼 LOGOUT
 router.post('/logout', (req, res) => {

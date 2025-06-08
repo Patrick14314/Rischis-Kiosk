@@ -3,10 +3,14 @@ import purchaseProduct from '../../utils/purchaseProduct.js';
 import getUserAndProduct from '../../utils/getUserAndProduct.js';
 import { requireAdmin } from '../../middleware/auth.js';
 import { validateAdminBuy } from '../../middleware/validate.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 const router = express.Router();
 
-router.post('/', validateAdminBuy, requireAdmin, async (req, res, next) => {
-  try {
+router.post(
+  '/',
+  validateAdminBuy,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
     const authUser = req.user;
 
     const { user_id, product_id, quantity } = req.body;
@@ -23,9 +27,7 @@ router.post('/', validateAdminBuy, requireAdmin, async (req, res, next) => {
 
     const result = await purchaseProduct(user, product, quantity);
     res.json(result);
-  } catch (err) {
-    next(err);
-  }
-});
+  }),
+);
 
 export default router;
