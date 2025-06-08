@@ -51,7 +51,7 @@ async function loadRound() {
   const joinBtn = document.getElementById('join-btn');
 
   if (round) {
-    infoEl.textContent = `Einsatz: ${round.bet} Punkte, Limit: ${round.points_limit}`;
+    infoEl.textContent = `Einsatz: ${round.bet} €, Limit: ${round.points_limit}`;
     joinBtn.classList.remove('hidden');
   } else {
     infoEl.textContent = 'Keine laufende Runde';
