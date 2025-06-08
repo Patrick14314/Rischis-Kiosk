@@ -13,8 +13,16 @@ router.get(
       .from('buzzer_rounds')
       .select('*')
       .eq('active', true)
-      .single();
-    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+      .maybeSingle();
+
+    if (error) {
+      return res.status(500).json({ error: 'Datenbankfehler' });
+    }
+
+    if (!round) {
+      return res.status(404).json({ round: null });
+    }
+
     res.json({ round });
   }),
 );
