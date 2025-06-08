@@ -66,18 +66,8 @@ router.put('/:id/available', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
-  const { error: delPurchases } = await supabase
-    .from('purchases')
-    .delete()
-    .eq('product_id', id);
-  const { error: delProduct } = await supabase
-    .from('products')
-    .delete()
-    .eq('id', id);
-  if (delPurchases || delProduct)
-    return res
-      .status(500)
-      .json({ error: delPurchases?.message || delProduct?.message });
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
   res.status(204).send();
 });
 
