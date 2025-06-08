@@ -21,6 +21,7 @@ import adminUsers from './routes/admin/users.js';
 import adminBuyForUser from './routes/admin/buy_for_user.js';
 import errorHandler from './middleware/errorHandler.js';
 import requestLogger from './middleware/requestLogger.js';
+import notFound from './middleware/notFound.js';
 import logger from './utils/logger.js';
 import { getCookieOptions } from './utils/authCookies.js';
 
@@ -108,6 +109,9 @@ app.use('/api/admin/purchases', adminPurchases);
 app.use('/api/admin/stats', adminStats);
 app.use('/api/admin/users', adminUsers);
 app.use('/api/admin/buy', adminBuyForUser);
+
+// 404-Handler
+app.use(notFound);
 
 // Zentrale Fehlerbehandlung
 app.use(errorHandler);
