@@ -13,7 +13,9 @@ export default async function purchaseProduct(user, product, quantity) {
   });
 
   if (error) {
-    return { error: 'Fehler beim Kaufvorgang' };
+    const err = new Error('Fehler beim Kaufvorgang');
+    err.status = 500;
+    throw err;
   }
 
   return { success: true };

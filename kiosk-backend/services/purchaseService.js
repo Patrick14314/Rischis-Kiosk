@@ -5,9 +5,10 @@ export async function buyProduct(userId, productId, quantity) {
   const { user, product } = await getUserAndProduct(userId, productId);
 
   if (!product || product.stock < quantity) {
-    return { error: 'Nicht genug Bestand' };
+    const error = new Error('Nicht genug Bestand');
+    error.status = 400;
+    throw error;
   }
 
-  const result = await purchaseProduct(user, product, quantity);
-  return result;
+  return purchaseProduct(user, product, quantity);
 }
