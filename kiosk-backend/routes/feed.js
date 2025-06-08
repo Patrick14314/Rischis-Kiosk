@@ -1,6 +1,8 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
 import getUserFromRequest from '../utils/getUser.js';
+import getUserName from '../utils/getUserName.js';
+import getUserRole from '../utils/getUserRole.js';
 const router = express.Router();
 
 // Liste der letzten Fütterungen
@@ -20,20 +22,12 @@ router.post('/', async (req, res) => {
   const user = await getUserFromRequest(req);
   const { type } = req.body;
 
-  let name = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from('users')
-      .select('name')
-      .eq('id', user.id)
-      .single();
-    name = profile?.name || user.email;
-  }
+  const name = user ? (await getUserName(user.id)) || user.email : null;
 
   const { error } = await supabase.from('mentos_feedings').insert({
     futterart: type,
     gefuettert_von: name,
-    zeitstempel: new Date().toISOString()
+    zeitstempel: new Date().toISOString(),
   });
 
   if (error) return res.status(500).json({ error: error.message });
@@ -45,13 +39,9 @@ router.delete('/', async (req, res) => {
   const user = await getUserFromRequest(req);
   if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  const role = await getUserRole(user.id);
 
-  if (profile?.role !== 'admin') {
+  if (role !== 'admin') {
     return res.status(403).json({ error: 'Nicht erlaubt' });
   }
 

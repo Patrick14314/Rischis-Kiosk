@@ -1,31 +1,22 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
+import getUserRole from '../utils/getUserRole.js';
+import getUserFromRequest from '../utils/getUser.js';
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  let role = null;
-  const token = req.cookies['sb-access-token'];
-  if (token) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser(token);
-    if (user) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      role = profile?.role || null;
-    }
-  }
+const SORT_OPTIONS = {
+  price_desc: { column: 'price', asc: false },
+  price_asc: { column: 'price', asc: true },
+  name_desc: { column: 'name', asc: false },
+  name_asc: { column: 'name', asc: true },
+};
 
-  const sortOptions = {
-    price_desc: { column: 'price', asc: false },
-    price_asc: { column: 'price', asc: true },
-    name_desc: { column: 'name', asc: false },
-    name_asc: { column: 'name', asc: true },
-  };
-  const { column, asc } = sortOptions[req.query.sort] || sortOptions.price_asc;
+router.get('/', async (req, res) => {
+  const user = await getUserFromRequest(req);
+  const role = user ? await getUserRole(user.id) : null;
+
+  const { column, asc } =
+    SORT_OPTIONS[req.query.sort] || SORT_OPTIONS.price_asc;
 
   const query = supabase
     .from('products')
