@@ -1,8 +1,11 @@
 export function getCookieOptions() {
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
+    secure:
+      process.env.COOKIE_SECURE
+        ? process.env.COOKIE_SECURE === 'true'
+        : process.env.NODE_ENV === 'production',
+    sameSite: process.env.COOKIE_SAMESITE || 'lax',
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };

@@ -25,6 +25,15 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `SUPABASE_SERVICE_ROLE` | Service Role Key von Supabase             |
 | `PORT`                  | Port, auf dem der Server läuft (optional) |
 | `COOKIE_DOMAIN`         | Domain für Cookies (optional)             |
+| `COOKIE_SECURE`         | `true` erzwingt Secure-Cookies            |
+| `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut            |
+| `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um  |
+
+## CSRF-Schutz
+
+Der Server stellt unter `/api/csrf-token` einen Endpunkt bereit, der ein
+gültiges CSRF-Token zurückliefert. Dieses muss bei schreibenden Anfragen in
+das Header-Feld `x-csrf-token` übernommen werden.
 
 ## Formatierung und Linting
 
