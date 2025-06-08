@@ -5,6 +5,22 @@ const BACKEND_URL = window.location.origin;
 // Aktuell eingeloggter Benutzer
 let currentUserId = null;
 
+let csrfToken;
+async function getCsrfToken() {
+  if (!csrfToken) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      csrfToken = data.csrfToken;
+    } catch (err) {
+      console.error('CSRF-Token konnte nicht geladen werden', err);
+    }
+  }
+  return csrfToken;
+}
+
 // Darkmode
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
@@ -84,9 +100,13 @@ async function addProduct(e) {
   const purchase_price = parseFloat(document.getElementById('product-purchase').value.replace(',', '.'));
   const stock = parseInt(document.getElementById('product-stock').value);
   const category = document.getElementById('product-category').value;
+  const token = await getCsrfToken();
   const res = await fetch(`${BACKEND_URL}/api/admin/products`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': token,
+    },
     credentials: 'include',
     body: JSON.stringify({ name, price, purchase_price, stock, category, created_by: currentUserId })
   });
@@ -114,9 +134,13 @@ async function editProduct(id) {
   const newPrice = prompt('Neuen Verkaufspreis in € eingeben:', p.price);
   const newStock = prompt('Neuen Bestand eingeben:', p.stock);
   if (!newName || !newPrice || !newStock) return;
+  const token = await getCsrfToken();
   await fetch(`${BACKEND_URL}/api/admin/products/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': token,
+    },
     credentials: 'include',
     body: JSON.stringify({ name:newName, price:parseFloat(newPrice), stock:parseInt(newStock) })
   });
@@ -125,9 +149,13 @@ async function editProduct(id) {
 }
 
 async function toggleAvailability(id, current) {
+  const token2 = await getCsrfToken();
   await fetch(`${BACKEND_URL}/api/admin/products/${id}/available`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': token2,
+    },
     credentials: 'include',
     body: JSON.stringify({ available: !current })
   });
@@ -136,7 +164,12 @@ async function toggleAvailability(id, current) {
 
 async function deleteProduct(id) {
   if (!confirm('Produkt löschen (Käufe bleiben erhalten)?')) return;
-  await fetch(`${BACKEND_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
+  const token3 = await getCsrfToken();
+  await fetch(`${BACKEND_URL}/api/admin/products/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: { 'x-csrf-token': token3 },
+  });
   loadProducts();
   loadStats();
   loadPurchases(true);
@@ -215,9 +248,13 @@ async function loadUserPasswords() {
 async function editUser(id, currentName) {
   const newName = prompt('Neuer Name:', currentName);
   if (newName && newName.trim() !== '') {
+    const token = await getCsrfToken();
     const res = await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': token,
+      },
       credentials: 'include',
       body: JSON.stringify({ name: newName.trim() })
     });
@@ -228,9 +265,13 @@ async function editUser(id, currentName) {
   const newPw = prompt('Neues Passwort (mind. 6 Zeichen, leer lassen zum Überspringen):');
   if (newPw) {
     if (newPw.length < 6) return alert('Passwort zu kurz.');
+    const tokenPw = await getCsrfToken();
     const resPw = await fetch(`${BACKEND_URL}/api/admin/users/${id}/password`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': tokenPw,
+      },
       credentials: 'include',
       body: JSON.stringify({ password: newPw })
     });
@@ -263,9 +304,13 @@ async function updateBalance(id, action) {
   const user = await res.json();
   let newBalance = user.balance;
   if (action === 'add') newBalance += val; else newBalance -= val;
+  const token = await getCsrfToken();
   await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': token,
+    },
     credentials: 'include',
     body: JSON.stringify({ balance: newBalance })
   });
@@ -300,9 +345,13 @@ async function buyForUser(e) {
   const productId = document.getElementById('buy-product')?.value;
   const qty = parseInt(document.getElementById('buy-qty')?.value || '1');
   if (!userId || !productId || isNaN(qty) || qty <= 0) return;
+  const token = await getCsrfToken();
   const res = await fetch(`${BACKEND_URL}/api/admin/buy`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': token,
+    },
     credentials: 'include',
     body: JSON.stringify({ user_id: userId, product_id: productId, quantity: qty })
   });

@@ -97,6 +97,19 @@
 
     const message = document.getElementById('message');
 
+    async function getCsrfToken() {
+      if (!window.csrfToken) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/csrf-token`, { credentials: 'include' });
+          const data = await res.json();
+          window.csrfToken = data.csrfToken;
+        } catch (err) {
+          console.error('CSRF-Token konnte nicht geladen werden', err);
+        }
+      }
+      return window.csrfToken;
+    }
+
     function showMessage(text, success = false) {
       message.textContent = text;
       message.className = success ? 'text-green-600 mt-4 text-center' : 'text-red-500 mt-4 text-center';
@@ -116,9 +129,13 @@
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
 
+      const token = await getCsrfToken();
       const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': token
+        },
         credentials: 'include',
         body: JSON.stringify({ email, password })
       });
@@ -140,9 +157,13 @@
 
       if (password !== repeat) return showMessage("Passwörter stimmen nicht überein.");
 
+      const token = await getCsrfToken();
       const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': token
+        },
         credentials: 'include',
         body: JSON.stringify({ email, password })
       });
