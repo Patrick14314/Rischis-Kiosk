@@ -131,7 +131,7 @@ async function toggleAvailability(id, current) {
 }
 
 async function deleteProduct(id) {
-  if (!confirm('Produkt inklusive Käufen löschen?')) return;
+  if (!confirm('Produkt löschen (Käufe bleiben erhalten)?')) return;
   await fetch(`${BACKEND_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
   loadProducts();
   loadStats();
