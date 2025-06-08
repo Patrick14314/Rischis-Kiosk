@@ -1,10 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import env from './env.js';
 
-const { SUPABASE_URL, SUPABASE_SERVICE_ROLE } = process.env;
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
-  throw new Error('Supabase credentials not set');
-}
+const { SUPABASE_URL, SUPABASE_SERVICE_ROLE } = env;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
 

@@ -29,6 +29,10 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut            |
 | `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um  |
 
+Beim Start des Servers werden diese Variablen mit einem Zod-Schema
+validiert. Fehlen erforderliche Werte oder sind sie ungültig, wird der
+Start abgebrochen.
+
 ## Datenbank vorbereiten
 
 Damit Kaufvorgänge funktionieren, muss in Supabase die Funktion
