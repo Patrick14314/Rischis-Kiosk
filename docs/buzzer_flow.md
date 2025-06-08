@@ -10,6 +10,7 @@ Diese Datei beschreibt den kompletten Ablauf des Buzzer-Spiels, wie es in "Risch
 ## 2. Spieler beitreten
 
 - Teilnahme ist nur möglich, wenn eine Runde aktiv ist.
+- Jeder Spieler kann nur einmal beitreten.
 - Klickt ein Spieler auf **Beitreten**, entsteht ein Eintrag in `buzzer_participants`.
 - Der Einsatz wird sofort vom Guthaben abgezogen.
 - Der Spielerstatus wird gesetzt: `has_buzzed = false`, `has_skipped = false`.
@@ -51,6 +52,7 @@ Diese Datei beschreibt den kompletten Ablauf des Buzzer-Spiels, wie es in "Risch
 - Erreicht ein Spieler das Punktelimit, muss der Admin die Runde manuell beenden.
 - Über `POST /api/buzzer/round/end` wird die Runde auf inaktiv gesetzt.
 - Der Gewinner wird in `buzzer_rounds.winner_id` vermerkt.
+- Wird die Runde ohne Gewinner beendet, erhalten alle Teilnehmer ihren Einsatz zurück.
 
 ## 9. Topf und Auszahlung
 
