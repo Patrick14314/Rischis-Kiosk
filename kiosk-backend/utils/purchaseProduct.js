@@ -2,29 +2,17 @@ import supabase from './supabase.js';
 
 export default async function purchaseProduct(user, product, quantity) {
   const total = quantity * product.price;
-  const newBalance = (user.balance || 0) - total;
 
-  const [
-    { error: purchaseError },
-    { error: balanceError },
-    { error: stockError },
-  ] = await Promise.all([
-    supabase.from('purchases').insert({
-      user_id: user.id,
-      user_name: user.name,
-      product_id: product.id,
-      product_name: product.name,
-      price: total,
-      quantity,
-    }),
-    supabase.from('users').update({ balance: newBalance }).eq('id', user.id),
-    supabase
-      .from('products')
-      .update({ stock: product.stock - quantity })
-      .eq('id', product.id),
-  ]);
+  const { error } = await supabase.rpc('purchase_product', {
+    p_user_id: user.id,
+    p_user_name: user.name,
+    p_product_id: product.id,
+    p_product_name: product.name,
+    p_price: total,
+    p_quantity: quantity,
+  });
 
-  if (purchaseError || balanceError || stockError) {
+  if (error) {
     return { error: 'Fehler beim Kaufvorgang' };
   }
 
