@@ -46,3 +46,11 @@ export const validateLogin = createValidator(loginSchema);
 export const validateRegister = createValidator(registerSchema);
 export const validateBuy = createValidator(buySchema);
 export const validateAdminBuy = createValidator(adminBuySchema);
+
+// Validierung für das Erstellen einer Buzzer-Runde
+const buzzerRoundSchema = z.object({
+  bet: z.coerce.number().int().positive(),
+  points_limit: z.coerce.number().int().positive(),
+});
+
+export const validateBuzzerRound = createValidator(buzzerRoundSchema);
