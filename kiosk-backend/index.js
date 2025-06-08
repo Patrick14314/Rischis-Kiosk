@@ -90,6 +90,9 @@ app.use(express.static(publicDir));
 app.get('/', (req, res) => {
   res.sendFile(join(publicDir, 'index.html'));
 });
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(join(publicDir, 'favicon.jpeg'));
+});
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK');
 });
