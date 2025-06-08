@@ -99,9 +99,10 @@ router.post(
 
     if (existingError) {
       console.error('createRound existingError', existingError);
-      return res
-        .status(500)
-        .json({ error: 'Runde konnte nicht erstellt werden' });
+      return res.status(500).json({
+        error: 'Runde konnte nicht erstellt werden',
+        detail: existingError.message,
+      });
     }
 
     if (existing)
@@ -120,9 +121,10 @@ router.post(
       .single();
     if (error) {
       console.error('createRound insert error', error);
-      return res
-        .status(500)
-        .json({ error: 'Runde konnte nicht erstellt werden' });
+      return res.status(500).json({
+        error: 'Runde konnte nicht erstellt werden',
+        detail: error.message,
+      });
     }
     res.json({ round: data });
   }),
