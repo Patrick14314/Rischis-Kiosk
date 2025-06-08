@@ -4,9 +4,8 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Routen-Imports (nur funktionsfähige Imports!)
 import feed from './routes/feed.js';
@@ -23,7 +22,7 @@ import adminBuyForUser from './routes/admin/buy_for_user.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const publicDir = path.join(__dirname, 'public');
+const publicDir = join(__dirname, 'public');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -42,11 +41,11 @@ app.use(express.static(publicDir));
 // Statische Routen
 ['admin', 'dashboard', 'mentos', 'shop'].forEach((page) => {
   app.get(`/${page}`, (req, res) => {
-    res.sendFile(path.join(publicDir, `${page}.html`));
+    res.sendFile(join(publicDir, `${page}.html`));
   });
 });
 app.get('/', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  res.sendFile(join(publicDir, 'index.html'));
 });
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK');
