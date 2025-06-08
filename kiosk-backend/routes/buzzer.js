@@ -46,11 +46,20 @@ router.post(
   validateBuzzerRound,
   asyncHandler(async (req, res) => {
     const { bet, points_limit } = req.body;
-    const { data: existing } = await supabase
+    const {
+      data: existing,
+      error: existingError,
+    } = await supabase
       .from('buzzer_rounds')
       .select('id')
       .eq('active', true)
       .maybeSingle();
+
+    if (existingError) {
+      return res
+        .status(500)
+        .json({ error: 'Runde konnte nicht erstellt werden' });
+    }
 
     if (existing)
       return res.status(400).json({ error: 'Es läuft bereits eine Runde' });
