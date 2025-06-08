@@ -5,6 +5,19 @@ import asyncHandler from '../utils/asyncHandler.js';
 
 const router = express.Router();
 
+// Online-Status und Rollen aller Nutzer abrufen
+router.get(
+  '/info',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data, error } = await supabase
+      .from('user_sessions')
+      .select('username, online, users(role)');
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    res.json({ sessions: data });
+  }),
+);
+
 router.get(
   '/round',
   requireAuth,

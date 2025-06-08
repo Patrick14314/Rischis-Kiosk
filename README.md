@@ -83,3 +83,4 @@ Das Buzzer-Spiel ermöglicht schnelle Musikquiz-Runden. Es nutzt Supabase für A
 - `POST /api/buzzer/join` – aktueller Runde beitreten
 - `POST /api/buzzer/buzz` – im laufenden KOLO buzzern
 - `POST /api/buzzer/skip` – Buzz überspringen
+- `GET /api/buzzer/info` – Online-Status aller Nutzer
