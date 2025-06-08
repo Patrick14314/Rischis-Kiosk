@@ -2,6 +2,8 @@
 
 const BACKEND_URL = window.location.origin;
 
+let currentUser = null;
+
 async function getCsrfToken() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
@@ -49,13 +51,16 @@ async function loadRound() {
 
   const infoEl = document.getElementById('round-info');
   const joinBtn = document.getElementById('join-btn');
+  const endBtn = document.getElementById('end-round-btn');
 
   if (round) {
     infoEl.textContent = `Einsatz: ${round.bet} €, Limit: ${round.points_limit}`;
     joinBtn.classList.remove('hidden');
+    if (currentUser?.role === 'admin') endBtn?.classList.remove('hidden');
   } else {
     infoEl.textContent = 'Keine laufende Runde';
     joinBtn.classList.add('hidden');
+    endBtn?.classList.add('hidden');
   }
 }
 
@@ -78,11 +83,15 @@ async function loadGeneralInfo() {
 async function init() {
   const user = await checkUser();
   if (!user) return;
+  currentUser = user;
   if (user.role === 'admin') {
     document.getElementById('admin-section').classList.remove('hidden');
     document
       .getElementById('round-form')
       ?.addEventListener('submit', createRound);
+    document
+      .getElementById('end-round-btn')
+      ?.addEventListener('click', endRound);
   }
   await loadRound();
   await loadGeneralInfo();
@@ -151,6 +160,27 @@ async function createRound(e) {
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Start';
+  }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
+}
+
+async function endRound(e) {
+  e.preventDefault();
+  const token = await getCsrfToken();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/round/end`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
+  });
+  const msgEl = document.getElementById('admin-message');
+  if (res.ok) {
+    msgEl.textContent = 'Runde beendet';
+    await loadRound();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    msgEl.textContent = data.error || 'Fehler beim Beenden';
   }
   setTimeout(() => {
     msgEl.textContent = '';
