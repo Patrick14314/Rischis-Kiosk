@@ -1,19 +1,22 @@
 import express from 'express';
 import supabase from '../../utils/supabase.js';
 import { requireAdmin } from '../../middleware/auth.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 const router = express.Router();
 
 router.use(requireAdmin);
 
-router.get('/', async (req, res) => {
-  const [{ data: users }, { data: products }, { data: purchases }] =
-    await Promise.all([
-      supabase.from('users').select('name, balance'),
-      supabase
-        .from('products')
-        .select('id, name, price, purchase_price, stock'),
-      supabase.from('purchases').select('product_id, price, quantity'),
-    ]);
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    const [{ data: users }, { data: products }, { data: purchases }] =
+      await Promise.all([
+        supabase.from('users').select('name, balance'),
+        supabase
+          .from('products')
+          .select('id, name, price, purchase_price, stock'),
+        supabase.from('purchases').select('product_id, price, quantity'),
+      ]);
 
   const totalBalance = users.reduce((sum, u) => sum + (u.balance || 0), 0);
   const shopValue = products.reduce(
@@ -31,14 +34,15 @@ router.get('/', async (req, res) => {
 
   const profit = totalRevenue - totalCost;
 
-  res.json({
-    users,
-    totalBalance,
-    shopValue,
-    totalRevenue,
-    totalCost,
-    profit,
-  });
-});
+    res.json({
+      users,
+      totalBalance,
+      shopValue,
+      totalRevenue,
+      totalCost,
+      profit,
+    });
+  }),
+);
 
 export default router;
