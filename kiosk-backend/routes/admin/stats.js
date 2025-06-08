@@ -1,8 +1,14 @@
 import express from 'express';
 import supabase from '../../utils/supabase.js';
+import getUserFromRequest from '../../utils/getUser.js';
+import getUserRole from '../../utils/getUserRole.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
+  const user = await getUserFromRequest(req);
+  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
+  const role = await getUserRole(user.id);
+  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const [
     { data: users },
     { data: products },
