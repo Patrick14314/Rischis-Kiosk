@@ -23,6 +23,7 @@ import adminBuyForUser from './routes/admin/buy_for_user.js';
 import errorHandler from './middleware/errorHandler.js';
 import requestLogger from './middleware/requestLogger.js';
 import logger from './utils/logger.js';
+import { getCookieOptions } from './utils/authCookies.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -53,8 +54,7 @@ if (process.env.FORCE_HTTPS === 'true') {
 
 const csrfProtection = csrf({
   cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    ...getCookieOptions(),
     sameSite: 'strict',
   },
 });
