@@ -61,6 +61,12 @@ Standard-HTTP-Sicherheits-Header wie `X-Frame-Options` oder
 `Content-Security-Policy` gesetzt. Dadurch verringern sich typische
 Angriffsflächen wie Clickjacking.
 
+Das Frontend lädt Tailwind CSS sowie Google Fonts aus externen Quellen.
+Darum erlaubt die Content-Security-Policy in `kiosk-backend/index.js`
+neben `cdn.tailwindcss.com` auch die Domains `fonts.googleapis.com` und
+`fonts.gstatic.com`. Zudem wird für Inline-Styles `'unsafe-inline'`
+freigegeben, damit das Tailwind-CDN seine Styles einfügen kann.
+
 ## Formatierung und Linting
 
 Das Projekt verwendet ESLint und Prettier zur Code-Qualität. Die folgenden Befehle stehen zur Verfügung:
