@@ -56,6 +56,7 @@ router.post(
       .maybeSingle();
 
     if (existingError) {
+      console.error('createRound existingError', existingError);
       return res
         .status(500)
         .json({ error: 'Runde konnte nicht erstellt werden' });
@@ -69,10 +70,12 @@ router.post(
       .insert({ bet, points_limit, active: true })
       .select()
       .single();
-    if (error)
+    if (error) {
+      console.error('createRound insert error', error);
       return res
         .status(500)
         .json({ error: 'Runde konnte nicht erstellt werden' });
+    }
     res.json({ round: data });
   }),
 );
