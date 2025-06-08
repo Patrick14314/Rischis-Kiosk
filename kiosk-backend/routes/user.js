@@ -1,18 +1,18 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
-import getUserFromRequest from '../utils/getUser.js';
+import { requireAuth } from '../middleware/auth.js';
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
+router.get('/', requireAuth, async (req, res) => {
+  const user = req.user;
 
   const { data, error } = await supabase
     .from('users')
     .select('*')
     .eq('id', user.id)
     .single();
-  if (error || !data) return res.status(404).json({ error: 'Nutzer nicht gefunden' });
+  if (error || !data)
+    return res.status(404).json({ error: 'Nutzer nicht gefunden' });
 
   const { data: session } = await supabase
     .from('user_sessions')

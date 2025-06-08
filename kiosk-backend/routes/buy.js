@@ -1,13 +1,12 @@
 import express from 'express';
-import getUserFromRequest from '../utils/getUser.js';
+import { requireAuth } from '../middleware/auth.js';
 import { buyProduct } from '../services/purchaseService.js';
 import { validateBuy } from '../middleware/validate.js';
 const router = express.Router();
 
-router.post('/', validateBuy, async (req, res, next) => {
+router.post('/', validateBuy, requireAuth, async (req, res, next) => {
   try {
-    const user = await getUserFromRequest(req);
-    if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
+    const user = req.user;
 
     const { product_id, quantity } = req.body;
 
