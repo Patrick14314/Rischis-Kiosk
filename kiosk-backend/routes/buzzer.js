@@ -41,6 +41,25 @@ router.get(
   }),
 );
 
+router.get(
+  '/participants',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .maybeSingle();
+    if (!round) return res.status(404).json({ participants: [] });
+    const { data, error } = await supabase
+      .from('buzzer_participants')
+      .select('user_id, users(name)')
+      .eq('round_id', round.id);
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    res.json({ participants: data });
+  }),
+);
+
 router.post(
   '/round',
   requireAdmin,
