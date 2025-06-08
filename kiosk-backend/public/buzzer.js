@@ -1,10 +1,7 @@
 // buzzer.js – einfache Steuerung der Buzzer-Seite
 
-const SUPABASE_URL = 'SUPABASE_URL'; // TODO: anpassen
-const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY'; // TODO: anpassen
-
+// Basis-URL des Backends - identisch für alle Skripte
 const BACKEND_URL = window.location.origin;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
@@ -29,11 +26,10 @@ async function checkUser() {
 }
 
 async function loadRound() {
-  const { data: round } = await supabase
-    .from('buzzer_rounds')
-    .select('*')
-    .eq('active', true)
-    .single();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/round`, {
+    credentials: 'include',
+  });
+  const { round } = res.ok ? await res.json() : { round: null };
 
   const infoEl = document.getElementById('round-info');
   const joinBtn = document.getElementById('join-btn');
@@ -48,9 +44,10 @@ async function loadRound() {
 }
 
 async function loadGeneralInfo() {
-  const { data: online } = await supabase
-    .from('user_sessions')
-    .select('username, online, users(role)');
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/info`, {
+    credentials: 'include',
+  });
+  const { sessions: online } = res.ok ? await res.json() : { sessions: [] };
   const container = document.getElementById('general-info');
   container.innerHTML = '';
   online?.forEach((u) => {
@@ -69,6 +66,43 @@ async function init() {
   }
   await loadRound();
   await loadGeneralInfo();
+
+  document.getElementById('join-btn').addEventListener('click', joinRound);
+  document.getElementById('buzz-btn').addEventListener('click', buzz);
+  document.getElementById('skip-btn').addEventListener('click', skip);
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+async function joinRound() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/join`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.ok) {
+    document.getElementById('join-btn').disabled = true;
+  }
+}
+
+async function buzz() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/buzz`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.ok) {
+    document.getElementById('buzz-btn').disabled = true;
+  }
+}
+
+async function skip() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/skip`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.ok) {
+    document.getElementById('skip-btn').disabled = true;
+  }
+}
