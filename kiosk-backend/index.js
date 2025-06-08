@@ -4,7 +4,6 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import csurf from 'csurf';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,32 +28,14 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : [];
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true,
     credentials: true,
   }),
 );
 app.use(cookieParser());
 app.use(express.json());
-app.use(
-  csurf({
-    cookie: {
-      httpOnly: true,
-      sameSite: 'lax',
-      domain: process.env.COOKIE_DOMAIN || undefined,
-    },
-  }),
-);
 app.use(express.static(publicDir));
 
 // Statische Routen
@@ -68,9 +49,6 @@ app.get('/', (req, res) => {
 });
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK');
-});
-app.get('/api/csrf-token', (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
 });
 
 // API-Routen

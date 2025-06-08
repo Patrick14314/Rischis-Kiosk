@@ -20,12 +20,11 @@ npm start
 Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie die bereitgestellte `.env.example` als Vorlage.
 
 | Variable                | Beschreibung                              |
-| ----------------------- | ----------------------------------------- |
+|-------------------------|-------------------------------------------|
 | `SUPABASE_URL`          | URL Ihres Supabase Projekts               |
 | `SUPABASE_SERVICE_ROLE` | Service Role Key von Supabase             |
 | `PORT`                  | Port, auf dem der Server läuft (optional) |
 | `COOKIE_DOMAIN`         | Domain für Cookies (optional)             |
-| `ALLOWED_ORIGINS`       | Erlaubte Domains für CORS (kommagetrennt) |
 
 ## Formatierung und Linting
 
@@ -35,9 +34,3 @@ Das Projekt verwendet ESLint und Prettier zur Code-Qualität. Die folgenden Befe
 npm run lint     # Code mit ESLint prüfen
 npm run format   # Code mit Prettier formatieren
 ```
-
-## CSRF-Schutz
-
-Für alle verändernden API-Routen wird ein CSRF-Token benötigt. Das Token kann
-unter `/api/csrf-token` abgefragt werden und muss anschließend in der
-`X-CSRF-Token`-Header gesendet werden.
