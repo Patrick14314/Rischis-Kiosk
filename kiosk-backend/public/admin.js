@@ -30,15 +30,6 @@ function formatDateTime(iso) {
          d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin' });
 }
 
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 // Eingeloggten Benutzer laden
 async function loadCurrentUser() {
   try {
@@ -65,8 +56,8 @@ async function loadProducts() {
     li.innerHTML = `
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <p class="text-base font-semibold">${escapeHtml(p.name)}</p>
-          <p class="text-sm text-gray-600 dark:text-gray-300">Preis: <strong>${p.price.toFixed(2)} €</strong> – Bestand: <strong>${p.stock}</strong> – Kategorie: <strong>${escapeHtml(p.category || '-')}</strong></p>
+          <p class="text-base font-semibold">${p.name}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">Preis: <strong>${p.price.toFixed(2)} €</strong> – Bestand: <strong>${p.stock}</strong> – Kategorie: <strong>${p.category || '-'}</strong></p>
         </div>
         <div class="flex flex-row gap-1 sm:ml-4">
           <button onclick="toggleAvailability('${p.id}', ${p.available})" class="bg-yellow-500 text-white text-xs px-2 py-1 rounded shadow hover:bg-yellow-600 focus:outline-none">
@@ -194,12 +185,7 @@ async function loadPurchases(initial = false) {
   const res = await fetch(`${BACKEND_URL}/api/admin/purchases?offset=${purchaseOffset}&limit=${purchaseLimit}`, { credentials: 'include' });
   const data = await res.json();
   const list = document.getElementById('purchase-history');
-  const items = data
-    .map(
-      e =>
-        `<li>${formatDateTime(e.created_at)} – <strong>${escapeHtml(e.user_name)}</strong> kaufte <strong>${e.quantity || 1}x ${escapeHtml(e.product_name)}</strong> für ${e.price.toFixed(2)} €</li>`
-    )
-    .join('');
+  const items = data.map(e => `<li>${formatDateTime(e.created_at)} – <strong>${e.user_name}</strong> kaufte <strong>${e.quantity || 1}x ${e.product_name}</strong> für ${e.price.toFixed(2)} €</li>`).join('');
   if (initial) list.innerHTML = items; else list.innerHTML += items;
   purchaseOffset += purchaseLimit;
 }
@@ -262,7 +248,7 @@ async function loadUserBalances() {
   document.getElementById('balance-control-list').innerHTML = data.map(u => {
     const cls = u.balance < 0 ? 'text-red-600 dark:text-red-400 font-bold' : 'text-green-600 dark:text-green-400';
     return `<li class="flex flex-wrap items-center gap-2">
-      <span class="flex-1">${escapeHtml(u.name)}: <span class="${cls}">${u.balance.toFixed(2)} €</span></span>
+      <span class="flex-1">${u.name}: <span class="${cls}">${u.balance.toFixed(2)} €</span></span>
       <input type="number" id="bal-${u.id}" class="w-20 border px-2 py-1" step="0.01" />
       <button onclick="updateBalance('${u.id}', 'add')" class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">+</button>
       <button onclick="updateBalance('${u.id}', 'subtract')" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">-</button>
@@ -294,9 +280,7 @@ async function loadBuyUsers() {
   const data = await res.json();
   const select = document.getElementById('buy-user');
   if (!select) return;
-  select.innerHTML = data
-    .map(u => `<option value="${u.id}">${escapeHtml(u.name)}</option>`)
-    .join('');
+  select.innerHTML = data.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
 }
 
 async function loadBuyProducts() {
@@ -306,7 +290,7 @@ async function loadBuyProducts() {
   if (!select) return;
   select.innerHTML = data
     .filter(p => p.available && p.stock > 0)
-    .map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.stock})</option>`)
+    .map(p => `<option value="${p.id}">${p.name} (${p.stock})</option>`)
     .join('');
 }
 
