@@ -1,17 +1,16 @@
+import env from './env.js';
+
 export function getCookieOptions() {
   const options = {
     httpOnly: true,
-    secure:
-      process.env.COOKIE_SECURE
-        ? process.env.COOKIE_SECURE === 'true'
-        : process.env.NODE_ENV === 'production',
-    sameSite: process.env.COOKIE_SAMESITE || 'lax',
+    secure: env.COOKIE_SECURE,
+    sameSite: env.COOKIE_SAMESITE,
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
-  if (process.env.COOKIE_DOMAIN) {
-    options.domain = process.env.COOKIE_DOMAIN;
+  if (env.COOKIE_DOMAIN) {
+    options.domain = env.COOKIE_DOMAIN;
   }
 
   return options;

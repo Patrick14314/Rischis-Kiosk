@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import env from './utils/env.js';
 
 import express from 'express';
 import cors from 'cors';
@@ -30,7 +29,7 @@ const __dirname = dirname(__filename);
 const publicDir = join(__dirname, 'public');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = env.PORT;
 
 // Middleware
 app.use(
@@ -42,7 +41,7 @@ app.use(
 app.use(cookieParser());
 app.use(requestLogger);
 
-if (process.env.FORCE_HTTPS === 'true') {
+if (env.FORCE_HTTPS) {
   app.set('trust proxy', 1);
   app.use((req, res, next) => {
     if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
