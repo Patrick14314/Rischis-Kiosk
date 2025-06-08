@@ -3,26 +3,40 @@ import supabase from '../../utils/supabase.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const { data: users } = await supabase.from('users').select('name, balance');
-  const { data: products } = await supabase.from('products').select('id, name, price, purchase_price, stock');
-  const { data: purchases } = await supabase.from('purchases').select('product_id, price, quantity');
+  const [
+    { data: users },
+    { data: products },
+    { data: purchases },
+  ] = await Promise.all([
+    supabase.from('users').select('name, balance'),
+    supabase.from('products').select('id, name, price, purchase_price, stock'),
+    supabase.from('purchases').select('product_id, price, quantity'),
+  ]);
 
   const totalBalance = users.reduce((sum, u) => sum + (u.balance || 0), 0);
-  const shopValue = products.reduce((sum, p) => sum + ((p.stock || 0) * (p.price || 0)), 0);
+  const shopValue = products.reduce(
+    (sum, p) => sum + (p.stock || 0) * (p.price || 0),
+    0,
+  );
   const totalRevenue = purchases.reduce((sum, p) => sum + (p.price || 0), 0);
   let totalCost = 0;
-
-  purchases.forEach(p => {
-    const product = products.find(x => x.id === p.product_id);
-    if (product) totalCost += (product.purchase_price || 0) * (p.quantity || 1);
+  const productMap = new Map(products.map((p) => [p.id, p]));
+  purchases.forEach((purchase) => {
+    const product = productMap.get(purchase.product_id);
+    if (product)
+      totalCost += (product.purchase_price || 0) * (purchase.quantity || 1);
   });
 
   const profit = totalRevenue - totalCost;
 
   res.json({
-    users, totalBalance, shopValue, totalRevenue, totalCost, profit
+    users,
+    totalBalance,
+    shopValue,
+    totalRevenue,
+    totalCost,
+    profit,
   });
 });
-
 
 export default router;

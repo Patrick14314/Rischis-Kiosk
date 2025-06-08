@@ -9,22 +9,19 @@ router.get('/', async (req, res) => {
   const user = await getUserFromRequest(req);
   if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
 
-  const sort = req.query.sort || 'desc';
+  const sortOptions = {
+    asc: { column: 'created_at', asc: true },
+    desc: { column: 'created_at', asc: false },
+    price_asc: { column: 'price', asc: true },
+    price_desc: { column: 'price', asc: false },
+  };
+  const { column, asc } = sortOptions[req.query.sort] || sortOptions.desc;
   const limit = parseInt(req.query.limit);
   let query = supabase
     .from('purchases')
     .select('price, quantity, created_at, product_name, product_id')
-    .eq('user_id', user.id);
-
-  if (sort === 'asc') {
-    query = query.order('created_at', { ascending: true });
-  } else if (sort === 'price_asc') {
-    query = query.order('price', { ascending: true });
-  } else if (sort === 'price_desc') {
-    query = query.order('price', { ascending: false });
-  } else {
-    query = query.order('created_at', { ascending: false });
-  }
+    .eq('user_id', user.id)
+    .order(column, { ascending: asc });
 
   if (Number.isInteger(limit) && limit > 0) {
     query = query.limit(limit);

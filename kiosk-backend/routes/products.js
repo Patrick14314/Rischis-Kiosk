@@ -19,19 +19,18 @@ router.get('/', async (req, res) => {
     }
   }
 
-  const sort = req.query.sort || 'price_asc';
+  const sortOptions = {
+    price_desc: { column: 'price', asc: false },
+    price_asc: { column: 'price', asc: true },
+    name_desc: { column: 'name', asc: false },
+    name_asc: { column: 'name', asc: true },
+  };
+  const { column, asc } = sortOptions[req.query.sort] || sortOptions.price_asc;
 
-  let query = supabase.from('products').select('*');
-  if (sort === 'price_desc') {
-    query = query.order('price', { ascending: false });
-  } else if (sort === 'name_asc') {
-    query = query.order('name', { ascending: true });
-  } else if (sort === 'name_desc') {
-    query = query.order('name', { ascending: false });
-  } else {
-    // Default: price ascending
-    query = query.order('price', { ascending: true });
-  }
+  const query = supabase
+    .from('products')
+    .select('*')
+    .order(column, { ascending: asc });
 
   const { data, error } = await query;
 
