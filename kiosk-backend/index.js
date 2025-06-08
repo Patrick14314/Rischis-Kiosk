@@ -23,39 +23,34 @@ import adminBuyForUser from './routes/admin/buy_for_user.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const publicDir = path.join(__dirname, 'public');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(publicDir));
 
 // Statische Routen
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
-app.get('/mentos', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'mentos.html'));
-});
-app.get('/shop', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'shop.html'));
+['admin', 'dashboard', 'mentos', 'shop'].forEach((page) => {
+  app.get(`/${page}`, (req, res) => {
+    res.sendFile(path.join(publicDir, `${page}.html`));
+  });
 });
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
-app.get("/healthz", (req, res) => {
-  res.status(200).send("OK");
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
 });
-
 
 // API-Routen
 app.use('/api/feedings', feed);
