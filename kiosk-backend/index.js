@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import csrf from 'csurf';
+import helmet from 'helmet';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,6 +34,15 @@ const app = express();
 const PORT = env.PORT;
 
 // Middleware
+// Helmet should come before CORS so security headers are set early
+app.use(
+  helmet({
+    // Disable COEP to prevent fonts from being blocked on mobile
+    crossOriginEmbedderPolicy: false,
+    // Allow resources like fonts from other origins
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
 app.use(
   cors({
     // Allow all origins in development. In production only ".de" domains are
