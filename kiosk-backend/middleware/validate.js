@@ -1,42 +1,68 @@
-export function validateLogin(req, res, next) {
-  const { email, password } = req.body;
-  if (typeof email !== 'string' || typeof password !== 'string') {
-    return res.status(400).json({ error: 'Ungültige Eingaben' });
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+const buySchema = z.object({
+  product_id: z.coerce.number().int().positive(),
+  quantity: z.coerce.number().int().positive(),
+});
+
+const adminBuySchema = buySchema.extend({
+  user_id: z.coerce.number().int().positive(),
+});
+
+function parse(schema, data) {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => i.message);
+    const message = issues.join('; ');
+    const error = new Error(message || 'Ungültige Eingaben');
+    error.status = 400;
+    throw error;
   }
-  next();
+  return result.data;
+}
+
+export function validateLogin(req, res, next) {
+  try {
+    req.body = parse(loginSchema, req.body);
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function validateRegister(req, res, next) {
-  const { email, password } = req.body;
-  if (
-    typeof email !== 'string' ||
-    typeof password !== 'string' ||
-    password.length < 6
-  ) {
-    return res.status(400).json({ error: 'Ungültige Eingaben' });
+  try {
+    req.body = parse(registerSchema, req.body);
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 }
 
 export function validateBuy(req, res, next) {
-  const { product_id, quantity } = req.body;
-  const pid = parseInt(product_id, 10);
-  const qty = parseInt(quantity, 10);
-  if (!pid || pid <= 0 || !qty || qty <= 0) {
-    return res.status(400).json({ error: 'Ungültige Eingaben' });
+  try {
+    req.body = parse(buySchema, req.body);
+    next();
+  } catch (err) {
+    next(err);
   }
-  req.body.product_id = pid;
-  req.body.quantity = qty;
-  next();
 }
 
 export function validateAdminBuy(req, res, next) {
-  const { user_id } = req.body;
-  const uid = parseInt(user_id, 10);
-  if (!uid || uid <= 0) {
-    return res.status(400).json({ error: "Ung\u00fcltige Eingaben" });
+  try {
+    req.body = parse(adminBuySchema, req.body);
+    next();
+  } catch (err) {
+    next(err);
   }
-  req.body.user_id = uid;
-  validateBuy(req, res, next);
 }
-
