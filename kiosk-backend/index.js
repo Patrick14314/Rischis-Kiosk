@@ -82,7 +82,7 @@ app.use(express.json());
 app.use(express.static(publicDir));
 
 // Statische Routen
-['admin', 'dashboard', 'mentos', 'shop'].forEach((page) => {
+['admin', 'dashboard', 'mentos', 'shop', 'buzzer'].forEach((page) => {
   app.get(`/${page}`, (req, res) => {
     res.sendFile(join(publicDir, `${page}.html`));
   });
