@@ -34,7 +34,16 @@ const app = express();
 const PORT = env.PORT;
 
 // Middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'script-src': ["'self'", 'https://cdn.tailwindcss.com'],
+      },
+    },
+  }),
+);
 app.use(
   cors({
     // Allow all origins in development. In production only ".de" domains are
