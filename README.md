@@ -54,6 +54,13 @@ Im Entwicklungsmodus sind Anfragen von allen Domains erlaubt. Wird der Server
 mit `NODE_ENV=production` gestartet, akzeptiert er nur noch Ursprünge mit der
 Top-Level-Domain `.de`.
 
+## Sicherheits-Header
+
+Über das Paket [Helmet](https://www.npmjs.com/package/helmet) werden
+Standard-HTTP-Sicherheits-Header wie `X-Frame-Options` oder
+`Content-Security-Policy` gesetzt. Dadurch verringern sich typische
+Angriffsflächen wie Clickjacking.
+
 ## Formatierung und Linting
 
 Das Projekt verwendet ESLint und Prettier zur Code-Qualität. Die folgenden Befehle stehen zur Verfügung:

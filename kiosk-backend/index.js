@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import csrf from 'csurf';
+import helmet from 'helmet';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,6 +34,7 @@ const app = express();
 const PORT = env.PORT;
 
 // Middleware
+app.use(helmet());
 app.use(
   cors({
     // Allow all origins in development. In production only ".de" domains are
