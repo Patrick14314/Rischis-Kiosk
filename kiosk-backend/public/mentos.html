@@ -116,6 +116,15 @@
     const resetTimerBtn = document.getElementById('reset-timer-btn');
     const clearHistoryBtn = document.getElementById('clear-history-btn');
 
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then(user => {
@@ -136,12 +145,16 @@
 
     function updateTable(entries) {
       const body = document.getElementById('feedings-body');
-      body.innerHTML = entries.map(e => `
+      body.innerHTML = entries
+        .map(
+          e => `
         <tr class="odd:bg-green-50 dark:odd:bg-gray-700">
           <td class="px-2 py-1 border-b">${new Date(e.zeitstempel).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}</td>
-          <td class="px-2 py-1 border-b">${e.futterart}</td>
-          <td class="px-2 py-1 border-b">${e.gefuettert_von || ''}</td>
-        </tr>`).join('');
+          <td class="px-2 py-1 border-b">${escapeHtml(e.futterart)}</td>
+          <td class="px-2 py-1 border-b">${escapeHtml(e.gefuettert_von || '')}</td>
+        </tr>`
+        )
+        .join('');
     }
 
     function startCountdown(time) {
