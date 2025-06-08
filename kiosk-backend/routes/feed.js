@@ -1,14 +1,7 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
+import getUserFromRequest from '../utils/getUser.js';
 const router = express.Router();
-
-async function getUser(req) {
-  const token = req.cookies['sb-access-token'];
-  if (!token) return null;
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-  return user;
-}
 
 // Liste der letzten Fütterungen
 router.get('/', async (req, res) => {
@@ -24,7 +17,7 @@ router.get('/', async (req, res) => {
 
 // Neue Fütterung eintragen (optional mit Benutzer)
 router.post('/', async (req, res) => {
-  const user = await getUser(req);
+  const user = await getUserFromRequest(req);
   const { type } = req.body;
 
   let name = null;
@@ -49,7 +42,7 @@ router.post('/', async (req, res) => {
 
 // Verlauf löschen (nur Admin)
 router.delete('/', async (req, res) => {
-  const user = await getUser(req);
+  const user = await getUserFromRequest(req);
   if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
 
   const { data: profile } = await supabase

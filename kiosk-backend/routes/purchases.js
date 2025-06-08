@@ -1,22 +1,20 @@
 // routes/purchases.js
 import express from 'express';
 import supabase from '../utils/supabase.js';
+import getUserFromRequest from '../utils/getUser.js';
 const router = express.Router();
 
 // GET /api/purchases?sort=desc|asc|price_asc|price_desc&limit=3
 router.get('/', async (req, res) => {
-  const token = req.cookies?.['sb-access-token'];
-  if (!token) return res.status(401).json({ error: 'Nicht eingeloggt' });
-
-  const { data: authData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !authData?.user) return res.status(401).json({ error: 'Ungültiger Token' });
+  const user = await getUserFromRequest(req);
+  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
 
   const sort = req.query.sort || 'desc';
   const limit = parseInt(req.query.limit);
   let query = supabase
     .from('purchases')
     .select('price, quantity, created_at, product_name, product_id')
-    .eq('user_id', authData.user.id);
+    .eq('user_id', user.id);
 
   if (sort === 'asc') {
     query = query.order('created_at', { ascending: true });
