@@ -19,6 +19,18 @@ router.get(
   }),
 );
 
+router.get(
+  '/sessions',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data, error } = await supabase
+      .from('user_sessions')
+      .select('username, online, users(role)');
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    res.json({ sessions: data });
+  }),
+);
+
 router.post(
   '/round',
   requireAdmin,
