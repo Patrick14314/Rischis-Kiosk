@@ -75,6 +75,8 @@ Das Buzzer-Spiel ermöglicht schnelle Musikquiz-Runden. Es nutzt Supabase für A
 - **Echtzeit-Buzzern** und Skippen – nur der erste Buzz zählt
 - Punktevergabe manuell durch den Admin
 - Verteilung des Einsatzes: 95 % an Gewinner, 5 % an Bank
+- Einsatz wird beim Beitritt direkt vom Guthaben abgezogen (nur einmaliger Beitritt)
+- Abbruch ohne Gewinner erstattet allen Teilnehmern den Einsatz
 
 ### API-Endpunkte (Auszug)
 

@@ -5,6 +5,8 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validateBuzzerRound } from '../middleware/validate.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
+const BANK_EMAIL = 'bank@rischi.de';
+
 const router = express.Router();
 
 router.get(
@@ -101,23 +103,78 @@ router.post(
   '/round/end',
   requireAdmin,
   asyncHandler(async (req, res) => {
+    const winnerId = req.body?.winner_id;
     const { data: round } = await supabase
       .from('buzzer_rounds')
-      .select('id')
+      .select('id, bet')
       .eq('active', true)
       .single();
 
     if (!round) return res.status(404).json({ error: 'Keine aktive Runde' });
 
+    const { data: participants, error: partError } = await supabase
+      .from('buzzer_participants')
+      .select('user_id')
+      .eq('round_id', round.id);
+
+    if (partError) return res.status(500).json({ error: 'Datenbankfehler' });
+
     const { error } = await supabase
       .from('buzzer_rounds')
-      .update({ active: false })
+      .update({ active: false, winner_id: winnerId || null })
       .eq('id', round.id);
 
     if (error)
       return res
         .status(500)
         .json({ error: 'Runde konnte nicht beendet werden' });
+
+    const pot = round.bet * participants.length;
+
+    if (winnerId) {
+      const winner = participants.find((p) => p.user_id === winnerId);
+      if (winner) {
+        const [{ data: winnerData }, { data: bankUser }] = await Promise.all([
+          supabase.from('users').select('balance').eq('id', winnerId).single(),
+          supabase
+            .from('users')
+            .select('id, balance')
+            .eq('email', BANK_EMAIL)
+            .single(),
+        ]);
+
+        const winnerShare = pot * 0.95;
+        const bankShare = pot * 0.05;
+
+        await Promise.all([
+          supabase
+            .from('users')
+            .update({ balance: (winnerData.balance || 0) + winnerShare })
+            .eq('id', winnerId),
+          bankUser &&
+            supabase
+              .from('users')
+              .update({ balance: (bankUser.balance || 0) + bankShare })
+              .eq('id', bankUser.id),
+        ]);
+      }
+    } else {
+      // refund bet to all participants
+      await Promise.all(
+        participants.map(async (p) => {
+          const { data: user } = await supabase
+            .from('users')
+            .select('balance')
+            .eq('id', p.user_id)
+            .single();
+          if (user)
+            await supabase
+              .from('users')
+              .update({ balance: (user.balance || 0) + round.bet })
+              .eq('id', p.user_id);
+        }),
+      );
+    }
 
     res.json({ ended: true });
   }),
@@ -130,15 +187,52 @@ router.post(
     const userId = req.user.id;
     const { data: round } = await supabase
       .from('buzzer_rounds')
-      .select('id')
+      .select('id, bet')
       .eq('active', true)
       .single();
     if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
-    const { error } = await supabase
+
+    const { data: existing } = await supabase
       .from('buzzer_participants')
-      .insert({ id: randomUUID(), round_id: round.id, user_id: userId });
-    if (error)
+      .select('id')
+      .eq('round_id', round.id)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) return res.status(400).json({ error: 'Bereits beigetreten' });
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('balance')
+      .eq('id', userId)
+      .single();
+
+    if (!user || user.balance < round.bet)
+      return res.status(400).json({ error: 'Zu wenig Guthaben' });
+
+    const { data: participant, error: joinError } = await supabase
+      .from('buzzer_participants')
+      .insert({ id: randomUUID(), round_id: round.id, user_id: userId })
+      .select()
+      .single();
+    if (joinError)
       return res.status(500).json({ error: 'Teilnahme fehlgeschlagen' });
+
+    const { error: balanceError } = await supabase
+      .from('users')
+      .update({ balance: user.balance - round.bet })
+      .eq('id', userId);
+
+    if (balanceError) {
+      await supabase
+        .from('buzzer_participants')
+        .delete()
+        .eq('id', participant.id);
+      return res
+        .status(500)
+        .json({ error: 'Guthaben konnte nicht abgezogen werden' });
+    }
+
     res.json({ joined: true });
   }),
 );
