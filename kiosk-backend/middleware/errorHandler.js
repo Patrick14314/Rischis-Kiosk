@@ -1,5 +1,7 @@
+import logger from '../utils/logger.js';
+
 export default function errorHandler(err, req, res, next) {
-  console.error(err);
+  logger.error({ err }, 'unhandled error');
   if (res.headersSent) {
     return next(err);
   }

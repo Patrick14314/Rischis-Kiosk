@@ -21,6 +21,8 @@ import adminStats from './routes/admin/stats.js';
 import adminUsers from './routes/admin/users.js';
 import adminBuyForUser from './routes/admin/buy_for_user.js';
 import errorHandler from './middleware/errorHandler.js';
+import requestLogger from './middleware/requestLogger.js';
+import logger from './utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,6 +39,7 @@ app.use(
   }),
 );
 app.use(cookieParser());
+app.use(requestLogger);
 
 if (process.env.FORCE_HTTPS === 'true') {
   app.set('trust proxy', 1);
@@ -94,5 +97,5 @@ app.use(errorHandler);
 
 // Server starten
 app.listen(PORT, () => {
-  console.log(`✅ Server läuft auf Port ${PORT}`);
+  logger.info(`✅ Server läuft auf Port ${PORT}`);
 });

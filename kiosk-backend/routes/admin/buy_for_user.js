@@ -14,20 +14,15 @@ router.post('/', validateAdminBuy, requireAdmin, async (req, res, next) => {
     const { user, product } = await getUserAndProduct(user_id, product_id);
 
     if (!user || !product || product.stock < quantity) {
-      return res
-        .status(400)
-        .json({
-          error: 'Nicht gen\u00fcgend Bestand oder Nutzer nicht gefunden',
-        });
+      const error = new Error(
+        'Nicht genügend Bestand oder Nutzer nicht gefunden',
+      );
+      error.status = 400;
+      throw error;
     }
 
-    const { error, success } = await purchaseProduct(user, product, quantity);
-
-    if (!success) {
-      return res.status(500).json({ error });
-    }
-
-    res.json({ success: true });
+    const result = await purchaseProduct(user, product, quantity);
+    res.json(result);
   } catch (err) {
     next(err);
   }
