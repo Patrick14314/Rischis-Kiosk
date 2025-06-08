@@ -117,7 +117,31 @@
         class="hidden p-4 border rounded-lg dark:border-gray-600"
       >
         <h2 class="text-xl font-semibold mb-2">Admin-Funktionen</h2>
-        <div id="admin-controls" class="space-y-2"></div>
+        <form id="round-form" class="space-y-2 mb-2">
+          <input
+            id="round-bet"
+            type="number"
+            min="1"
+            placeholder="Einsatz in Punkten"
+            class="p-2 border rounded w-full"
+            required
+          />
+          <input
+            id="round-limit"
+            type="number"
+            min="1"
+            placeholder="Punktelimit"
+            class="p-2 border rounded w-full"
+            required
+          />
+          <button
+            type="submit"
+            class="px-3 py-1 bg-green-600 text-white rounded"
+          >
+            Runde starten
+          </button>
+        </form>
+        <p id="admin-message" class="text-sm"></p>
       </section>
 
       <section

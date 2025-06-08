@@ -2,6 +2,18 @@
 
 const BACKEND_URL = window.location.origin;
 
+async function getCsrfToken() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
+      credentials: 'include',
+    });
+    const data = await res.json();
+    return data.csrfToken;
+  } catch {
+    return null;
+  }
+}
+
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', isDark ? 'true' : 'false');
@@ -68,6 +80,9 @@ async function init() {
   if (!user) return;
   if (user.role === 'admin') {
     document.getElementById('admin-section').classList.remove('hidden');
+    document
+      .getElementById('round-form')
+      ?.addEventListener('submit', createRound);
   }
   await loadRound();
   await loadGeneralInfo();
@@ -80,10 +95,11 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 async function joinRound() {
+  const token = await getCsrfToken();
   const res = await fetch(`${BACKEND_URL}/api/buzzer/join`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
   });
   if (res.ok) {
     document.getElementById('join-btn').disabled = true;
@@ -91,10 +107,11 @@ async function joinRound() {
 }
 
 async function buzz() {
+  const token = await getCsrfToken();
   const res = await fetch(`${BACKEND_URL}/api/buzzer/buzz`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
   });
   if (res.ok) {
     document.getElementById('buzz-btn').disabled = true;
@@ -102,12 +119,40 @@ async function buzz() {
 }
 
 async function skip() {
+  const token = await getCsrfToken();
   const res = await fetch(`${BACKEND_URL}/api/buzzer/skip`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
   });
   if (res.ok) {
     document.getElementById('skip-btn').disabled = true;
   }
+}
+
+async function createRound(e) {
+  e.preventDefault();
+  const bet = parseInt(document.getElementById('round-bet').value, 10);
+  const limit = parseInt(document.getElementById('round-limit').value, 10);
+  const token = await getCsrfToken();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/round`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': token,
+    },
+    body: JSON.stringify({ bet, points_limit: limit }),
+  });
+  const msgEl = document.getElementById('admin-message');
+  if (res.ok) {
+    msgEl.textContent = 'Runde gestartet';
+    await loadRound();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    msgEl.textContent = data.error || 'Fehler beim Start';
+  }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
 }
