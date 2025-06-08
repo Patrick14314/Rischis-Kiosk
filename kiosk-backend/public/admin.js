@@ -5,20 +5,17 @@ const BACKEND_URL = window.location.origin;
 // Aktuell eingeloggter Benutzer
 let currentUserId = null;
 
-let csrfToken;
 async function getCsrfToken() {
-  if (!csrfToken) {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
-        credentials: 'include',
-      });
-      const data = await res.json();
-      csrfToken = data.csrfToken;
-    } catch (err) {
-      console.error('CSRF-Token konnte nicht geladen werden', err);
-    }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
+      credentials: 'include',
+    });
+    const data = await res.json();
+    return data.csrfToken;
+  } catch (err) {
+    console.error('CSRF-Token konnte nicht geladen werden', err);
+    return null;
   }
-  return csrfToken;
 }
 
 // Darkmode
