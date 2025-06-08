@@ -29,6 +29,14 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut            |
 | `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um  |
 
+## Datenbank vorbereiten
+
+Damit Kaufvorgänge funktionieren, muss in Supabase die Funktion
+`purchase_product` vorhanden sein. Führen Sie dazu das SQL-Skript
+`kiosk-backend/sql/purchase_product.sql` in Ihrem Supabase-Projekt aus.
+
+Anschließend können Produkte im Shop gekauft werden.
+
 ## CSRF-Schutz
 
 Der Server stellt unter `/api/csrf-token` einen Endpunkt bereit, der ein
