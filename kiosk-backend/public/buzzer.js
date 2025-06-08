@@ -2,6 +2,8 @@
 
 const BACKEND_URL = window.location.origin;
 
+const buzzerSound = new Audio('buzz.wav');
+
 let currentUser = null;
 
 async function getCsrfToken() {
@@ -125,6 +127,14 @@ async function init() {
   await loadRound();
   await loadParticipants();
   await loadGeneralInfo();
+
+  const evt = new EventSource(`${BACKEND_URL}/api/buzzer/events`, {
+    withCredentials: true,
+  });
+  evt.addEventListener('buzz', () => {
+    buzzerSound.currentTime = 0;
+    buzzerSound.play().catch(() => {});
+  });
 
   document.getElementById('join-btn').addEventListener('click', joinRound);
   document.getElementById('buzz-btn').addEventListener('click', buzz);
