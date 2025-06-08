@@ -1,15 +1,12 @@
 import express from 'express';
 import supabase from '../../utils/supabase.js';
-import getUserFromRequest from '../../utils/getUser.js';
-import getUserRole from '../../utils/getUserRole.js';
+import { requireAdmin } from '../../middleware/auth.js';
 const router = express.Router();
+
+router.use(requireAdmin);
 
 // Liste aller Nutzer
 router.get('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { data, error } = await supabase
     .from('users')
     .select('id, email, name, balance');
@@ -19,10 +16,6 @@ router.get('/', async (req, res) => {
 
 // Einzelnen Nutzer laden
 router.get('/:id', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { id } = req.params;
   const { data, error } = await supabase
     .from('users')
@@ -36,29 +29,18 @@ router.get('/:id', async (req, res) => {
 
 // Name oder Balance aktualisieren
 router.put('/:id', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { id } = req.params;
   const { name, balance } = req.body;
   const updates = {};
   if (name !== undefined) updates.name = name;
   if (balance !== undefined) updates.balance = balance;
-  const { error } = await supabase
-    .from('users')
-    .update(updates)
-    .eq('id', id);
+  const { error } = await supabase.from('users').update(updates).eq('id', id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ message: 'updated' });
 });
 
 // Passwort ändern
 router.put('/:id/password', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { id } = req.params;
   const { password } = req.body;
   if (!password || password.length < 6) {

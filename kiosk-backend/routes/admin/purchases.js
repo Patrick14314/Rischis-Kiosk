@@ -1,14 +1,11 @@
 import express from 'express';
 import supabase from '../../utils/supabase.js';
-import getUserFromRequest from '../../utils/getUser.js';
-import getUserRole from '../../utils/getUserRole.js';
+import { requireAdmin } from '../../middleware/auth.js';
 const router = express.Router();
 
+router.use(requireAdmin);
+
 router.get('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { data, error } = await supabase
     .from('purchases')
     .select('user_name, product_name, price, quantity, created_at')
@@ -18,10 +15,6 @@ router.get('/', async (req, res) => {
 });
 
 router.delete('/:product_id', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { product_id } = req.params;
   const { error } = await supabase
     .from('purchases')

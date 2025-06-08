@@ -1,14 +1,11 @@
 import express from 'express';
 import supabase from '../../utils/supabase.js';
-import getUserFromRequest from '../../utils/getUser.js';
-import getUserRole from '../../utils/getUserRole.js';
+import { requireAdmin } from '../../middleware/auth.js';
 const router = express.Router();
 
+router.use(requireAdmin);
+
 router.get('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { data, error } = await supabase
     .from('products')
     .select('id, name, price, stock, available, category');
@@ -17,10 +14,6 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { name, price, purchase_price, stock, category, created_by } = req.body;
 
   if (
@@ -34,17 +27,15 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Fehlende Felder' });
   }
 
-  const { error } = await supabase
-    .from('products')
-    .insert({
-      name,
-      price,
-      purchase_price,
-      stock,
-      category,
-      available: true,
-      created_by,
-    });
+  const { error } = await supabase.from('products').insert({
+    name,
+    price,
+    purchase_price,
+    stock,
+    category,
+    available: true,
+    created_by,
+  });
 
   if (error) return res.status(500).json({ error: error.message });
 
@@ -52,10 +43,6 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { id } = req.params;
   const { name, price, stock } = req.body;
   const { error } = await supabase
@@ -68,10 +55,6 @@ router.put('/:id', async (req, res) => {
 
 // Verfügbarkeit eines Produkts umschalten
 router.put('/:id/available', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { id } = req.params;
   const { available } = req.body;
   const { error } = await supabase
@@ -83,10 +66,6 @@ router.put('/:id/available', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-  const role = await getUserRole(user.id);
-  if (role !== 'admin') return res.status(403).json({ error: 'Nicht erlaubt' });
   const { id } = req.params;
   const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) return res.status(500).json({ error: error.message });

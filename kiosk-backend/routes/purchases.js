@@ -1,13 +1,12 @@
 // routes/purchases.js
 import express from 'express';
 import supabase from '../utils/supabase.js';
-import getUserFromRequest from '../utils/getUser.js';
+import { requireAuth } from '../middleware/auth.js';
 const router = express.Router();
 
 // GET /api/purchases?sort=desc|asc|price_asc|price_desc&limit=3
-router.get('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
+router.get('/', requireAuth, async (req, res) => {
+  const user = req.user;
 
   const sortOptions = {
     asc: { column: 'created_at', asc: true },

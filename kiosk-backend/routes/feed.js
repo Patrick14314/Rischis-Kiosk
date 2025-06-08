@@ -2,7 +2,7 @@ import express from 'express';
 import supabase from '../utils/supabase.js';
 import getUserFromRequest from '../utils/getUser.js';
 import getUserName from '../utils/getUserName.js';
-import getUserRole from '../utils/getUserRole.js';
+import { requireAdmin } from '../middleware/auth.js';
 const router = express.Router();
 
 // Liste der letzten Fütterungen
@@ -35,16 +35,7 @@ router.post('/', async (req, res) => {
 });
 
 // Verlauf löschen (nur Admin)
-router.delete('/', async (req, res) => {
-  const user = await getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
-
-  const role = await getUserRole(user.id);
-
-  if (role !== 'admin') {
-    return res.status(403).json({ error: 'Nicht erlaubt' });
-  }
-
+router.delete('/', requireAdmin, async (req, res) => {
   const { error } = await supabase
     .from('mentos_feedings')
     .delete()
