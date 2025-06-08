@@ -91,12 +91,16 @@ async function addProduct(e) {
     body: JSON.stringify({ name, price, purchase_price, stock, category, created_by: currentUserId })
   });
   const result = await res.json();
-  document.getElementById('product-result').textContent = res.ok ? 'Produkt gespeichert!' : `Fehler: ${result.error}`;
+  const msgEl = document.getElementById('product-result');
+  msgEl.textContent = res.ok ? 'Produkt gespeichert!' : `Fehler: ${result.error}`;
   if (res.ok) {
     e.target.reset();
     loadStats();
     loadProducts();
   }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
 }
 
 document.getElementById('add-product')?.addEventListener('submit', addProduct);
