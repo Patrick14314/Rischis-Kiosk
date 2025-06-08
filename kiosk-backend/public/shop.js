@@ -8,6 +8,15 @@ let userBalance = 0;
 let userSortedProducts = false;
 let allProducts = [];
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function showMessage(text, type = 'info') {
   const el = document.getElementById('message');
   el.textContent = text;
@@ -138,7 +147,7 @@ function renderProductList(products) {
     li.innerHTML = `
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <p class="text-base font-medium">${product.name}</p>
+          <p class="text-base font-medium">${escapeHtml(product.name)}</p>
           ${product.recent ? '<p class="text-xs text-yellow-600 dark:text-yellow-400">Zuletzt gekauft</p>' : ''}
           <p class="text-sm text-gray-600 dark:text-gray-300">${product.price.toFixed(2)} € – Bestand: ${product.stock}</p>
         </div>
