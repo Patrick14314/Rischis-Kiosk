@@ -4,6 +4,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import csrf from 'csurf';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -36,6 +37,26 @@ app.use(
   }),
 );
 app.use(cookieParser());
+
+if (process.env.FORCE_HTTPS === 'true') {
+  app.set('trust proxy', 1);
+  app.use((req, res, next) => {
+    if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(`https://${req.headers.host}${req.originalUrl}`);
+    }
+    next();
+  });
+}
+
+const csrfProtection = csrf({
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  },
+});
+
+app.use(csrfProtection);
 app.use(express.json());
 app.use(express.static(publicDir));
 
@@ -50,6 +71,9 @@ app.get('/', (req, res) => {
 });
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK');
+});
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
 });
 
 // API-Routen
