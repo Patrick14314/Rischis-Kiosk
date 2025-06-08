@@ -84,7 +84,13 @@ router.post(
 
     const { data, error } = await supabase
       .from('buzzer_rounds')
-      .insert({ id: randomUUID(), bet, points_limit, active: true })
+      .insert({
+        id: randomUUID(),
+        bet,
+        points_limit,
+        active: true,
+        joinable: true,
+      })
       .select()
       .single();
     if (error) {
@@ -124,16 +130,47 @@ router.post(
 );
 
 router.post(
+  '/round/lock',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id, joinable')
+      .eq('active', true)
+      .single();
+
+    if (!round) return res.status(404).json({ error: 'Keine aktive Runde' });
+
+    if (round.joinable === false)
+      return res.status(400).json({ error: 'Runde bereits geschlossen' });
+
+    const { error } = await supabase
+      .from('buzzer_rounds')
+      .update({ joinable: false })
+      .eq('id', round.id);
+
+    if (error)
+      return res
+        .status(500)
+        .json({ error: 'Runde konnte nicht geschlossen werden' });
+
+    res.json({ locked: true });
+  }),
+);
+
+router.post(
   '/join',
   requireAuth,
   asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const { data: round } = await supabase
       .from('buzzer_rounds')
-      .select('id')
+      .select('id, joinable')
       .eq('active', true)
       .single();
     if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+    if (round.joinable === false)
+      return res.status(400).json({ error: 'Runde ist geschlossen' });
     const { error } = await supabase
       .from('buzzer_participants')
       .insert({ id: randomUUID(), round_id: round.id, user_id: userId });
