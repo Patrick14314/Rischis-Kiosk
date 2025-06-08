@@ -1,10 +1,11 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
 import { setAuthCookie, clearAuthCookie } from '../utils/authCookies.js';
+import { validateLogin, validateRegister } from '../middleware/validate.js';
 const router = express.Router();
 
 // 🔐 LOGIN
-router.post('/login', async (req, res) => {
+router.post('/login', validateLogin, async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -27,12 +28,12 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ error: 'Serverfehler' });
+    next(err);
   }
 });
 
 // 🆕 LOGIN-STATUS PRÜFEN
-router.get('/me', async (req, res) => {
+router.get('/me', async (req, res, next) => {
   const token = req.cookies?.['sb-access-token'];
 
   if (!token) {
@@ -48,12 +49,12 @@ router.get('/me', async (req, res) => {
 
     res.json({ loggedIn: true, user: data.user });
   } catch (err) {
-    res.status(500).json({ loggedIn: false, error: 'Serverfehler' });
+    next(err);
   }
 });
 
 // 🧾 REGISTRIEREN
-router.post('/register', async (req, res) => {
+router.post('/register', validateRegister, async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -73,7 +74,7 @@ router.post('/register', async (req, res) => {
 
     res.json({ message: 'Registrierung erfolgreich' });
   } catch (err) {
-    res.status(500).json({ error: 'Serverfehler' });
+    next(err);
   }
 });
 
