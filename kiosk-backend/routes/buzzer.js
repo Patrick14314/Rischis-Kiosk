@@ -7,6 +7,31 @@ import asyncHandler from '../utils/asyncHandler.js';
 
 const router = express.Router();
 
+// -----------------------
+// Simple Server-Sent Events setup
+// -----------------------
+let sseClients = [];
+
+function broadcastBuzz() {
+  const msg = `event: buzz\ndata: buzz\n\n`;
+  sseClients.forEach((client) => client.write(msg));
+}
+
+router.get('/events', requireAuth, (req, res) => {
+  res.set({
+    'Content-Type': 'text/event-stream',
+    Connection: 'keep-alive',
+    'Cache-Control': 'no-cache',
+  });
+  res.flushHeaders();
+
+  sseClients.push(res);
+
+  req.on('close', () => {
+    sseClients = sseClients.filter((c) => c !== res);
+  });
+});
+
 router.get(
   '/round',
   requireAuth,
@@ -204,6 +229,7 @@ router.post(
       .insert({ id: randomUUID(), kolo_id: kolo.id, user_id: userId });
     if (error) return res.status(500).json({ error: 'Buzz fehlgeschlagen' });
     res.json({ buzzed: true });
+    broadcastBuzz();
   }),
 );
 
