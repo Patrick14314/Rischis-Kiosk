@@ -1,20 +1,26 @@
 import express from 'express';
 import supabase from '../../utils/supabase.js';
 import { requireAdmin } from '../../middleware/auth.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 const router = express.Router();
 
 router.use(requireAdmin);
 
-router.get('/', async (req, res) => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, name, price, stock, available, category');
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
-});
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, name, price, stock, available, category');
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  }),
+);
 
-router.post('/', async (req, res) => {
-  const { name, price, purchase_price, stock, category, created_by } = req.body;
+router.post(
+  '/',
+  asyncHandler(async (req, res) => {
+    const { name, price, purchase_price, stock, category, created_by } = req.body;
 
   if (
     !name ||
@@ -40,36 +46,46 @@ router.post('/', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
 
   res.status(201).json({ message: 'Produkt gespeichert' });
-});
+  }),
+);
 
-router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const { name, price, stock } = req.body;
-  const { error } = await supabase
-    .from('products')
-    .update({ name, price, stock })
-    .eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ message: 'Produkt aktualisiert' });
-});
+router.put(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { name, price, stock } = req.body;
+    const { error } = await supabase
+      .from('products')
+      .update({ name, price, stock })
+      .eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Produkt aktualisiert' });
+  }),
+);
 
 // Verfügbarkeit eines Produkts umschalten
-router.put('/:id/available', async (req, res) => {
-  const { id } = req.params;
-  const { available } = req.body;
-  const { error } = await supabase
-    .from('products')
-    .update({ available })
-    .eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ message: 'Produkt aktualisiert' });
-});
+router.put(
+  '/:id/available',
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { available } = req.body;
+    const { error } = await supabase
+      .from('products')
+      .update({ available })
+      .eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Produkt aktualisiert' });
+  }),
+);
 
-router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.status(204).send();
-});
+router.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(204).send();
+  }),
+);
 
 export default router;

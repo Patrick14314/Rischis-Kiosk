@@ -2,11 +2,15 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
+import asyncHandler from '../utils/asyncHandler.js';
 const router = express.Router();
 
 // GET /api/purchases?sort=desc|asc|price_asc|price_desc&limit=3
-router.get('/', requireAuth, async (req, res) => {
-  const user = req.user;
+router.get(
+  '/',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
 
   const sortOptions = {
     asc: { column: 'created_at', asc: true },
@@ -30,6 +34,7 @@ router.get('/', requireAuth, async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
 
   res.json(data);
-});
+  }),
+);
 
 export default router;
