@@ -64,6 +64,24 @@ async function loadRound() {
   }
 }
 
+async function loadParticipants() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/participants`, {
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    document.getElementById('participant-list').innerHTML = '';
+    return;
+  }
+  const { participants } = await res.json();
+  const listEl = document.getElementById('participant-list');
+  listEl.innerHTML = '';
+  participants.forEach((p) => {
+    const li = document.createElement('li');
+    li.textContent = p.users?.name || p.username || p.user_id;
+    listEl.appendChild(li);
+  });
+}
+
 async function loadGeneralInfo() {
   const res = await fetch(`${BACKEND_URL}/api/buzzer/sessions`, {
     credentials: 'include',
@@ -94,11 +112,14 @@ async function init() {
       ?.addEventListener('click', endRound);
   }
   await loadRound();
+  await loadParticipants();
   await loadGeneralInfo();
 
   document.getElementById('join-btn').addEventListener('click', joinRound);
   document.getElementById('buzz-btn').addEventListener('click', buzz);
   document.getElementById('skip-btn').addEventListener('click', skip);
+
+  setInterval(loadParticipants, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -110,9 +131,18 @@ async function joinRound() {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
   });
+  const msgEl = document.getElementById('join-message');
   if (res.ok) {
     document.getElementById('join-btn').disabled = true;
+    msgEl.textContent = 'Beigetreten';
+    await loadParticipants();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    msgEl.textContent = data.error || 'Fehler beim Beitreten';
   }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
 }
 
 async function buzz() {
@@ -157,6 +187,7 @@ async function createRound(e) {
   if (res.ok) {
     msgEl.textContent = 'Runde gestartet';
     await loadRound();
+    await loadParticipants();
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Start';
@@ -178,6 +209,7 @@ async function endRound(e) {
   if (res.ok) {
     msgEl.textContent = 'Runde beendet';
     await loadRound();
+    await loadParticipants();
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Beenden';

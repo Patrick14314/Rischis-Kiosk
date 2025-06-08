@@ -1,4 +1,5 @@
 import express from 'express';
+import { randomUUID } from 'node:crypto';
 import supabase from '../utils/supabase.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validateBuzzerRound } from '../middleware/validate.js';
@@ -40,16 +41,32 @@ router.get(
   }),
 );
 
+router.get(
+  '/participants',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .maybeSingle();
+    if (!round) return res.status(404).json({ participants: [] });
+    const { data, error } = await supabase
+      .from('buzzer_participants')
+      .select('user_id, users(name)')
+      .eq('round_id', round.id);
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    res.json({ participants: data });
+  }),
+);
+
 router.post(
   '/round',
   requireAdmin,
   validateBuzzerRound,
   asyncHandler(async (req, res) => {
     const { bet, points_limit } = req.body;
-    const {
-      data: existing,
-      error: existingError,
-    } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('buzzer_rounds')
       .select('id')
       .eq('active', true)
@@ -67,7 +84,7 @@ router.post(
 
     const { data, error } = await supabase
       .from('buzzer_rounds')
-      .insert({ bet, points_limit, active: true })
+      .insert({ id: randomUUID(), bet, points_limit, active: true })
       .select()
       .single();
     if (error) {
@@ -86,7 +103,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { data: round } = await supabase
       .from('buzzer_rounds')
-      .select('id')
+      .select('id, winner_id')
       .eq('active', true)
       .single();
 
@@ -101,6 +118,14 @@ router.post(
       return res
         .status(500)
         .json({ error: 'Runde konnte nicht beendet werden' });
+
+    if (!round.winner_id) {
+      const { error: refundError } = await supabase.rpc('refund_buzzer_round', {
+        p_round_id: round.id,
+      });
+      if (refundError)
+        return res.status(500).json({ error: 'Rückzahlung fehlgeschlagen' });
+    }
 
     res.json({ ended: true });
   }),
@@ -117,9 +142,18 @@ router.post(
       .eq('active', true)
       .single();
     if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
-    const { error } = await supabase
+    const { data: existing } = await supabase
       .from('buzzer_participants')
-      .insert({ round_id: round.id, user_id: userId });
+      .select('id')
+      .eq('round_id', round.id)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (existing) return res.status(400).json({ error: 'Bereits beigetreten' });
+
+    const { error } = await supabase.rpc('join_buzzer_round', {
+      p_round_id: round.id,
+      p_user_id: userId,
+    });
     if (error)
       return res.status(500).json({ error: 'Teilnahme fehlgeschlagen' });
     res.json({ joined: true });
@@ -147,7 +181,7 @@ router.post(
     if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
     const { error } = await supabase
       .from('buzzes')
-      .insert({ kolo_id: kolo.id, user_id: userId });
+      .insert({ id: randomUUID(), kolo_id: kolo.id, user_id: userId });
     if (error) return res.status(500).json({ error: 'Buzz fehlgeschlagen' });
     res.json({ buzzed: true });
   }),
@@ -174,7 +208,7 @@ router.post(
     if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
     const { error } = await supabase
       .from('skips')
-      .insert({ kolo_id: kolo.id, user_id: userId });
+      .insert({ id: randomUUID(), kolo_id: kolo.id, user_id: userId });
     if (error) return res.status(500).json({ error: 'Skip fehlgeschlagen' });
     res.json({ skipped: true });
   }),
