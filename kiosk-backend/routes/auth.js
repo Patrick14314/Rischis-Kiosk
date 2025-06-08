@@ -2,10 +2,11 @@ import express from 'express';
 import supabase from '../utils/supabase.js';
 import { setAuthCookie, clearAuthCookie } from '../utils/authCookies.js';
 import { validateLogin, validateRegister } from '../middleware/validate.js';
+import { loginLimiter } from '../middleware/rateLimiter.js';
 const router = express.Router();
 
 // 🔐 LOGIN
-router.post('/login', validateLogin, async (req, res, next) => {
+router.post('/login', loginLimiter, validateLogin, async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signInWithPassword({
