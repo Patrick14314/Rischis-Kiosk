@@ -1,0 +1,114 @@
+import express from 'express';
+import supabase from '../utils/supabase.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import asyncHandler from '../utils/asyncHandler.js';
+
+const router = express.Router();
+
+router.get(
+  '/round',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data: round, error } = await supabase
+      .from('buzzer_rounds')
+      .select('*')
+      .eq('active', true)
+      .single();
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    res.json({ round });
+  }),
+);
+
+router.post(
+  '/round',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const { bet, points_limit } = req.body;
+    const { data, error } = await supabase
+      .from('buzzer_rounds')
+      .insert({ bet, points_limit, active: true })
+      .select()
+      .single();
+    if (error)
+      return res
+        .status(500)
+        .json({ error: 'Runde konnte nicht erstellt werden' });
+    res.json({ round: data });
+  }),
+);
+
+router.post(
+  '/join',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .single();
+    if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+    const { error } = await supabase
+      .from('buzzer_participants')
+      .insert({ round_id: round.id, user_id: userId });
+    if (error)
+      return res.status(500).json({ error: 'Teilnahme fehlgeschlagen' });
+    res.json({ joined: true });
+  }),
+);
+
+router.post(
+  '/buzz',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .single();
+    if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+    const { data: kolo } = await supabase
+      .from('kolos')
+      .select('id')
+      .eq('round_id', round.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
+    const { error } = await supabase
+      .from('buzzes')
+      .insert({ kolo_id: kolo.id, user_id: userId });
+    if (error) return res.status(500).json({ error: 'Buzz fehlgeschlagen' });
+    res.json({ buzzed: true });
+  }),
+);
+
+router.post(
+  '/skip',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .single();
+    if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+    const { data: kolo } = await supabase
+      .from('kolos')
+      .select('id')
+      .eq('round_id', round.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
+    const { error } = await supabase
+      .from('skips')
+      .insert({ kolo_id: kolo.id, user_id: userId });
+    if (error) return res.status(500).json({ error: 'Skip fehlgeschlagen' });
+    res.json({ skipped: true });
+  }),
+);
+
+export default router;

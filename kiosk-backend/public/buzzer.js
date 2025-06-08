@@ -69,6 +69,43 @@ async function init() {
   }
   await loadRound();
   await loadGeneralInfo();
+
+  document.getElementById('join-btn').addEventListener('click', joinRound);
+  document.getElementById('buzz-btn').addEventListener('click', buzz);
+  document.getElementById('skip-btn').addEventListener('click', skip);
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+async function joinRound() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/join`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.ok) {
+    document.getElementById('join-btn').disabled = true;
+  }
+}
+
+async function buzz() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/buzz`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.ok) {
+    document.getElementById('buzz-btn').disabled = true;
+  }
+}
+
+async function skip() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/skip`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.ok) {
+    document.getElementById('skip-btn').disabled = true;
+  }
+}
