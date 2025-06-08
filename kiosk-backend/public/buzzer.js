@@ -93,19 +93,36 @@ async function loadParticipants() {
 }
 
 async function loadGeneralInfo() {
-  const res = await fetch(`${BACKEND_URL}/api/buzzer/sessions`, {
-    credentials: 'include',
-  });
-  if (!res.ok) return;
-  const { sessions: online } = await res.json();
+  const [sessionRes, scoreRes] = await Promise.all([
+    fetch(`${BACKEND_URL}/api/buzzer/sessions`, { credentials: 'include' }),
+    fetch(`${BACKEND_URL}/api/buzzer/leaderboard`, { credentials: 'include' }),
+  ]);
   const container = document.getElementById('general-info');
   container.innerHTML = '';
-  online?.forEach((u) => {
-    const li = document.createElement('div');
-    const color = u.users?.role === 'admin' ? 'text-red-600' : 'text-green-600';
-    li.innerHTML = `<span class="${color}">${u.username}</span> – ${u.online ? 'online' : 'offline'}`;
-    container.appendChild(li);
-  });
+
+  if (scoreRes.ok) {
+    const { leaderboard } = await scoreRes.json();
+    if (leaderboard.length > 0) {
+      const listEl = document.createElement('ul');
+      leaderboard.forEach((p) => {
+        const li = document.createElement('li');
+        li.textContent = `${p.users?.name || p.user_id}: ${p.score} Punkte`;
+        listEl.appendChild(li);
+      });
+      container.appendChild(listEl);
+    }
+  }
+
+  if (sessionRes.ok) {
+    const { sessions: online } = await sessionRes.json();
+    online?.forEach((u) => {
+      const li = document.createElement('div');
+      const color =
+        u.users?.role === 'admin' ? 'text-red-600' : 'text-green-600';
+      li.innerHTML = `<span class="${color}">${u.username}</span> – ${u.online ? 'online' : 'offline'}`;
+      container.appendChild(li);
+    });
+  }
 }
 
 async function init() {
@@ -141,6 +158,7 @@ async function init() {
   document.getElementById('skip-btn').addEventListener('click', skip);
 
   setInterval(loadParticipants, 5000);
+  setInterval(loadGeneralInfo, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
