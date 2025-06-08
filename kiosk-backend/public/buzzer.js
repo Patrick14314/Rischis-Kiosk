@@ -29,21 +29,29 @@ async function checkUser() {
 }
 
 async function loadRound() {
-  const { data: round } = await supabase
-    .from('buzzer_rounds')
-    .select('*')
-    .eq('active', true)
-    .single();
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/buzzer/round`, {
+      credentials: 'include',
+    });
 
-  const infoEl = document.getElementById('round-info');
-  const joinBtn = document.getElementById('join-btn');
+    let round = null;
+    if (res.ok) {
+      const data = await res.json();
+      round = data.round;
+    }
 
-  if (round) {
-    infoEl.textContent = `Einsatz: ${round.bet} Punkte, Limit: ${round.points_limit}`;
-    joinBtn.classList.remove('hidden');
-  } else {
-    infoEl.textContent = 'Keine laufende Runde';
-    joinBtn.classList.add('hidden');
+    const infoEl = document.getElementById('round-info');
+    const joinBtn = document.getElementById('join-btn');
+
+    if (round) {
+      infoEl.textContent = `Einsatz: ${round.bet} Punkte, Limit: ${round.points_limit}`;
+      joinBtn.classList.remove('hidden');
+    } else {
+      infoEl.textContent = 'Keine laufende Runde';
+      joinBtn.classList.add('hidden');
+    }
+  } catch (err) {
+    console.error('Fehler beim Laden der Runde', err);
   }
 }
 
