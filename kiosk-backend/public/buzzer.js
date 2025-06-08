@@ -28,8 +28,12 @@ async function loadRound() {
   const res = await fetch(`${BACKEND_URL}/api/buzzer/round`, {
     credentials: 'include',
   });
-  if (!res.ok) return;
-  const { round } = await res.json();
+  let round = null;
+  if (res.status !== 404) {
+    if (!res.ok) return;
+    const data = await res.json();
+    round = data.round;
+  }
 
   const infoEl = document.getElementById('round-info');
   const joinBtn = document.getElementById('join-btn');
