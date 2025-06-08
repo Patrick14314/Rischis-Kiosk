@@ -82,7 +82,7 @@ app.use(express.json());
 app.use(express.static(publicDir));
 
 // Statische Routen
-['admin', 'dashboard', 'mentos', 'shop'].forEach((page) => {
+['admin', 'dashboard', 'mentos', 'shop', 'buzzer'].forEach((page) => {
   app.get(`/${page}`, (req, res) => {
     res.sendFile(join(publicDir, `${page}.html`));
   });
@@ -95,6 +95,9 @@ app.get('/healthz', (req, res) => {
 });
 app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
+});
+app.get('/api/supabase', (req, res) => {
+  res.json({ url: env.SUPABASE_URL, anonKey: env.SUPABASE_ANON_KEY });
 });
 
 // API-Routen

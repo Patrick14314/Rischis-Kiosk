@@ -5,6 +5,7 @@ dotenv.config();
 
 const envSchema = z.object({
   SUPABASE_URL: z.string().url(),
+  SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE: z.string().min(1),
   PORT: z.coerce.number().int().positive().default(10000),
   COOKIE_DOMAIN: z.string().optional(),

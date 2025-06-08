@@ -22,6 +22,7 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | Variable                | Beschreibung                              |
 |-------------------------|-------------------------------------------|
 | `SUPABASE_URL`          | URL Ihres Supabase Projekts               |
+| `SUPABASE_ANON_KEY`     | Öffentlicher Anon Key von Supabase        |
 | `SUPABASE_SERVICE_ROLE` | Service Role Key von Supabase             |
 | `PORT`                  | Port, auf dem der Server läuft (optional) |
 | `COOKIE_DOMAIN`         | Domain für Cookies (optional)             |
