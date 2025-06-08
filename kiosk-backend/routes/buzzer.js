@@ -85,6 +85,26 @@ router.get(
   }),
 );
 
+router.get(
+  '/leaderboard',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .maybeSingle();
+    if (!round) return res.status(404).json({ leaderboard: [] });
+    const { data, error } = await supabase
+      .from('buzzer_participants')
+      .select('user_id, score, users(name)')
+      .eq('round_id', round.id)
+      .order('score', { ascending: false });
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    res.json({ leaderboard: data });
+  }),
+);
+
 router.post(
   '/round',
   requireAdmin,
