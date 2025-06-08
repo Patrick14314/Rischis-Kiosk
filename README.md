@@ -61,6 +61,10 @@ Standard-HTTP-Sicherheits-Header wie `X-Frame-Options` oder
 `Content-Security-Policy` gesetzt. Dadurch verringern sich typische
 Angriffsflächen wie Clickjacking.
 
+Da das Frontend Tailwind CSS über ein CDN lädt, ist `cdn.tailwindcss.com`
+im `script-src`-Directive der Content-Security-Policy erlaubt. Diese
+Konfiguration befindet sich in `kiosk-backend/index.js`.
+
 ## Formatierung und Linting
 
 Das Projekt verwendet ESLint und Prettier zur Code-Qualität. Die folgenden Befehle stehen zur Verfügung:
