@@ -13,7 +13,12 @@ export default async function purchaseProduct(user, product, quantity) {
   });
 
   if (error) {
-    const err = new Error('Fehler beim Kaufvorgang');
+    let message = 'Fehler beim Kaufvorgang';
+    if (error.message && error.message.includes('purchase_product')) {
+      message =
+        'Fehlende Funktion purchase_product – SQL unter sql/purchase_product.sql ausführen.';
+    }
+    const err = new Error(message);
     err.status = 500;
     throw err;
   }
