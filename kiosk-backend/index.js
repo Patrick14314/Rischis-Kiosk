@@ -34,7 +34,25 @@ const PORT = env.PORT;
 // Middleware
 app.use(
   cors({
-    origin: true,
+    // Allow all origins in development. In production only ".de" domains are
+    // permitted. Requests without an origin header (e.g. curl) are also allowed.
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+
+      try {
+        const { hostname } = new URL(origin);
+        if (hostname.endsWith('.de')) {
+          return callback(null, true);
+        }
+      } catch {
+        // Ignore invalid origins
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   }),
 );
