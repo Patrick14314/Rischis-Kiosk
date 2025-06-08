@@ -54,6 +54,16 @@ Im Entwicklungsmodus sind Anfragen von allen Domains erlaubt. Wird der Server
 mit `NODE_ENV=production` gestartet, akzeptiert er nur noch Ursprünge mit der
 Top-Level-Domain `.de`.
 
+## Sicherheits-Header
+
+Über das Paket [Helmet](https://www.npmjs.com/package/helmet) werden
+Standard-HTTP-Sicherheits-Header wie `X-Frame-Options` gesetzt. Um
+darzustellen, dass externe Schriftarten weiterhin geladen werden
+können, ist `crossOriginEmbedderPolicy` deaktiviert und der
+`Cross-Origin-Resource-Policy` Header auf `cross-origin` gesetzt.
+Dadurch bleiben mobile Browser funktionsfähig, während Basis-Schutz
+aktiv ist.
+
 ## Formatierung und Linting
 
 Das Projekt verwendet ESLint und Prettier zur Code-Qualität. Die folgenden Befehle stehen zur Verfügung:
