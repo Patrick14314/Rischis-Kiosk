@@ -11,12 +11,12 @@ const registerSchema = z.object({
 });
 
 const buySchema = z.object({
-  product_id: z.coerce.number().int().positive(),
+  product_id: z.string().uuid(),
   quantity: z.coerce.number().int().positive(),
 });
 
 const adminBuySchema = buySchema.extend({
-  user_id: z.coerce.number().int().positive(),
+  user_id: z.string().uuid(),
 });
 
 function parse(schema, data) {
