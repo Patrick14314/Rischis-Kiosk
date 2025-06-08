@@ -3,7 +3,7 @@
 Diese Datei beschreibt den kompletten Ablauf des Buzzer-Spiels, wie es in "Rischis Kiosk" umgesetzt ist. Die Logik basiert auf Supabase und einer einfachen Express API.
 
 ## 1. Rundenstart durch den Admin
-- Der Admin wählt einen Einsatz in Punkten (z. B. 1 Punkt) und ein Punktelimit (z. B. 5 Punkte).
+- Der Admin wählt einen Einsatz in Euro (z. B. 1 €) und ein Punktelimit (z. B. 5 Punkte).
 - Eine neue Runde wird in `buzzer_rounds` als aktiv gespeichert. Es kann immer nur eine aktive Runde geben.
 
 ## 2. Spieler beitreten
