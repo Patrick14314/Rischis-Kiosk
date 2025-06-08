@@ -1,13 +1,11 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
+import getUserFromRequest from '../utils/getUser.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const token = req.cookies['sb-access-token']; // <- Cookie statt Header
-  if (!token) return res.status(401).json({ error: 'Kein Token vorhanden' });
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) return res.status(401).json({ error: 'Nicht eingeloggt' });
+  const user = await getUserFromRequest(req);
+  if (!user) return res.status(401).json({ error: 'Nicht eingeloggt' });
 
   const { data, error } = await supabase
     .from('users')
