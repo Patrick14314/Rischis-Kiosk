@@ -28,6 +28,7 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `COOKIE_SECURE`         | `true` erzwingt Secure-Cookies            |
 | `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut            |
 | `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um  |
+| `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen |
 
 Beim Start des Servers werden diese Variablen mit einem Zod-Schema
 validiert. Fehlen erforderliche Werte oder sind sie ungültig, wird der
@@ -46,6 +47,12 @@ Anschließend können Produkte im Shop gekauft werden.
 Der Server stellt unter `/api/csrf-token` einen Endpunkt bereit, der ein
 gültiges CSRF-Token zurückliefert. Dieses muss bei schreibenden Anfragen in
 das Header-Feld `x-csrf-token` übernommen werden.
+
+## CORS-Einstellungen
+
+Im Entwicklungsmodus sind Anfragen von allen Domains erlaubt. Wird der Server
+mit `NODE_ENV=production` gestartet, akzeptiert er nur noch Ursprünge mit der
+Top-Level-Domain `.de`.
 
 ## Formatierung und Linting
 
