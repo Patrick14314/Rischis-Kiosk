@@ -97,7 +97,7 @@ async function playPoker() {
   } catch (err) {
     console.error(err);
     const resultEl = document.getElementById('result');
-    resultEl.textContent = 'Fehler beim Spiel';
+    resultEl.textContent = err.message || 'Fehler beim Spiel';
     resultCard.classList.remove('result-win', 'result-lose', 'hidden');
     resultCard.classList.add('result-show', 'result-lose');
     setTimeout(() => {

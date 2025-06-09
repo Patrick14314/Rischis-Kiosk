@@ -25,7 +25,13 @@ router.post(
       .eq('id', userId)
       .single();
     if (error) return res.status(500).json({ error: 'Datenbankfehler' });
-    if (!user || (user.balance || 0) < bet) {
+    if (!user) return res.status(404).json({ error: 'Nutzer nicht gefunden' });
+    if (user.balance < 0) {
+      return res
+        .status(400)
+        .json({ error: 'Guthaben im Minus. Bitte zuerst bei Rischi zahlen.' });
+    }
+    if (user.balance < bet) {
       return res.status(400).json({ error: 'Nicht genug Guthaben' });
     }
 
