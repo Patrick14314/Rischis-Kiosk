@@ -19,6 +19,7 @@
     <script>
       tailwind.config = { darkMode: 'class' };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="poker.js" defer></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
@@ -85,6 +86,28 @@
         font-weight: 700;
         font-size: 1.5rem;
         animation: win-pop 0.8s ease-out;
+      }
+
+      @keyframes lose-shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20%,
+        60% {
+          transform: translateX(-10px);
+        }
+        40%,
+        80% {
+          transform: translateX(10px);
+        }
+      }
+
+      .lose-animation {
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 1.5rem;
+        animation: lose-shake 0.8s ease-in-out;
       }
     </style>
   </head>
