@@ -110,5 +110,6 @@ Zock Royale ist ein kleines Spaß-Pokerspiel. Über `/api/poker/play` kannst du
 einen Einsatz platzieren. In 40 % der Fälle gewinnt der Spieler und erhält das
 Doppelte seines Einsatzes. Verliert der Spieler, landet der Einsatz auf dem
 Konto, das in `BANK_USER_NAME` hinterlegt ist (in der Regel der „Haus“-Account).
-Somit hat das Haus eine Gewinnchance von 60 %. Das Ergebnis wird im
+Gewinnt der Spieler, zahlt das Haus den doppelten Einsatz aus seinem Guthaben
+an den Spieler aus. Somit hat das Haus eine Gewinnchance von 60 %. Das Ergebnis wird im
 Nutzerkonto gespeichert.
