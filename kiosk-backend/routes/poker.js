@@ -3,7 +3,7 @@ import supabase from '../utils/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import env from '../utils/env.js';
-import { creditBank } from '../utils/bank.js';
+import { creditBank, debitBank } from '../utils/bank.js';
 
 const BANK_USER_NAME = env.BANK_USER_NAME;
 
@@ -33,6 +33,7 @@ router.post(
     let newBalance = user.balance - bet;
     if (win) {
       newBalance += bet * 2;
+      await debitBank(bet);
     } else {
       await creditBank(bet);
     }
