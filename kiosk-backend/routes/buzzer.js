@@ -206,6 +206,96 @@ router.post(
 );
 
 router.post(
+  '/kolo',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .single();
+
+    if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+
+    const { data, error } = await supabase
+      .from('kolos')
+      .insert({ id: randomUUID(), round_id: round.id, active: true })
+      .select()
+      .single();
+
+    if (error)
+      return res
+        .status(500)
+        .json({ error: 'KOLO konnte nicht gestartet werden' });
+
+    res.json({ kolo: data });
+  }),
+);
+
+router.post(
+  '/kolo/end',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const { correct } = req.body ?? {};
+
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .single();
+
+    if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+
+    const { data: kolo } = await supabase
+      .from('kolos')
+      .select('id')
+      .eq('round_id', round.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
+
+    const { error: endError } = await supabase
+      .from('kolos')
+      .update({ active: false })
+      .eq('id', kolo.id);
+
+    if (endError)
+      return res
+        .status(500)
+        .json({ error: 'KOLO konnte nicht beendet werden' });
+
+    if (correct) {
+      const { data: firstBuzz } = await supabase
+        .from('buzzes')
+        .select('user_id')
+        .eq('kolo_id', kolo.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (firstBuzz) {
+        const { data: participant } = await supabase
+          .from('buzzer_participants')
+          .select('score')
+          .eq('round_id', round.id)
+          .eq('user_id', firstBuzz.user_id)
+          .single();
+        const newScore = (participant?.score || 0) + 1;
+        await supabase
+          .from('buzzer_participants')
+          .update({ score: newScore })
+          .eq('round_id', round.id)
+          .eq('user_id', firstBuzz.user_id);
+      }
+    }
+
+    res.json({ ended: true });
+  }),
+);
+
+router.post(
   '/join',
   requireAuth,
   asyncHandler(async (req, res) => {
