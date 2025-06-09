@@ -4,8 +4,10 @@ import supabase from '../utils/supabase.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validateBuzzerRound } from '../middleware/validate.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import env from '../utils/env.js';
 
 const router = express.Router();
+const BANK_USER_NAME = env.BANK_USER_NAME;
 
 // -----------------------
 // Simple Server-Sent Events setup
@@ -156,21 +158,58 @@ router.post(
   asyncHandler(async (req, res) => {
     const { data: round } = await supabase
       .from('buzzer_rounds')
-      .select('id')
+      .select('id, bet')
       .eq('active', true)
       .single();
 
     if (!round) return res.status(404).json({ error: 'Keine aktive Runde' });
 
+    const { data: participants } = await supabase
+      .from('buzzer_participants')
+      .select('user_id, score')
+      .eq('round_id', round.id)
+      .order('score', { ascending: false });
+
+    const pot = round.bet * (participants?.length || 0);
+    const winner = participants?.[0];
+
     const { error } = await supabase
       .from('buzzer_rounds')
-      .update({ active: false, joinable: false })
+      .update({ active: false, joinable: false, winner_id: winner?.user_id })
       .eq('id', round.id);
 
     if (error)
       return res
         .status(500)
         .json({ error: 'Runde konnte nicht beendet werden' });
+
+    if (winner && pot > 0) {
+      const winnerShare = pot * 0.95;
+      const bankShare = pot - winnerShare;
+
+      const { data: winUser } = await supabase
+        .from('users')
+        .select('balance')
+        .eq('id', winner.user_id)
+        .single();
+      await supabase
+        .from('users')
+        .update({ balance: (winUser?.balance || 0) + winnerShare })
+        .eq('id', winner.user_id);
+
+      if (BANK_USER_NAME) {
+        const { data: bank } = await supabase
+          .from('users')
+          .select('id, balance')
+          .eq('name', BANK_USER_NAME)
+          .maybeSingle();
+        if (bank)
+          await supabase
+            .from('users')
+            .update({ balance: (bank.balance || 0) + bankShare })
+            .eq('id', bank.id);
+      }
+    }
 
     res.json({ ended: true });
   }),
@@ -227,6 +266,11 @@ router.post(
       return res
         .status(500)
         .json({ error: 'KOLO konnte nicht gestartet werden' });
+
+    await supabase
+      .from('buzzer_participants')
+      .update({ has_buzzed: false, has_skipped: false })
+      .eq('round_id', round.id);
 
     res.json({ kolo: data });
   }),
@@ -302,15 +346,40 @@ router.post(
     const userId = req.user.id;
     const { data: round } = await supabase
       .from('buzzer_rounds')
-      .select('id, joinable')
+      .select('id, joinable, bet')
       .eq('active', true)
       .single();
     if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
     if (round.joinable === false)
       return res.status(400).json({ error: 'Runde ist geschlossen' });
-    const { error } = await supabase
+
+    const { count } = await supabase
       .from('buzzer_participants')
-      .insert({ id: randomUUID(), round_id: round.id, user_id: userId });
+      .select('id', { count: 'exact', head: true })
+      .eq('round_id', round.id)
+      .eq('user_id', userId);
+    if (count > 0)
+      return res.status(400).json({ error: 'Bereits beigetreten' });
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('balance')
+      .eq('id', userId)
+      .single();
+    const newBalance = (user?.balance || 0) - round.bet;
+    await supabase
+      .from('users')
+      .update({ balance: newBalance })
+      .eq('id', userId);
+
+    const { error } = await supabase.from('buzzer_participants').insert({
+      id: randomUUID(),
+      round_id: round.id,
+      user_id: userId,
+      score: 0,
+      has_buzzed: false,
+      has_skipped: false,
+    });
     if (error)
       return res.status(500).json({ error: 'Teilnahme fehlgeschlagen' });
     res.json({ joined: true });
@@ -336,10 +405,28 @@ router.post(
       .limit(1)
       .single();
     if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
+    const { data: participant } = await supabase
+      .from('buzzer_participants')
+      .select('has_buzzed, has_skipped')
+      .eq('round_id', round.id)
+      .eq('user_id', userId)
+      .single();
+    if (!participant)
+      return res.status(400).json({ error: 'Nicht Teilnehmer' });
+    if (participant.has_buzzed || participant.has_skipped)
+      return res.status(400).json({ error: 'Bereits Buzz/Skip genutzt' });
+
     const { error } = await supabase
       .from('buzzes')
       .insert({ id: randomUUID(), kolo_id: kolo.id, user_id: userId });
     if (error) return res.status(500).json({ error: 'Buzz fehlgeschlagen' });
+
+    await supabase
+      .from('buzzer_participants')
+      .update({ has_buzzed: true })
+      .eq('round_id', round.id)
+      .eq('user_id', userId);
+
     res.json({ buzzed: true });
     broadcastBuzz();
   }),
@@ -364,10 +451,28 @@ router.post(
       .limit(1)
       .single();
     if (!kolo) return res.status(400).json({ error: 'Kein aktives KOLO' });
+    const { data: participant } = await supabase
+      .from('buzzer_participants')
+      .select('has_buzzed, has_skipped')
+      .eq('round_id', round.id)
+      .eq('user_id', userId)
+      .single();
+    if (!participant)
+      return res.status(400).json({ error: 'Nicht Teilnehmer' });
+    if (participant.has_buzzed || participant.has_skipped)
+      return res.status(400).json({ error: 'Bereits Buzz/Skip genutzt' });
+
     const { error } = await supabase
       .from('skips')
       .insert({ id: randomUUID(), kolo_id: kolo.id, user_id: userId });
     if (error) return res.status(500).json({ error: 'Skip fehlgeschlagen' });
+
+    await supabase
+      .from('buzzer_participants')
+      .update({ has_skipped: true })
+      .eq('round_id', round.id)
+      .eq('user_id', userId);
+
     res.json({ skipped: true });
   }),
 );

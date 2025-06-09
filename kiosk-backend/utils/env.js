@@ -16,6 +16,7 @@ const envSchema = z.object({
     .int()
     .default(15 * 60 * 1000),
   LOGIN_MAX_ATTEMPTS: z.coerce.number().int().default(5),
+  BANK_USER_NAME: z.string().optional(),
   NODE_ENV: z.string().optional(),
 });
 
@@ -28,6 +29,7 @@ const env = {
       ? parsed.COOKIE_SECURE === 'true'
       : parsed.NODE_ENV === 'production',
   FORCE_HTTPS: parsed.FORCE_HTTPS === 'true',
+  BANK_USER_NAME: parsed.BANK_USER_NAME,
 };
 
 export default env;
