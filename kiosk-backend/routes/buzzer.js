@@ -164,7 +164,7 @@ router.post(
 
     const { error } = await supabase
       .from('buzzer_rounds')
-      .update({ active: false })
+      .update({ active: false, joinable: false })
       .eq('id', round.id);
 
     if (error)
