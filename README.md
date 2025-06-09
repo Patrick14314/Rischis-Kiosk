@@ -65,6 +65,18 @@ npm run lint     # Code mit ESLint prüfen
 npm run format   # Code mit Prettier formatieren
 ```
 
+## Tools
+
+Neben Linting und Formatierung stehen noch weitere npm-Skripte zur
+Verfügung, die den Entwicklungsalltag erleichtern:
+
+```bash
+npm start        # Express-Server starten
+npm test         # Tests ausführen (Platzhalter)
+npm run lint     # Code mit ESLint prüfen
+npm run format   # Code mit Prettier formatieren
+```
+
 ## Buzzer-Spiel
 
 Das Buzzer-Spiel ermöglicht schnelle Musikquiz-Runden. Es nutzt Supabase für Authentifizierung, Datenbankzugriffe und Realtime-Channels.
@@ -84,5 +96,7 @@ Das Buzzer-Spiel ermöglicht schnelle Musikquiz-Runden. Es nutzt Supabase für A
 - `POST /api/buzzer/join` – aktueller Runde beitreten
 - `POST /api/buzzer/buzz` – im laufenden KOLO buzzern
 - `POST /api/buzzer/skip` – Buzz überspringen
+- `POST /api/buzzer/kolo` – neues KOLO starten (Admin)
+- `POST /api/buzzer/kolo/end` – KOLO beenden und werten (Admin)
 
 Weitere Details zum kompletten Ablauf finden sich in [docs/buzzer_flow.md](docs/buzzer_flow.md).

@@ -140,6 +140,15 @@ async function init() {
     document
       .getElementById('lock-round-btn')
       ?.addEventListener('click', lockRound);
+    document
+      .getElementById('start-kolo-btn')
+      ?.addEventListener('click', startKolo);
+    document
+      .getElementById('kolo-correct-btn')
+      ?.addEventListener('click', () => endKolo(true));
+    document
+      .getElementById('kolo-wrong-btn')
+      ?.addEventListener('click', () => endKolo(false));
   }
   await loadRound();
   await loadParticipants();
@@ -271,6 +280,48 @@ async function endRound(e) {
     msgEl.textContent = 'Runde beendet';
     await loadRound();
     await loadParticipants();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    msgEl.textContent = data.error || 'Fehler beim Beenden';
+  }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
+}
+
+async function startKolo(e) {
+  e.preventDefault();
+  const token = await getCsrfToken();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/kolo`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
+  });
+  const msgEl = document.getElementById('admin-message');
+  if (res.ok) {
+    msgEl.textContent = 'KOLO gestartet';
+  } else {
+    const data = await res.json().catch(() => ({}));
+    msgEl.textContent = data.error || 'Fehler beim Starten';
+  }
+  setTimeout(() => {
+    msgEl.textContent = '';
+  }, 3000);
+}
+
+async function endKolo(correct) {
+  const token = await getCsrfToken();
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/kolo/end`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
+    body: JSON.stringify({ correct }),
+  });
+  const msgEl = document.getElementById('admin-message');
+  if (res.ok) {
+    msgEl.textContent = 'KOLO beendet';
+    await loadParticipants();
+    await loadGeneralInfo();
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Beenden';
