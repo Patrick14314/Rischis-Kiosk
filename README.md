@@ -45,7 +45,11 @@ Damit Kaufvorgänge funktionieren, muss in Supabase die Funktion
 `purchase_product` vorhanden sein. Führen Sie dazu das SQL-Skript
 `kiosk-backend/sql/purchase_product.sql` in Ihrem Supabase-Projekt aus.
 
-Anschließend können Produkte im Shop gekauft werden.
+Für das Pokerspiel muss zusätzlich die Tabelle `poker_rounds` existieren.
+Führen Sie dafür das Skript `kiosk-backend/sql/poker_rounds.sql` aus.
+
+Anschließend können Produkte im Shop gekauft werden und Zock Royale
+funktioniert ohne Datenbankfehler.
 
 ## CSRF-Schutz
 
