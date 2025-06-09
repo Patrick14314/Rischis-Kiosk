@@ -55,6 +55,7 @@ async function loadRound() {
   const joinBtn = document.getElementById('join-btn');
   const endBtn = document.getElementById('end-round-btn');
   const lockBtn = document.getElementById('lock-round-btn');
+  const koloControls = document.getElementById('kolo-controls');
 
   if (round) {
     infoEl.textContent = `Einsatz: ${round.bet} €, Limit: ${round.points_limit}`;
@@ -65,12 +66,16 @@ async function loadRound() {
       joinBtn.classList.remove('hidden');
       if (currentUser?.role === 'admin') lockBtn?.classList.remove('hidden');
     }
-    if (currentUser?.role === 'admin') endBtn?.classList.remove('hidden');
+    if (currentUser?.role === 'admin') {
+      endBtn?.classList.remove('hidden');
+      koloControls?.classList.remove('hidden');
+    }
   } else {
     infoEl.textContent = 'Keine laufende Runde';
     joinBtn.classList.add('hidden');
     endBtn?.classList.add('hidden');
     lockBtn?.classList.add('hidden');
+    koloControls?.classList.add('hidden');
   }
 }
 
