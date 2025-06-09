@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Rischis Kiosk" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>Rischis Kiosk – Zock Royale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
+    <script src="poker.js" defer></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="/favicon.jpeg" type="image/jpeg" />
+    <style>
+      html {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0, #6ee7b7);
+      }
+      html.dark {
+        background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+        color-scheme: dark;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        max-width: 100vw;
+        overflow-x: hidden;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+      h1 {
+        font-family: 'Poppins', sans-serif;
+      }
+      .panel-shadow {
+        box-shadow: 0 15px 35px rgba(22, 163, 74, 0.4);
+      }
+      .dark .panel-shadow {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      }
+      .glass-effect {
+        backdrop-filter: blur(14px);
+        background-color: rgba(255, 255, 255, 0.88);
+      }
+      .dark .glass-effect {
+        background-color: rgba(31, 41, 55, 0.8);
+      }
+      input {
+        background-color: white;
+        color: black;
+      }
+      .dark input {
+        background-color: #374151;
+        color: white;
+      }
+    </style>
+  </head>
+  <body class="text-green-900 dark:text-white">
+    <div class="fixed bottom-4 right-4 z-50">
+      <button
+        onclick="toggleDarkMode()"
+        class="bg-gray-300/75 dark:bg-gray-700/75 text-black dark:text-white p-2 rounded-full shadow opacity-70 hover:opacity-100 transition"
+      >
+        🌙
+      </button>
+    </div>
+    <div class="fixed top-4 left-4 z-50">
+      <a
+        href="dashboard.html"
+        class="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-full shadow text-sm"
+      >
+        ⬅️ Zurück
+      </a>
+    </div>
+    <div class="min-h-screen flex flex-col justify-center items-center p-6">
+      <div
+        class="w-full max-w-sm space-y-6 p-6 rounded-3xl panel-shadow border-4 border-green-300 dark:border-green-500 glass-effect animate-fade-in"
+      >
+        <h1 class="text-2xl font-bold text-center">Zock Royale</h1>
+        <p class="text-center">Guthaben: <span id="balance">0.00 €</span></p>
+        <div class="space-y-4">
+          <input
+            id="bet"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="Einsatz €"
+            class="w-full p-2 rounded"
+          />
+          <button
+            id="play"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Spielen
+          </button>
+          <p id="result" class="text-center"></p>
+        </div>
+      </div>
+    </div>
+    <script>
+      function toggleDarkMode() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+      }
+      if (localStorage.getItem('darkMode') !== 'false') {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+  </body>
+</html>

@@ -31,7 +31,7 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut                                    |
 | `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um                          |
 | `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen |
-| `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen (optional) |
+| `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen und Poker-Gewinne (optional) |
 
 **Hinweis:** Wenn der Server lediglich per HTTP erreichbar ist (beispielsweise bei lokalen Tests), muss `COOKIE_SECURE=false` gesetzt sein. Andernfalls wird das Session-Cookie nicht übertragen und Sie werden beim Seitenwechsel ausgeloggt.
 
@@ -103,3 +103,12 @@ Das Buzzer-Spiel ermöglicht schnelle Musikquiz-Runden. Es nutzt Supabase für A
 - `POST /api/buzzer/kolo/end` – KOLO beenden und werten (Admin)
 
 Weitere Details zum kompletten Ablauf finden sich in [docs/buzzer_flow.md](docs/buzzer_flow.md).
+
+## Zock Royale
+
+Zock Royale ist ein kleines Spaß-Pokerspiel. Über `/api/poker/play` kannst du
+einen Einsatz platzieren. In 40 % der Fälle gewinnt der Spieler und erhält das
+Doppelte seines Einsatzes. Verliert der Spieler, landet der Einsatz auf dem
+Konto, das in `BANK_USER_NAME` hinterlegt ist (in der Regel der „Haus“-Account).
+Somit hat das Haus eine Gewinnchance von 60 %. Das Ergebnis wird im
+Nutzerkonto gespeichert.
