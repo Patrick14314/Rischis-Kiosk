@@ -31,7 +31,7 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut                                    |
 | `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um                          |
 | `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen |
-| `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen und Poker-Gewinne (optional) |
+| `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen und Poker-Gewinne (optional). Muss exakt dem Wert in `users.name` entsprechen |
 
 **Hinweis:** Wenn der Server lediglich per HTTP erreichbar ist (beispielsweise bei lokalen Tests), muss `COOKIE_SECURE=false` gesetzt sein. Andernfalls wird das Session-Cookie nicht übertragen und Sie werden beim Seitenwechsel ausgeloggt.
 

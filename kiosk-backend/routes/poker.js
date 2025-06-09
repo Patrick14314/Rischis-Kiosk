@@ -3,6 +3,7 @@ import supabase from '../utils/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import env from '../utils/env.js';
+import { creditBank } from '../utils/bank.js';
 
 const BANK_USER_NAME = env.BANK_USER_NAME;
 
@@ -32,17 +33,8 @@ router.post(
     let newBalance = user.balance - bet;
     if (win) {
       newBalance += bet * 2;
-    } else if (BANK_USER_NAME) {
-      const { data: bank } = await supabase
-        .from('users')
-        .select('id, balance')
-        .eq('name', BANK_USER_NAME)
-        .maybeSingle();
-      if (bank)
-        await supabase
-          .from('users')
-          .update({ balance: (bank.balance || 0) + bet })
-          .eq('id', bank.id);
+    } else {
+      await creditBank(bet);
     }
 
     const { error: upErr } = await supabase

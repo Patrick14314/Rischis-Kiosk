@@ -1,5 +1,6 @@
 import supabase from './supabase.js';
 import env from './env.js';
+import { creditBank } from './bank.js';
 
 export default async function purchaseProduct(user, product, quantity) {
   const total = quantity * product.price;
@@ -24,19 +25,7 @@ export default async function purchaseProduct(user, product, quantity) {
     throw err;
   }
 
-  if (env.BANK_USER_NAME) {
-    const { data: bank } = await supabase
-      .from('users')
-      .select('id, balance')
-      .eq('name', env.BANK_USER_NAME)
-      .maybeSingle();
-    if (bank) {
-      await supabase
-        .from('users')
-        .update({ balance: (bank.balance || 0) + total })
-        .eq('id', bank.id);
-    }
-  }
+  await creditBank(total);
 
   return { success: true };
 }
