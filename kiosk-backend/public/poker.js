@@ -70,7 +70,10 @@ async function playPoker() {
     const resultEl = document.getElementById('result');
     resultEl.textContent = data.win ? 'Gewonnen!' : 'Verloren!';
     resultCard.classList.remove('hidden', 'result-win', 'result-lose');
-    resultCard.classList.add('result-show', data.win ? 'result-win' : 'result-lose');
+    resultCard.classList.add(
+      'result-show',
+      data.win ? 'result-win' : 'result-lose',
+    );
     if (data.win) {
       resultEl.classList.add('win-animation');
       launchConfetti();
@@ -101,4 +104,19 @@ async function playPoker() {
 document.addEventListener('DOMContentLoaded', () => {
   loadUser();
   document.getElementById('play').addEventListener('click', playPoker);
+  const betInput = document.getElementById('bet');
+  document.querySelectorAll('.quick-bet').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      betInput.value = parseFloat(btn.dataset.bet).toFixed(2);
+      document
+        .querySelectorAll('.quick-bet')
+        .forEach((b) => b.classList.remove('ring-2', 'ring-offset-2'));
+      btn.classList.add('ring-2', 'ring-offset-2');
+    });
+  });
+  betInput.addEventListener('input', () => {
+    document
+      .querySelectorAll('.quick-bet')
+      .forEach((b) => b.classList.remove('ring-2', 'ring-offset-2'));
+  });
 });
