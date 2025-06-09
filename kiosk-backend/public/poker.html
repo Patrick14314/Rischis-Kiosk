@@ -64,6 +64,28 @@
         background-color: #374151;
         color: white;
       }
+
+      @keyframes win-pop {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .win-animation {
+        color: #16a34a;
+        font-weight: 700;
+        font-size: 1.5rem;
+        animation: win-pop 0.8s ease-out;
+      }
     </style>
   </head>
   <body class="text-green-900 dark:text-white">
