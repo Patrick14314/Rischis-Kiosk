@@ -22,9 +22,10 @@ let userBalance = 0;
 const balanceEl = document.getElementById('balance');
 const resultCard = document.getElementById('result-card');
 
-function launchConfetti() {
+function launchConfetti(jackpot) {
   if (typeof confetti === 'function') {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+    const count = jackpot ? 150 : 80;
+    confetti({ particleCount: count, spread: 60, origin: { y: 0.6 } });
   }
 }
 
@@ -74,7 +75,12 @@ async function playPoker() {
     balanceEl.textContent = `${userBalance.toFixed(2)} €`;
     balanceEl.classList.add('balance-update');
     const resultEl = document.getElementById('result');
-    resultEl.textContent = data.win ? 'Gewonnen!' : 'Verloren!';
+    const message = data.jackpot
+      ? 'Jackpot! Vierfacher Gewinn!'
+      : data.win
+        ? 'Gewonnen!'
+        : 'Verloren!';
+    resultEl.textContent = message;
     resultCard.classList.remove('hidden', 'result-win', 'result-lose');
     resultCard.classList.add(
       'result-show',
@@ -82,7 +88,7 @@ async function playPoker() {
     );
     if (data.win) {
       resultEl.classList.add('win-animation');
-      launchConfetti();
+      launchConfetti(data.jackpot);
     } else {
       resultEl.classList.add('lose-animation');
     }

@@ -35,11 +35,21 @@ router.post(
       return res.status(400).json({ error: 'Nicht genug Guthaben' });
     }
 
-    const win = Math.random() >= 0.6; // 40% Chance auf Gewinn
+    const rand = Math.random();
+    let multiplier = 0;
+    let jackpot = false;
+    if (rand < 0.05) {
+      multiplier = 4;
+      jackpot = true;
+    } else if (rand < 0.4) {
+      multiplier = 2;
+    }
+
+    const win = multiplier > 0;
     let newBalance = user.balance - bet;
     if (win) {
-      newBalance += bet * 2;
-      await debitBank(bet);
+      newBalance += bet * multiplier;
+      await debitBank(bet * (multiplier - 1));
     } else {
       await creditBank(bet);
     }
@@ -50,7 +60,7 @@ router.post(
       .eq('id', userId);
     if (upErr) return res.status(500).json({ error: 'Datenbankfehler' });
 
-    res.json({ win, newBalance });
+    res.json({ win, jackpot, newBalance });
   }),
 );
 
