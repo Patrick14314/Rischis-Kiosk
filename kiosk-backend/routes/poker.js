@@ -1,101 +1,56 @@
 import express from 'express';
+import supabase from '../utils/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import { playPokerRound } from '../services/pokerService.js';
-import supabase from '../utils/supabase.js';
+import env from '../utils/env.js';
+import { creditBank, debitBank } from '../utils/bank.js';
+
+const BANK_USER_NAME = env.BANK_USER_NAME;
 
 const router = express.Router();
-
-const messages = {
-  loss: [
-    '🙈 Leider verloren! Dein Einsatz ist weg.',
-    '😢 Pech gehabt, vielleicht nächstes Mal!',
-    '👎 Das war nichts – versuch es nochmal!',
-  ],
-  win: [
-    '🎉 Gewonnen! Dein Einsatz hat sich verdoppelt!',
-    '🥳 Glückwunsch zum Sieg! +100%!',
-  ],
-  jackpot: [
-    '🔥 JACKPOT! Unglaublich!',
-    '💥 Was für ein Treffer! Jackpot!',
-    '✨ Du räumst richtig ab – Jackpot!',
-  ],
-};
-
-function randomMessage(type) {
-  const arr = messages[type] || [];
-  return arr[Math.floor(Math.random() * arr.length)] || '';
-}
-
-async function getStats(userId) {
-  const [{ count: total }, { count: wins }, { count: jackpots }] =
-    await Promise.all([
-      supabase
-        .from('poker_rounds')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId),
-      supabase
-        .from('poker_rounds')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .neq('result', 'loss'),
-      supabase
-        .from('poker_rounds')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('result', 'jackpot'),
-    ]);
-
-  const gamesPlayed = total || 0;
-  const winRate = gamesPlayed
-    ? `${(((wins || 0) / gamesPlayed) * 100).toFixed(1)}%`
-    : '0%';
-  return {
-    gamesPlayed,
-    winRate,
-    jackpots: jackpots || 0,
-  };
-}
 
 router.post(
   '/play',
   requireAuth,
   asyncHandler(async (req, res) => {
     const userId = req.user.id;
-    const amount = parseFloat(req.body.bet);
-    if (!amount || amount <= 0) {
+    const bet = parseFloat(req.body.bet);
+    if (!bet || bet <= 0) {
       return res.status(400).json({ error: 'Ungültiger Einsatz' });
     }
 
-    const round = await playPokerRound(userId, amount);
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('balance')
+      .eq('id', userId)
+      .single();
+    if (error) return res.status(500).json({ error: 'Datenbankfehler' });
+    if (!user) return res.status(404).json({ error: 'Nutzer nicht gefunden' });
+    if (user.balance < 0) {
+      return res
+        .status(400)
+        .json({ error: 'Guthaben im Minus. Bitte zuerst bei Rischi zahlen.' });
+    }
+    if (user.balance < bet) {
+      return res.status(400).json({ error: 'Nicht genug Guthaben' });
+    }
 
-    const stats = await getStats(userId);
+    const win = Math.random() >= 0.6; // 40% Chance auf Gewinn
+    let newBalance = user.balance - bet;
+    if (win) {
+      newBalance += bet * 2;
+      await debitBank(bet);
+    } else {
+      await creditBank(bet);
+    }
 
-    const message = randomMessage(
-      round.result === 'jackpot' ? 'jackpot' : round.result,
-    );
-    const sound =
-      round.result === 'loss'
-        ? 'lose.mp3'
-        : round.result === 'win'
-          ? 'win.mp3'
-          : 'jackpot.mp3';
+    const { error: upErr } = await supabase
+      .from('users')
+      .update({ balance: newBalance })
+      .eq('id', userId);
+    if (upErr) return res.status(500).json({ error: 'Datenbankfehler' });
 
-    const response = {
-      result: round.result,
-      message:
-        `${message} ${round.multiplier > 1 ? `Du hast das ${round.multiplier}-FACHE gewonnen!` : ''}`.trim(),
-      balance: round.balance,
-      multiplier: round.multiplier,
-      sound,
-      stats,
-    };
-
-    const delay = Math.random() * 2000 + 1000; // 1-3s
-    await new Promise((resolve) => setTimeout(resolve, delay));
-
-    res.json(response);
+    res.json({ win, newBalance });
   }),
 );
 
