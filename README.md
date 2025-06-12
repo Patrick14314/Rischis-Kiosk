@@ -21,16 +21,16 @@ npm start
 
 Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie die bereitgestellte `.env.example` als Vorlage.
 
-| Variable                | Beschreibung                                                      |
-| ----------------------- | ----------------------------------------------------------------- |
-| `SUPABASE_URL`          | URL Ihres Supabase Projekts                                       |
-| `SUPABASE_SERVICE_ROLE` | Service Role Key von Supabase                                     |
-| `PORT`                  | Port, auf dem der Server läuft (optional)                         |
-| `COOKIE_DOMAIN`         | Domain für Cookies (optional)                                     |
-| `COOKIE_SECURE`         | `true` erzwingt Secure-Cookies. Standard ist `false`, solange `FORCE_HTTPS` nicht aktiv ist |
-| `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut                                    |
-| `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um                          |
-| `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen |
+| Variable                | Beschreibung                                                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `SUPABASE_URL`          | URL Ihres Supabase Projekts                                                                                                 |
+| `SUPABASE_SERVICE_ROLE` | Service Role Key von Supabase                                                                                               |
+| `PORT`                  | Port, auf dem der Server läuft (optional)                                                                                   |
+| `COOKIE_DOMAIN`         | Domain für Cookies (optional)                                                                                               |
+| `COOKIE_SECURE`         | `true` erzwingt Secure-Cookies. Standard ist `false`, solange `FORCE_HTTPS` nicht aktiv ist                                 |
+| `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut                                                                                              |
+| `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um                                                                                    |
+| `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen                                                           |
 | `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen und Poker-Gewinne (optional). Muss exakt dem Wert in `users.name` entsprechen |
 
 Wenn Backend und Frontend auf unterschiedlichen Subdomains laufen (z.\u00a0B. `api.example.com` und `kiosk.example.com`), muss `COOKIE_DOMAIN` auf die gemeinsame Basis wie `.example.com` gesetzt werden, damit das Session-Cookie \u00fcbergreifend funktioniert.
@@ -38,9 +38,33 @@ Wenn Backend und Frontend auf unterschiedlichen Subdomains laufen (z.\u00a0B. `a
 **Hinweis:** Wenn der Server lediglich per HTTP erreichbar ist (beispielsweise bei lokalen Tests), darf `COOKIE_SECURE` nicht aktiviert sein. Solange `FORCE_HTTPS` nicht aktiv ist, bleibt diese Option standardmäßig ausgeschaltet. Andernfalls wird das Session-Cookie nicht übertragen und Sie werden beim Seitenwechsel ausgeloggt.
 Das Backend verweigert den Start, wenn `COOKIE_SECURE=true` gesetzt ist, `FORCE_HTTPS` aber nicht aktiv ist.
 
+### Deployment bei Render
+
+Wird der Server auf [Render](https://render.com) betrieben, setzt die Plattform die Umgebungsvariable `RENDER_EXTERNAL_URL`.
+Ist diese vorhanden, aktiviert das Backend automatisch `FORCE_HTTPS` und verwendet Secure-Cookies.
+Hinterlegen Sie `COOKIE_DOMAIN`, wenn Frontend und Backend unterschiedliche Subdomains nutzen.
+
 Beim Start des Servers werden diese Variablen mit einem Zod-Schema
 validiert. Fehlen erforderliche Werte oder sind sie ungültig, wird der
 Start abgebrochen.
+
+## Fehlerbehebung bei Logout-Problemen
+
+Falls Sie beim Navigieren zwischen Seiten immer wieder ausgeloggt werden,
+stimmen in der Regel die Cookie-Einstellungen nicht. Kontrollieren Sie
+Ihre `.env` bzw. die hinterlegten Render‑Variablen:
+
+1. **Ohne HTTPS**: `COOKIE_SECURE=false` lassen und `FORCE_HTTPS` nicht
+   aktivieren.
+2. **Mit HTTPS**: `FORCE_HTTPS=true` setzen und `COOKIE_SECURE=true`
+   nutzen. Render stellt `RENDER_EXTERNAL_URL` bereit, wodurch beide
+   Werte automatisch aktiviert werden.
+3. Bei unterschiedlichen Subdomains `COOKIE_DOMAIN` auf die gemeinsame
+   Basis wie `.example.com` setzen.
+
+Sind diese Variablen korrekt gesetzt, werden Session‑Cookies
+zuverlässig übermittelt und das Dashboard funktioniert ohne erneute
+Anmeldungen.
 
 ## Datenbank vorbereiten
 
