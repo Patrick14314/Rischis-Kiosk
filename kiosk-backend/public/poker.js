@@ -15,12 +15,6 @@ async function getCsrfToken() {
 
 let userBalance = 0;
 
-function launchConfetti() {
-  if (typeof confetti === 'function') {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-  }
-}
-
 async function loadUser() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/user`, {
@@ -60,13 +54,10 @@ async function playPoker() {
     resultEl.textContent = data.win ? 'Gewonnen!' : 'Verloren!';
     if (data.win) {
       resultEl.classList.add('win-animation');
-      launchConfetti();
-    } else {
-      resultEl.classList.add('lose-animation');
     }
     setTimeout(() => {
       resultEl.textContent = '';
-      resultEl.classList.remove('win-animation', 'lose-animation');
+      resultEl.classList.remove('win-animation');
     }, 2000);
   } catch (err) {
     console.error(err);
