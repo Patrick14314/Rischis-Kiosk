@@ -15,14 +15,8 @@ router.post(
   asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const bet = parseFloat(req.body.bet);
-    const color = req.body.color;
     if (!bet || bet <= 0) {
       return res.status(400).json({ error: 'Ungültiger Einsatz' });
-    }
-    if (color !== 'red' && color !== 'black') {
-      return res
-        .status(400)
-        .json({ error: 'Farbe muss rot oder schwarz sein' });
     }
 
     const { data: user, error } = await supabase
@@ -41,33 +35,17 @@ router.post(
       return res.status(400).json({ error: 'Nicht genug Guthaben' });
     }
 
-    const suits = [
-      { name: 'hearts', symbol: '♥', color: 'red' },
-      { name: 'diamonds', symbol: '♦', color: 'red' },
-      { name: 'clubs', symbol: '♣', color: 'black' },
-      { name: 'spades', symbol: '♠', color: 'black' },
-    ];
-    const ranks = [
-      'A',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      'J',
-      'Q',
-      'K',
-    ];
-    const suit = suits[Math.floor(Math.random() * suits.length)];
-    const rank = ranks[Math.floor(Math.random() * ranks.length)];
+    const rand = Math.random();
+    let multiplier = 0;
+    let jackpot = false;
+    if (rand < 0.05) {
+      multiplier = 4;
+      jackpot = true;
+    } else if (rand < 0.4) {
+      multiplier = 2;
+    }
 
-    const win = suit.color === color;
-    const multiplier = win ? 2 : 0;
-    const cardSymbol = `${rank}${suit.symbol}`;
+    const win = multiplier > 0;
     let newBalance = user.balance - bet;
     if (win) {
       newBalance += bet * multiplier;
@@ -82,11 +60,7 @@ router.post(
       .eq('id', userId);
     if (upErr) return res.status(500).json({ error: 'Datenbankfehler' });
 
-    res.json({
-      win,
-      card: { symbol: cardSymbol, color: suit.color },
-      newBalance,
-    });
+    res.json({ win, jackpot, newBalance });
   }),
 );
 

@@ -19,14 +19,13 @@ async function getCsrfToken() {
 
 let userBalance = 0;
 
-let selectedColor = null;
-
 const balanceEl = document.getElementById('balance');
 const resultCard = document.getElementById('result-card');
 
-function launchConfetti() {
+function launchConfetti(jackpot) {
   if (typeof confetti === 'function') {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+    const count = jackpot ? 150 : 80;
+    confetti({ particleCount: count, spread: 60, origin: { y: 0.6 } });
   }
 }
 
@@ -48,18 +47,6 @@ async function loadUser() {
 async function playPoker() {
   const betInput = document.getElementById('bet');
   const bet = parseFloat(betInput.value.replace(',', '.'));
-  if (!selectedColor) {
-    const resultEl = document.getElementById('result');
-    resultEl.textContent = 'Bitte zuerst eine Farbe wählen';
-    resultCard.classList.remove('result-win', 'result-lose', 'hidden');
-    resultCard.classList.add('result-show', 'result-lose');
-    setTimeout(() => {
-      resultCard.classList.add('hidden');
-      resultCard.classList.remove('result-show', 'result-lose');
-      resultEl.textContent = '';
-    }, 1500);
-    return;
-  }
   if (!bet || bet <= 0) {
     const resultEl = document.getElementById('result');
     resultEl.textContent = 'Ungültiger Einsatz';
@@ -80,7 +67,7 @@ async function playPoker() {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': token },
-      body: JSON.stringify({ bet, color: selectedColor }),
+      body: JSON.stringify({ bet }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Fehler');
@@ -88,8 +75,12 @@ async function playPoker() {
     balanceEl.textContent = `${userBalance.toFixed(2)} €`;
     balanceEl.classList.add('balance-update');
     const resultEl = document.getElementById('result');
-    const message = data.win ? 'Gewonnen!' : 'Verloren!';
-    resultEl.textContent = `${message} (${data.card.symbol})`;
+    const message = data.jackpot
+      ? 'Jackpot! Vierfacher Gewinn!'
+      : data.win
+        ? 'Gewonnen!'
+        : 'Verloren!';
+    resultEl.textContent = message;
     resultCard.classList.remove('hidden', 'result-win', 'result-lose');
     resultCard.classList.add(
       'result-show',
@@ -97,7 +88,7 @@ async function playPoker() {
     );
     if (data.win) {
       resultEl.classList.add('win-animation');
-      launchConfetti();
+      launchConfetti(data.jackpot);
     } else {
       resultEl.classList.add('lose-animation');
     }
@@ -138,15 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
       betInput.value = parseFloat(btn.dataset.bet).toFixed(2);
       document
         .querySelectorAll('.quick-bet')
-        .forEach((b) => b.classList.remove('ring-2', 'ring-offset-2'));
-      btn.classList.add('ring-2', 'ring-offset-2');
-    });
-  });
-  document.querySelectorAll('.color-choice').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      selectedColor = btn.dataset.color;
-      document
-        .querySelectorAll('.color-choice')
         .forEach((b) => b.classList.remove('ring-2', 'ring-offset-2'));
       btn.classList.add('ring-2', 'ring-offset-2');
     });
