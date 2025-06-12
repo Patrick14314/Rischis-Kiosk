@@ -50,15 +50,9 @@ async function playPoker() {
     userBalance = data.newBalance;
     document.getElementById('balance').textContent =
       `${userBalance.toFixed(2)} €`;
-    const resultEl = document.getElementById('result');
-    resultEl.textContent = data.win ? 'Gewonnen!' : 'Verloren!';
-    if (data.win) {
-      resultEl.classList.add('win-animation');
-    }
-    setTimeout(() => {
-      resultEl.textContent = '';
-      resultEl.classList.remove('win-animation');
-    }, 2000);
+    document.getElementById('result').textContent = data.win
+      ? 'Gewonnen!'
+      : 'Verloren!';
   } catch (err) {
     console.error(err);
     document.getElementById('result').textContent = 'Fehler beim Spiel';
