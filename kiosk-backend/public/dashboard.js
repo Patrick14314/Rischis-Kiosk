@@ -5,10 +5,14 @@
 // Einheitliche Definition für alle Frontend-Skripte
 const BACKEND_URL = window.location.origin;
 
+const controller = new AbortController();
+window.addEventListener('beforeunload', () => controller.abort());
+
 async function getCsrfToken() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
       credentials: 'include',
+      signal: controller.signal,
     });
     const data = await res.json();
     return data.csrfToken;
@@ -22,7 +26,8 @@ async function checkUserAndRole() {
   try {
     // Erst prüfen, ob eine gültige Session existiert
     const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
-      credentials: 'include'
+      credentials: 'include',
+      signal: controller.signal,
     });
     const { loggedIn } = await meRes.json();
 
@@ -32,7 +37,10 @@ async function checkUserAndRole() {
     }
 
     // Danach Benutzerdaten laden
-    const res = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
+    const res = await fetch(`${BACKEND_URL}/api/user`, {
+      credentials: 'include',
+      signal: controller.signal,
+    });
     const user = await res.json();
 
     if (!user?.id) {
@@ -44,7 +52,8 @@ async function checkUserAndRole() {
       document.getElementById('admin-btn')?.classList.remove('hidden');
     }
   } catch (err) {
-    console.error("Fehler beim Laden des Nutzers", err);
+    if (err.name === 'AbortError') return;
+    console.error('Fehler beim Laden des Nutzers', err);
     window.location.href = 'index.html';
   }
 }
@@ -66,7 +75,8 @@ async function logout() {
     await fetch(`${BACKEND_URL}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
-      headers: { 'x-csrf-token': token }
+      headers: { 'x-csrf-token': token },
+      signal: controller.signal,
     });
   } catch (err) {
     console.error('Fehler beim Logout', err);
