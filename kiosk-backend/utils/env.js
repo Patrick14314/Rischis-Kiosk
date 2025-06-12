@@ -32,4 +32,10 @@ const env = {
   BANK_USER_NAME: parsed.BANK_USER_NAME,
 };
 
+if (env.COOKIE_SECURE && !env.FORCE_HTTPS) {
+  throw new Error(
+    'COOKIE_SECURE=true ohne FORCE_HTTPS führt dazu, dass das Session-Cookie nicht übertragen wird. Bitte FORCE_HTTPS aktivieren oder COOKIE_SECURE=false setzen.'
+  );
+}
+
 export default env;
