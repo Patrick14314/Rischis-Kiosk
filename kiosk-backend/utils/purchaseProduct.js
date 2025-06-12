@@ -1,5 +1,4 @@
 import supabase from './supabase.js';
-import env from './env.js';
 
 export default async function purchaseProduct(user, product, quantity) {
   const total = quantity * product.price;
@@ -22,20 +21,6 @@ export default async function purchaseProduct(user, product, quantity) {
     const err = new Error(message);
     err.status = 500;
     throw err;
-  }
-
-  if (env.BANK_USER_NAME) {
-    const { data: bank } = await supabase
-      .from('users')
-      .select('id, balance')
-      .eq('name', env.BANK_USER_NAME)
-      .maybeSingle();
-    if (bank) {
-      await supabase
-        .from('users')
-        .update({ balance: (bank.balance || 0) + total })
-        .eq('id', bank.id);
-    }
   }
 
   return { success: true };
