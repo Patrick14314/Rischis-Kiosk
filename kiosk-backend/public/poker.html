@@ -109,51 +109,6 @@
         font-size: 1.5rem;
         animation: lose-shake 0.8s ease-in-out;
       }
-
-      @keyframes balance-pop {
-        0% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.2);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-
-      .balance-update {
-        animation: balance-pop 0.6s ease-out;
-      }
-
-      .result-card {
-        padding: 0.75rem;
-        border-radius: 1rem;
-        font-weight: 700;
-        margin-top: 0.5rem;
-        color: white;
-        transform: scale(0);
-        opacity: 0;
-        transition: transform 0.3s, opacity 0.3s;
-      }
-      .result-show {
-        transform: scale(1);
-        opacity: 1;
-      }
-      .result-win {
-        background-color: #16a34a;
-      }
-      .result-lose {
-        background-color: #dc2626;
-      }
-
-      #play {
-        transition: transform 0.1s;
-      }
-
-      #play:active {
-        transform: scale(0.95);
-      }
     </style>
   </head>
   <body class="text-green-900 dark:text-white">
@@ -194,9 +149,7 @@
           >
             Spielen
           </button>
-          <div id="result-card" class="result-card text-center hidden">
-            <span id="result"></span>
-          </div>
+          <p id="result" class="text-center"></p>
         </div>
       </div>
     </div>
