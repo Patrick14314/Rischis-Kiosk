@@ -48,6 +48,37 @@ Beim Start des Servers werden diese Variablen mit einem Zod-Schema
 validiert. Fehlen erforderliche Werte oder sind sie ungültig, wird der
 Start abgebrochen.
 
+## Fehlerbehebung bei Logout-Problemen
+
+Falls Sie beim Navigieren zwischen Seiten immer wieder ausgeloggt werden,
+stimmen in der Regel die Cookie-Einstellungen nicht. Kontrollieren Sie
+Ihre `.env` bzw. die hinterlegten Render‑Variablen:
+
+1. **Ohne HTTPS**: `COOKIE_SECURE=false` lassen und `FORCE_HTTPS` nicht
+   aktivieren.
+2. **Mit HTTPS**: `FORCE_HTTPS=true` setzen und `COOKIE_SECURE=true`
+   nutzen. Render stellt `RENDER_EXTERNAL_URL` bereit, wodurch beide
+   Werte automatisch aktiviert werden.
+3. Bei unterschiedlichen Subdomains `COOKIE_DOMAIN` auf die gemeinsame
+   Basis wie `.example.com` setzen.
+
+Sind diese Variablen korrekt gesetzt, werden Session‑Cookies
+zuverlässig übermittelt und das Dashboard funktioniert ohne erneute
+Anmeldungen.
+
+## Rollen und Seitenzugriff
+
+Registrierte Nutzer besitzen standardmäßig die Rolle `buyer`.
+Administratoren erhalten die Rolle `admin`.
+
+- **buyer:** Zugriff auf Shop, Dashboard, Buzzer und Poker
+- **admin:** Zugriff auf alle Bereiche inklusive `/admin`
+
+Die Admin-Seite prüft beim Laden die Rolle und leitet
+nicht berechtigte Nutzer zurück auf das Dashboard.
+Alle Admin‑API‑Routen sind zusätzlich serverseitig durch das
+`requireAdmin`‑Middleware geschützt.
+
 ## Datenbank vorbereiten
 
 Damit Kaufvorgänge funktionieren, muss in Supabase die Funktion

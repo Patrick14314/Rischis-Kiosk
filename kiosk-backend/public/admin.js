@@ -2,7 +2,7 @@
 // Einheitliche Definition für alle Frontend-Skripte
 const BACKEND_URL = window.location.origin;
 
-// Aktuell eingeloggter Benutzer
+// Aktuell eingeloggter Admin
 let currentUserId = null;
 
 async function getCsrfToken() {
@@ -15,6 +15,39 @@ async function getCsrfToken() {
   } catch (err) {
     console.error('CSRF-Token konnte nicht geladen werden', err);
     return null;
+  }
+}
+
+async function ensureAdmin() {
+  try {
+    const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+      credentials: 'include',
+    });
+    const { loggedIn } = await meRes.json();
+    if (!meRes.ok || !loggedIn) {
+      window.location.href = 'index.html';
+      return false;
+    }
+
+    const res = await fetch(`${BACKEND_URL}/api/user`, {
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      window.location.href = 'index.html';
+      return false;
+    }
+    const user = await res.json();
+    if (user.role !== 'admin') {
+      window.location.href = 'dashboard.html';
+      return false;
+    }
+
+    currentUserId = user.id;
+    return true;
+  } catch (err) {
+    console.error('Fehler beim Admin-Check', err);
+    window.location.href = 'index.html';
+    return false;
   }
 }
 
@@ -43,18 +76,6 @@ function formatDateTime(iso) {
          d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin' });
 }
 
-// Eingeloggten Benutzer laden
-async function loadCurrentUser() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
-    if (res.ok) {
-      const user = await res.json();
-      currentUserId = user.id;
-    }
-  } catch (err) {
-    console.error('Fehler beim Laden des Benutzers', err);
-  }
-}
 
 // -------- Produkte --------
 async function loadProducts() {
@@ -364,8 +385,9 @@ async function buyForUser(e) {
 }
 
 // ---------- Initialisierung ----------
-window.addEventListener('DOMContentLoaded', () => {
-  loadCurrentUser();
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await ensureAdmin();
+  if (!ok) return;
   loadStats();
   loadProducts();
   loadPurchases(true);
@@ -373,5 +395,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadUserBalances();
   loadBuyUsers();
   loadBuyProducts();
-  document.getElementById('buy-for-user-form')?.addEventListener('submit', buyForUser);
+  document
+    .getElementById('buy-for-user-form')
+    ?.addEventListener('submit', buyForUser);
 });
