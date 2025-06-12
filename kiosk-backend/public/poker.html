@@ -134,9 +134,7 @@
         color: white;
         transform: scale(0);
         opacity: 0;
-        transition:
-          transform 0.3s,
-          opacity 0.3s;
+        transition: transform 0.3s, opacity 0.3s;
       }
       .result-show {
         transform: scale(1);
@@ -190,36 +188,6 @@
             placeholder="Einsatz €"
             class="w-full p-2 rounded"
           />
-          <div id="quick-bets" class="flex flex-wrap justify-center gap-2">
-            <button
-              type="button"
-              data-bet="1"
-              class="quick-bet bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-            >
-              1 €
-            </button>
-            <button
-              type="button"
-              data-bet="2"
-              class="quick-bet bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-            >
-              2 €
-            </button>
-            <button
-              type="button"
-              data-bet="5"
-              class="quick-bet bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-            >
-              5 €
-            </button>
-            <button
-              type="button"
-              data-bet="10"
-              class="quick-bet bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-            >
-              10 €
-            </button>
-          </div>
           <button
             id="play"
             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
