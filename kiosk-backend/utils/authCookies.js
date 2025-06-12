@@ -16,10 +16,16 @@ export function getCookieOptions() {
   return options;
 }
 
-export function setAuthCookie(res, token) {
-  res.cookie('sb-access-token', token, getCookieOptions());
+export function setAuthCookies(res, { access_token, refresh_token }) {
+  if (access_token) {
+    res.cookie('sb-access-token', access_token, getCookieOptions());
+  }
+  if (refresh_token) {
+    res.cookie('sb-refresh-token', refresh_token, getCookieOptions());
+  }
 }
 
-export function clearAuthCookie(res) {
+export function clearAuthCookies(res) {
   res.clearCookie('sb-access-token', getCookieOptions());
+  res.clearCookie('sb-refresh-token', getCookieOptions());
 }

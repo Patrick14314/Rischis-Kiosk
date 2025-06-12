@@ -25,7 +25,7 @@ router.get(
 router.post(
   '/',
   asyncHandler(async (req, res) => {
-    const user = await getUserFromRequest(req);
+    const user = await getUserFromRequest(req, res);
     const { type } = req.body;
 
     const name = user ? (await getUserName(user.id)) || user.email : null;

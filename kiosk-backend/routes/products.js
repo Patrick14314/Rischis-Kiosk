@@ -9,7 +9,7 @@ const router = express.Router();
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const user = await getUserFromRequest(req);
+    const user = await getUserFromRequest(req, res);
     const role = user ? await getUserRole(user.id) : null;
 
     const { products, error } = await listProducts(req.query.sort, role);

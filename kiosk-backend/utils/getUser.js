@@ -1,19 +1,35 @@
 // kiosk-backend/utils/getUser.js
 import supabase from './supabase.js';
+import { setAuthCookies } from './authCookies.js';
 
-export default async function getUserFromRequest(req) {
-  const token =
+export default async function getUserFromRequest(req, res) {
+  const access =
     req.headers.authorization?.replace('Bearer ', '') ||
     req.cookies?.['sb-access-token'];
+  const refresh = req.cookies?.['sb-refresh-token'];
 
-  if (!token) return null;
+  if (!access && !refresh) return null;
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
+  if (access) {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(access);
+    if (!error && user) return user;
+  }
 
-  if (error || !user) return null;
+  if (refresh) {
+    const { data, error } = await supabase.auth.refreshSession({
+      refresh_token: refresh,
+    });
 
-  return user;
+    if (!error && data.session?.access_token) {
+      if (res) {
+        setAuthCookies(res, data.session);
+      }
+      return data.user;
+    }
+  }
+
+  return null;
 }
