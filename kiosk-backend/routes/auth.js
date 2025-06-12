@@ -1,6 +1,6 @@
 import express from 'express';
 import supabase from '../utils/supabase.js';
-import { setAuthCookie, clearAuthCookie } from '../utils/authCookies.js';
+import { setAuthCookies, clearAuthCookies } from '../utils/authCookies.js';
 import { validateLogin, validateRegister } from '../middleware/validate.js';
 import { loginLimiter } from '../middleware/rateLimiter.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -22,7 +22,7 @@ router.post(
       return res.status(401).json({ error: 'Login fehlgeschlagen' });
     }
 
-    setAuthCookie(res, data.session.access_token);
+    setAuthCookies(res, data.session);
 
     res.json({
       message: 'Login erfolgreich',
@@ -40,18 +40,31 @@ router.get(
   '/me',
   asyncHandler(async (req, res) => {
     const token = req.cookies?.['sb-access-token'];
+    const refresh = req.cookies?.['sb-refresh-token'];
 
-    if (!token) {
+    if (!token && !refresh) {
       return res.status(401).json({ loggedIn: false });
     }
 
-    const { data, error } = await supabase.auth.getUser(token);
-
-    if (error || !data?.user) {
-      return res.status(401).json({ loggedIn: false });
+    if (token) {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (!error && data?.user) {
+        return res.json({ loggedIn: true, user: data.user });
+      }
     }
 
-    res.json({ loggedIn: true, user: data.user });
+    if (refresh) {
+      const { data, error } = await supabase.auth.refreshSession({
+        refresh_token: refresh,
+      });
+
+      if (!error && data.session?.access_token) {
+        setAuthCookies(res, data.session);
+        return res.json({ loggedIn: true, user: data.user });
+      }
+    }
+
+    res.status(401).json({ loggedIn: false });
   }),
 );
 
@@ -82,7 +95,7 @@ router.post(
 
 // 🧼 LOGOUT
 router.post('/logout', (req, res) => {
-  clearAuthCookie(res);
+  clearAuthCookies(res);
   res.json({ message: 'Logout erfolgreich' });
 });
 
