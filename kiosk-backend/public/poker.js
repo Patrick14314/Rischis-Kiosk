@@ -15,9 +15,6 @@ async function getCsrfToken() {
 
 let userBalance = 0;
 
-const balanceEl = document.getElementById('balance');
-const resultCard = document.getElementById('result-card');
-
 function launchConfetti() {
   if (typeof confetti === 'function') {
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
@@ -43,15 +40,7 @@ async function playPoker() {
   const betInput = document.getElementById('bet');
   const bet = parseFloat(betInput.value.replace(',', '.'));
   if (!bet || bet <= 0) {
-    const resultEl = document.getElementById('result');
-    resultEl.textContent = 'Ungültiger Einsatz';
-    resultCard.classList.remove('result-win', 'result-lose', 'hidden');
-    resultCard.classList.add('result-show', 'result-lose');
-    setTimeout(() => {
-      resultCard.classList.add('hidden');
-      resultCard.classList.remove('result-show', 'result-lose');
-      resultEl.textContent = '';
-    }, 1500);
+    document.getElementById('result').textContent = 'Ungültiger Einsatz';
     return;
   }
   try {
@@ -65,12 +54,10 @@ async function playPoker() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Fehler');
     userBalance = data.newBalance;
-    balanceEl.textContent = `${userBalance.toFixed(2)} €`;
-    balanceEl.classList.add('balance-update');
+    document.getElementById('balance').textContent =
+      `${userBalance.toFixed(2)} €`;
     const resultEl = document.getElementById('result');
     resultEl.textContent = data.win ? 'Gewonnen!' : 'Verloren!';
-    resultCard.classList.remove('hidden', 'result-win', 'result-lose');
-    resultCard.classList.add('result-show', data.win ? 'result-win' : 'result-lose');
     if (data.win) {
       resultEl.classList.add('win-animation');
       launchConfetti();
@@ -78,23 +65,12 @@ async function playPoker() {
       resultEl.classList.add('lose-animation');
     }
     setTimeout(() => {
-      resultCard.classList.add('hidden');
-      resultCard.classList.remove('result-show', 'result-win', 'result-lose');
       resultEl.textContent = '';
       resultEl.classList.remove('win-animation', 'lose-animation');
-      balanceEl.classList.remove('balance-update');
     }, 2000);
   } catch (err) {
     console.error(err);
-    const resultEl = document.getElementById('result');
-    resultEl.textContent = 'Fehler beim Spiel';
-    resultCard.classList.remove('result-win', 'result-lose', 'hidden');
-    resultCard.classList.add('result-show', 'result-lose');
-    setTimeout(() => {
-      resultCard.classList.add('hidden');
-      resultCard.classList.remove('result-show', 'result-win', 'result-lose');
-      resultEl.textContent = '';
-    }, 2000);
+    document.getElementById('result').textContent = 'Fehler beim Spiel';
   }
 }
 
