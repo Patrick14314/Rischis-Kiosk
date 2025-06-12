@@ -1,16 +1,12 @@
 const BACKEND_URL = window.location.origin;
 
-let csrfToken;
-
 async function getCsrfToken() {
-  if (csrfToken) return csrfToken;
   try {
     const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
       credentials: 'include',
     });
     const data = await res.json();
-    csrfToken = data.csrfToken;
-    return csrfToken;
+    return data.csrfToken;
   } catch (err) {
     console.error('CSRF-Token konnte nicht geladen werden', err);
     return null;
@@ -58,8 +54,6 @@ async function playPoker() {
     }, 1500);
     return;
   }
-  const playBtn = document.getElementById('play');
-  playBtn.disabled = true;
   try {
     const token = await getCsrfToken();
     const res = await fetch(`${BACKEND_URL}/api/poker/play`, {
@@ -92,7 +86,6 @@ async function playPoker() {
       resultEl.textContent = '';
       resultEl.classList.remove('win-animation', 'lose-animation');
       balanceEl.classList.remove('balance-update');
-      playBtn.disabled = false;
     }, 2000);
   } catch (err) {
     console.error(err);
@@ -104,19 +97,13 @@ async function playPoker() {
       resultCard.classList.add('hidden');
       resultCard.classList.remove('result-show', 'result-win', 'result-lose');
       resultEl.textContent = '';
-      playBtn.disabled = false;
     }, 2000);
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadUser();
-  const playBtn = document.getElementById('play');
-  playBtn.addEventListener('click', playPoker);
-  getCsrfToken();
-  document.getElementById('bet').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') playPoker();
-  });
+  document.getElementById('play').addEventListener('click', playPoker);
   const betInput = document.getElementById('bet');
   document.querySelectorAll('.quick-bet').forEach((btn) => {
     btn.addEventListener('click', () => {
