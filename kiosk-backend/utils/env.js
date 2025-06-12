@@ -3,10 +3,6 @@ import { z } from 'zod';
 
 dotenv.config();
 
-// If the app is deployed on Render, HTTPS is enforced by default.
-// Enable FORCE_HTTPS automatically when RENDER_EXTERNAL_URL is present.
-const defaultForceHttps = process.env.RENDER_EXTERNAL_URL ? 'true' : 'false';
-
 const envSchema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE: z.string().min(1),
@@ -14,7 +10,7 @@ const envSchema = z.object({
   COOKIE_DOMAIN: z.string().optional(),
   COOKIE_SECURE: z.enum(['true', 'false']).optional(),
   COOKIE_SAMESITE: z.string().default('lax'),
-  FORCE_HTTPS: z.enum(['true', 'false']).optional().default(defaultForceHttps),
+  FORCE_HTTPS: z.enum(['true', 'false']).optional().default('false'),
   LOGIN_WINDOW_MS: z.coerce
     .number()
     .int()
@@ -38,7 +34,7 @@ const env = {
 
 if (env.COOKIE_SECURE && !env.FORCE_HTTPS) {
   throw new Error(
-    'COOKIE_SECURE=true ohne FORCE_HTTPS führt dazu, dass das Session-Cookie nicht übertragen wird. Bitte FORCE_HTTPS aktivieren oder COOKIE_SECURE=false setzen.',
+    'COOKIE_SECURE=true ohne FORCE_HTTPS führt dazu, dass das Session-Cookie nicht übertragen wird. Bitte FORCE_HTTPS aktivieren oder COOKIE_SECURE=false setzen.'
   );
 }
 
