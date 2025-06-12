@@ -27,7 +27,7 @@ const env = {
   COOKIE_SECURE:
     parsed.COOKIE_SECURE !== undefined
       ? parsed.COOKIE_SECURE === 'true'
-      : parsed.NODE_ENV === 'production',
+      : parsed.FORCE_HTTPS === 'true',
   FORCE_HTTPS: parsed.FORCE_HTTPS === 'true',
   BANK_USER_NAME: parsed.BANK_USER_NAME,
 };
