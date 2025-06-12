@@ -5,7 +5,6 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validateBuzzerRound } from '../middleware/validate.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import env from '../utils/env.js';
-import { creditBank } from '../utils/bank.js';
 
 const router = express.Router();
 const BANK_USER_NAME = env.BANK_USER_NAME;
@@ -198,7 +197,18 @@ router.post(
         .update({ balance: (winUser?.balance || 0) + winnerShare })
         .eq('id', winner.user_id);
 
-      await creditBank(bankShare);
+      if (BANK_USER_NAME) {
+        const { data: bank } = await supabase
+          .from('users')
+          .select('id, balance')
+          .eq('name', BANK_USER_NAME)
+          .maybeSingle();
+        if (bank)
+          await supabase
+            .from('users')
+            .update({ balance: (bank.balance || 0) + bankShare })
+            .eq('id', bank.id);
+      }
     }
 
     res.json({ ended: true });
