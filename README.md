@@ -58,12 +58,9 @@ Ihre `.env` bzw. die hinterlegten Render‑Variablen:
 2. **Mit HTTPS**: `FORCE_HTTPS=true` setzen und `COOKIE_SECURE=true`
    nutzen. Render stellt `RENDER_EXTERNAL_URL` bereit, wodurch beide
    Werte automatisch aktiviert werden.
-3. **Render-Interne Adresse**: Nutzt du die interne HTTP-URL wie
-   `http://myservice:10000`, muss `FORCE_HTTPS=false` explizit gesetzt
-   und `COOKIE_SECURE=false` bleiben, da dort kein HTTPS verfügbar ist.
-4. Bei unterschiedlichen Subdomains `COOKIE_DOMAIN` auf die gemeinsame
+3. Bei unterschiedlichen Subdomains `COOKIE_DOMAIN` auf die gemeinsame
    Basis wie `.example.com` setzen.
-5. `COOKIE_SAMESITE` auf `lax` belassen. Mit `strict` werden Cookies
+4. `COOKIE_SAMESITE` auf `lax` belassen. Mit `strict` werden Cookies
    bei Weiterleitungen oder Links von anderen Seiten nicht
    übermittelt, was zu unerwarteten Logouts führt.
 
