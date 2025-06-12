@@ -28,8 +28,7 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `PORT`                  | Port, auf dem der Server läuft (optional)                                                                                   |
 | `COOKIE_DOMAIN`         | Domain für Cookies (optional)                                                                                               |
 | `COOKIE_SECURE`         | `true` erzwingt Secure-Cookies. Standard ist `false`, solange `FORCE_HTTPS` nicht aktiv ist                                 |
-| `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut                                                                                              |
-| `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um                                                                                    |
+| `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut (Standard `lax`; `strict` kann zu Logouts fu00fchren) |
 | `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen                                                           |
 | `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen und Poker-Gewinne (optional). Muss exakt dem Wert in `users.name` entsprechen |
 
@@ -61,6 +60,9 @@ Ihre `.env` bzw. die hinterlegten Render‑Variablen:
    Werte automatisch aktiviert werden.
 3. Bei unterschiedlichen Subdomains `COOKIE_DOMAIN` auf die gemeinsame
    Basis wie `.example.com` setzen.
+4. `COOKIE_SAMESITE` auf `lax` belassen. Mit `strict` werden Cookies
+   bei Weiterleitungen oder Links von anderen Seiten nicht
+   übermittelt, was zu unerwarteten Logouts führt.
 
 Sind diese Variablen korrekt gesetzt, werden Session‑Cookies
 zuverlässig übermittelt und das Dashboard funktioniert ohne erneute
