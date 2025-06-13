@@ -43,6 +43,10 @@ Damit Kaufvorgänge funktionieren, muss in Supabase die Funktion
 `purchase_product` vorhanden sein. Führen Sie dazu das SQL-Skript
 `kiosk-backend/sql/purchase_product.sql` in Ihrem Supabase-Projekt aus.
 
+Damit stets nur eine einzige Buzzer‑Runde aktiv sein kann, empfiehlt es sich
+zusätzlich das Skript `kiosk-backend/sql/unique_active_round.sql` auszuführen.
+Dieses legt einen partiellen Unique‑Index auf `buzzer_rounds(active)` an.
+
 Anschließend können Produkte im Shop gekauft werden.
 
 ## CSRF-Schutz
