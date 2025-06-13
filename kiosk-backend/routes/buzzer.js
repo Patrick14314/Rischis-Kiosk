@@ -225,6 +225,12 @@ router.post(
       }
     }
 
+    // Mark all KOLOs of this round as inactive
+    await supabase
+      .from('kolos')
+      .update({ active: false })
+      .eq('round_id', round.id);
+
     res.json({ ended: true });
   }),
 );
