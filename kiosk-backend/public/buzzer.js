@@ -66,6 +66,7 @@ async function loadRound() {
   const endBtn = document.getElementById('end-round-btn');
   const lockBtn = document.getElementById('lock-round-btn');
   const koloControls = document.getElementById('kolo-controls');
+  const roundForm = document.getElementById('round-form');
 
   if (round) {
     infoEl.textContent = `Einsatz: ${round.bet} €, Limit: ${round.points_limit}`;
@@ -79,6 +80,7 @@ async function loadRound() {
     if (currentUser?.role === 'admin') {
       endBtn?.classList.remove('hidden');
       koloControls?.classList.remove('hidden');
+      roundForm?.classList.add('hidden');
     }
   } else {
     infoEl.textContent = 'Keine laufende Runde';
@@ -86,6 +88,9 @@ async function loadRound() {
     endBtn?.classList.add('hidden');
     lockBtn?.classList.add('hidden');
     koloControls?.classList.add('hidden');
+    if (currentUser?.role === 'admin') {
+      roundForm?.classList.remove('hidden');
+    }
   }
 }
 
