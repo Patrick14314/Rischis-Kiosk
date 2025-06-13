@@ -188,6 +188,7 @@ async function init() {
 
   setInterval(loadParticipants, 5000);
   setInterval(loadGeneralInfo, 5000);
+  setInterval(loadRound, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
