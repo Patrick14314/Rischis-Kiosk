@@ -38,8 +38,9 @@ const PORT = env.PORT;
 app.use(compression());
 app.use(
   cors({
-    // Allow all origins in development. In production only ".de" domains are
-    // permitted. Requests without an origin header (e.g. curl) are also allowed.
+    // Allow all origins in development. In production only domains matching
+    // the CORS_TLD environment variable are permitted. Requests without an
+    // origin header (e.g. curl) are also allowed.
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
 
@@ -49,7 +50,7 @@ app.use(
 
       try {
         const { hostname } = new URL(origin);
-        if (hostname.endsWith('.de')) {
+        if (hostname.endsWith(`.${env.CORS_TLD}`)) {
           return callback(null, true);
         }
       } catch {

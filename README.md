@@ -30,7 +30,8 @@ Legen Sie eine `.env` Datei im Verzeichnis `kiosk-backend` an oder nutzen Sie di
 | `COOKIE_SECURE`         | `true` erzwingt Secure-Cookies                                    |
 | `COOKIE_SAMESITE`       | Wert für das SameSite-Attribut                                    |
 | `FORCE_HTTPS`           | `true` leitet HTTP-Anfragen auf HTTPS um                          |
-| `NODE_ENV`              | Bei `production` werden nur Anfragen von `.de` Domains zugelassen |
+| `NODE_ENV`              | Umgebung (`production`, `development`, ...) |
+| `CORS_TLD`              | Top-Level-Domain, die in `production` für CORS erlaubt ist |
 | `BANK_USER_NAME`        | Name des System-Users für Buzzer-Auszahlungen (optional) |
 
 Beim Start des Servers werden diese Variablen mit einem Zod-Schema
@@ -58,8 +59,8 @@ das Header-Feld `x-csrf-token` übernommen werden.
 ## CORS-Einstellungen
 
 Im Entwicklungsmodus sind Anfragen von allen Domains erlaubt. Wird der Server
-mit `NODE_ENV=production` gestartet, akzeptiert er nur noch Ursprünge mit der
-Top-Level-Domain `.de`.
+mit `NODE_ENV=production` gestartet, akzeptiert er nur noch Ursprünge, deren
+Domain auf die in `CORS_TLD` definierte Top-Level-Domain endet (Standard: `de`).
 
 ## Safari-Hinweis vermeiden
 
