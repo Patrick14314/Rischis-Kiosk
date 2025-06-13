@@ -17,6 +17,7 @@ const envSchema = z.object({
     .default(15 * 60 * 1000),
   LOGIN_MAX_ATTEMPTS: z.coerce.number().int().default(5),
   BANK_USER_NAME: z.string().optional(),
+  CORS_TLD: z.string().optional().default('de'),
   NODE_ENV: z.string().optional(),
 });
 
@@ -30,6 +31,7 @@ const env = {
       : parsed.NODE_ENV === 'production',
   FORCE_HTTPS: parsed.FORCE_HTTPS === 'true',
   BANK_USER_NAME: parsed.BANK_USER_NAME,
+  CORS_TLD: parsed.CORS_TLD,
 };
 
 export default env;
