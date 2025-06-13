@@ -104,7 +104,6 @@ function setupButtons() {
   if (adminButton) buttons.push(adminButton);
   buttons.forEach((btn) => {
     if (!btn) return;
-    btn.classList.add('disabled-link');
     btn.addEventListener('click', (e) => {
       if (btn.classList.contains('disabled-link')) {
         e.preventDefault();
