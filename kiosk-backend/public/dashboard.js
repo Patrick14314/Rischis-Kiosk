@@ -8,6 +8,10 @@ const BACKEND_URL = window.location.origin;
 const controller = new AbortController();
 window.addEventListener('beforeunload', () => controller.abort());
 
+let currentRole = null;
+const buttons = [];
+let adminButton = null;
+
 async function getCsrfToken() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
@@ -52,9 +56,12 @@ async function checkUserAndRole(retries = 6) {
       return;
     }
 
+    currentRole = user.role;
+    adminButton = document.getElementById('admin-btn');
     if (user.role === 'admin') {
-      document.getElementById('admin-btn')?.classList.remove('hidden');
+      adminButton?.classList.remove('hidden');
     }
+    setupActivation();
   } catch (err) {
     if (err.name === 'AbortError') return;
     console.error('Fehler beim Laden des Nutzers', err);
@@ -71,8 +78,6 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-window.addEventListener('DOMContentLoaded', checkUserAndRole);
-
 async function logout() {
   try {
     const token = await getCsrfToken();
@@ -88,3 +93,56 @@ async function logout() {
     window.location.href = 'index.html';
   }
 }
+
+function setupButtons() {
+  buttons.push(
+    document.getElementById('kiosk-btn'),
+    document.getElementById('buzzer-btn'),
+    document.getElementById('mentos-btn')
+  );
+  adminButton = document.getElementById('admin-btn');
+  if (adminButton) buttons.push(adminButton);
+  buttons.forEach((btn) => {
+    if (!btn) return;
+    btn.addEventListener('click', (e) => {
+      if (btn.classList.contains('disabled-link')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  });
+}
+
+function disableButtons() {
+  document.getElementById('loader').classList.remove('hidden');
+  buttons.forEach((btn) => btn?.classList.add('disabled-link'));
+}
+
+function enableButtons() {
+  document.getElementById('loader').classList.add('hidden');
+  buttons.forEach((btn) => btn?.classList.remove('disabled-link'));
+}
+
+function setupActivation() {
+  if (currentRole === 'admin') {
+    const observer = new MutationObserver(() => {
+      if (adminButton && adminButton.offsetParent !== null) {
+        observer.disconnect();
+        enableButtons();
+      }
+    });
+    if (adminButton && adminButton.offsetParent !== null) {
+      enableButtons();
+    } else {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  } else {
+    setTimeout(enableButtons, 2000);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setupButtons();
+  disableButtons();
+  checkUserAndRole();
+});
