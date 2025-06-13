@@ -274,6 +274,7 @@ router.get(
       .from('kolos')
       .select('id, active, created_at')
       .eq('round_id', round.id)
+      .eq('active', true)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
