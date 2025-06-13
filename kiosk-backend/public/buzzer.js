@@ -205,6 +205,7 @@ async function init() {
   evt.addEventListener('unlock', () => {
     document.getElementById('buzz-btn').disabled = false;
     document.getElementById('skip-btn').disabled = false;
+    loadKolo();
   });
   evt.addEventListener('lock', () => {
     document.getElementById('buzz-btn').disabled = true;
