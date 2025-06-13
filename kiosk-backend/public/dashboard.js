@@ -108,7 +108,7 @@ function showWelcome() {
 
   overlayText = document.createElement('div');
   overlayText.id = 'welcome-text';
-  overlayText.textContent = '🎉 Willkommen im Kiosk!';
+  overlayText.textContent = '🎉 Willkommen bei Rischi!';
   overlay.appendChild(overlayText);
 
   const barContainer = document.createElement('div');
