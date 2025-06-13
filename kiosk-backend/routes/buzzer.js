@@ -225,11 +225,17 @@ router.post(
       }
     }
 
-    // Mark all KOLOs of this round as inactive
-    await supabase
+    // Mark all KOLOs as inactive
+    const { error: koloUpdateError } = await supabase
       .from('kolos')
-      .update({ active: false })
-      .eq('round_id', round.id);
+      .update({ active: false });
+
+    if (koloUpdateError) {
+      console.error('koloUpdateError', koloUpdateError);
+      return res
+        .status(500)
+        .json({ error: 'KOLOs konnten nicht deaktiviert werden' });
+    }
 
     res.json({ ended: true });
   }),
