@@ -2,6 +2,7 @@ import env from './utils/env.js';
 
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import csrf from 'csurf';
 import { dirname, join } from 'node:path';
@@ -34,6 +35,7 @@ const app = express();
 const PORT = env.PORT;
 
 // Middleware
+app.use(compression());
 app.use(
   cors({
     // Allow all origins in development. In production only ".de" domains are
@@ -80,7 +82,7 @@ const csrfProtection = csrf({
 
 app.use(csrfProtection);
 app.use(express.json());
-app.use(express.static(publicDir));
+app.use(express.static(publicDir, { maxAge: '1d' }));
 
 // Statische Routen
 ['admin', 'dashboard', 'mentos', 'shop', 'buzzer'].forEach((page) => {
