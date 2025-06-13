@@ -62,17 +62,34 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         'x-csrf-token': token,
       },
       credentials: 'include', // wichtig für Cookies
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     const result = await res.json();
     if (!res.ok) throw new Error(result.error || 'Login fehlgeschlagen');
 
-    showMessage("Login erfolgreich! Weiterleitung...", true);
+    showMessage('Login erfolgreich! Weiterleitung...', true);
 
-    setTimeout(() => {
+    const waitForSession = async (retries = 10) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
+            credentials: 'include',
+          });
+          const meData = await meRes.json();
+          if (meRes.ok && meData.loggedIn) {
+            window.location.href = 'dashboard.html';
+            return;
+          }
+        } catch {
+          // ignore errors and retry
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
       window.location.href = 'dashboard.html';
-    }, 1000);
+    };
+
+    waitForSession();
   } catch (err) {
     console.error(err);
     showMessage(err.message || 'Fehler beim Login');
@@ -80,33 +97,37 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 });
 
 // REGISTRIERUNG
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('register-email').value.trim();
-  const password = document.getElementById('register-password').value;
-  const repeat = document.getElementById('register-password-repeat').value;
+document
+  .getElementById('register-form')
+  .addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+    const repeat = document.getElementById('register-password-repeat').value;
 
-  if (password !== repeat) return showMessage("Passwörter stimmen nicht überein.");
+    if (password !== repeat)
+      return showMessage('Passwörter stimmen nicht überein.');
 
-  try {
-    const token = await getCsrfToken();
-    const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-csrf-token': token,
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const token = await getCsrfToken();
+      const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': token,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
 
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Registrierung fehlgeschlagen');
+      const result = await res.json();
+      if (!res.ok)
+        throw new Error(result.error || 'Registrierung fehlgeschlagen');
 
-    showMessage("Registrierung erfolgreich! Bitte jetzt einloggen.", true);
-    switchForm('login');
-  } catch (err) {
-    console.error(err);
-    showMessage(err.message || 'Fehler bei Registrierung');
-  }
-});
+      showMessage('Registrierung erfolgreich! Bitte jetzt einloggen.', true);
+      switchForm('login');
+    } catch (err) {
+      console.error(err);
+      showMessage(err.message || 'Fehler bei Registrierung');
+    }
+  });
