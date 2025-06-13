@@ -225,6 +225,11 @@ router.post(
       }
     }
 
+    // Mark all KOLOs across all rounds as inactive
+    await supabase
+      .from('kolos')
+      .update({ active: false });
+
     res.json({ ended: true });
   }),
 );
