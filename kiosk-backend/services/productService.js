@@ -10,10 +10,10 @@ const SORT_OPTIONS = {
 export async function listProducts(sortKey = 'price_asc', role = null) {
   const { column, asc } = SORT_OPTIONS[sortKey] || SORT_OPTIONS.price_asc;
 
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .order(column, { ascending: asc });
+  let query = supabase.from('products').select('*');
+  if (role !== 'admin') query = query.eq('available', true);
+
+  const { data, error } = await query.order(column, { ascending: asc });
 
   if (error) return { error: error.message };
 
