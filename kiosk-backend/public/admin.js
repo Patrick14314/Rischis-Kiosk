@@ -36,55 +36,17 @@ function toggleSection(id) {
   }
 }
 
-const sections = [
-  'add',
-  'stats',
-  'products',
-  'purchases',
-  'users',
-  'balance',
-  'buy-for-user',
-];
-function showTab(id) {
-  sections.forEach((sec) => {
-    const container = document.getElementById(`${sec}-container`);
-    const arrow = document.querySelector(`#toggle-${sec} .arrow`);
-    if (container) {
-      if (sec === id) {
-        container.classList.remove('hidden');
-        arrow && (arrow.textContent = '▲');
-      } else {
-        container.classList.add('hidden');
-        arrow && (arrow.textContent = '▼');
-      }
-    }
-  });
-  document.querySelectorAll('#admin-nav button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.target === id);
-  });
-}
-
 // Hilfsfunktion für Datum
 function formatDateTime(iso) {
   const d = new Date(iso);
-  return (
-    d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) +
-    ' ' +
-    d.toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Europe/Berlin',
-    })
-  );
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) + ' ' +
+         d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin' });
 }
 
 // Eingeloggten Benutzer laden
 async function loadCurrentUser() {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/user`, {
-      credentials: 'include',
-    });
+    const res = await fetch(`${BACKEND_URL}/api/user`, { credentials: 'include' });
     if (res.ok) {
       const user = await res.json();
       currentUserId = user.id;
@@ -97,19 +59,14 @@ async function loadCurrentUser() {
 // -------- Produkte --------
 async function loadProducts() {
   const category = document.getElementById('category-filter')?.value || 'all';
-  const res = await fetch(`${BACKEND_URL}/api/admin/products`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/products`, { credentials: 'include' });
   const data = await res.json();
   const list = document.getElementById('product-list');
   list.innerHTML = '';
-  data
-    .filter((p) => category === 'all' || p.category === category)
-    .forEach((p) => {
-      const li = document.createElement('li');
-      li.className =
-        'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md hover:shadow-lg transition-all';
-      li.innerHTML = `
+  data.filter(p => category === 'all' || p.category === category).forEach(p => {
+    const li = document.createElement('li');
+    li.className = 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md hover:shadow-lg transition-all';
+    li.innerHTML = `
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <p class="text-base font-semibold">${p.name}</p>
@@ -127,23 +84,17 @@ async function loadProducts() {
           </button>
         </div>
       </div>`;
-      list.appendChild(li);
-    });
+    list.appendChild(li);
+  });
 }
 
-document
-  .getElementById('category-filter')
-  ?.addEventListener('change', loadProducts);
+document.getElementById('category-filter')?.addEventListener('change', loadProducts);
 
 async function addProduct(e) {
   e.preventDefault();
   const name = document.getElementById('product-name').value.trim();
-  const price = parseFloat(
-    document.getElementById('product-price').value.replace(',', '.'),
-  );
-  const purchase_price = parseFloat(
-    document.getElementById('product-purchase').value.replace(',', '.'),
-  );
+  const price = parseFloat(document.getElementById('product-price').value.replace(',', '.'));
+  const purchase_price = parseFloat(document.getElementById('product-purchase').value.replace(',', '.'));
   const stock = parseInt(document.getElementById('product-stock').value);
   const category = document.getElementById('product-category').value;
   const token = await getCsrfToken();
@@ -154,20 +105,11 @@ async function addProduct(e) {
       'x-csrf-token': token,
     },
     credentials: 'include',
-    body: JSON.stringify({
-      name,
-      price,
-      purchase_price,
-      stock,
-      category,
-      created_by: currentUserId,
-    }),
+    body: JSON.stringify({ name, price, purchase_price, stock, category, created_by: currentUserId })
   });
   const result = await res.json();
   const msgEl = document.getElementById('product-result');
-  msgEl.textContent = res.ok
-    ? 'Produkt gespeichert!'
-    : `Fehler: ${result.error}`;
+  msgEl.textContent = res.ok ? 'Produkt gespeichert!' : `Fehler: ${result.error}`;
   if (res.ok) {
     e.target.reset();
     loadStats();
@@ -181,11 +123,9 @@ async function addProduct(e) {
 document.getElementById('add-product')?.addEventListener('submit', addProduct);
 
 async function editProduct(id) {
-  const res = await fetch(`${BACKEND_URL}/api/admin/products`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/products` , { credentials: 'include' });
   const products = await res.json();
-  const p = products.find((x) => x.id === id);
+  const p = products.find(x => x.id === id);
   if (!p) return;
   const newName = prompt('Neuen Produktnamen eingeben:', p.name);
   const newPrice = prompt('Neuen Verkaufspreis in € eingeben:', p.price);
@@ -199,11 +139,7 @@ async function editProduct(id) {
       'x-csrf-token': token,
     },
     credentials: 'include',
-    body: JSON.stringify({
-      name: newName,
-      price: parseFloat(newPrice),
-      stock: parseInt(newStock),
-    }),
+    body: JSON.stringify({ name:newName, price:parseFloat(newPrice), stock:parseInt(newStock) })
   });
   loadProducts();
   loadStats();
@@ -218,7 +154,7 @@ async function toggleAvailability(id, current) {
       'x-csrf-token': token2,
     },
     credentials: 'include',
-    body: JSON.stringify({ available: !current }),
+    body: JSON.stringify({ available: !current })
   });
   loadProducts();
 }
@@ -238,12 +174,9 @@ async function deleteProduct(id) {
 
 // ---------- Statistik ----------
 async function loadStats() {
-  const res = await fetch(`${BACKEND_URL}/api/admin/stats`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/stats`, { credentials: 'include' });
   if (!res.ok) return;
-  const { users, totalBalance, shopValue, totalRevenue, totalCost, profit } =
-    await res.json();
+  const { users, totalBalance, shopValue, totalRevenue, totalCost, profit } = await res.json();
   document.getElementById('stats').innerHTML = `
     <p class="mt-4 text-sm"><strong>Produkte im Shop:</strong> ${users.length}</p>
     <p class="text-sm"><strong>Shop-Warenwert:</strong> ${shopValue.toFixed(2)} €</p>
@@ -254,6 +187,7 @@ async function loadStats() {
     <hr class="my-3" />
     <p class="text-sm"><strong>Gesamtsaldo aller Nutzer:</strong> <span class="${totalBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${totalBalance.toFixed(2)} €</span></p>`;
 }
+
 
 // ---------- Käufe ----------
 let purchasesVisible = false;
@@ -278,36 +212,23 @@ function togglePurchases() {
 }
 
 async function loadPurchases(initial = false) {
-  const res = await fetch(
-    `${BACKEND_URL}/api/admin/purchases?offset=${purchaseOffset}&limit=${purchaseLimit}`,
-    { credentials: 'include' },
-  );
+  const res = await fetch(`${BACKEND_URL}/api/admin/purchases?offset=${purchaseOffset}&limit=${purchaseLimit}`, { credentials: 'include' });
   const data = await res.json();
   const list = document.getElementById('purchase-history');
-  const items = data
-    .map(
-      (e) =>
-        `<li>${formatDateTime(e.created_at)} – <strong>${e.user_name}</strong> kaufte <strong>${e.quantity || 1}x ${e.product_name}</strong> für ${e.price.toFixed(2)} €</li>`,
-    )
-    .join('');
-  if (initial) list.innerHTML = items;
-  else list.innerHTML += items;
+  const items = data.map(e => `<li>${formatDateTime(e.created_at)} – <strong>${e.user_name}</strong> kaufte <strong>${e.quantity || 1}x ${e.product_name}</strong> für ${e.price.toFixed(2)} €</li>`).join('');
+  if (initial) list.innerHTML = items; else list.innerHTML += items;
   purchaseOffset += purchaseLimit;
 }
 
-function loadMorePurchases() {
-  loadPurchases(false);
-}
+function loadMorePurchases() { loadPurchases(false); }
 
 // ---------- Benutzer & Guthaben ----------
 async function loadUserPasswords() {
-  const res = await fetch(`${BACKEND_URL}/api/admin/users`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
   const data = await res.json();
   const list = document.getElementById('user-manage-list');
   list.innerHTML = '';
-  data.forEach((u) => {
+  data.forEach(u => {
     const li = document.createElement('li');
     li.className = 'flex justify-between items-center gap-2';
     const span = document.createElement('span');
@@ -332,15 +253,13 @@ async function editUser(id, currentName) {
         'x-csrf-token': token,
       },
       credentials: 'include',
-      body: JSON.stringify({ name: newName.trim() }),
+      body: JSON.stringify({ name: newName.trim() })
     });
     if (!res.ok) {
       return alert('Fehler beim Speichern des Namens');
     }
   }
-  const newPw = prompt(
-    'Neues Passwort (mind. 6 Zeichen, leer lassen zum Überspringen):',
-  );
+  const newPw = prompt('Neues Passwort (mind. 6 Zeichen, leer lassen zum Überspringen):');
   if (newPw) {
     if (newPw.length < 6) return alert('Passwort zu kurz.');
     const tokenPw = await getCsrfToken();
@@ -351,7 +270,7 @@ async function editUser(id, currentName) {
         'x-csrf-token': tokenPw,
       },
       credentials: 'include',
-      body: JSON.stringify({ password: newPw }),
+      body: JSON.stringify({ password: newPw })
     });
     if (!resPw.ok) {
       return alert('Fehler beim Ändern des Passworts');
@@ -362,36 +281,26 @@ async function editUser(id, currentName) {
 }
 
 async function loadUserBalances() {
-  const res = await fetch(`${BACKEND_URL}/api/admin/users`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
   const data = await res.json();
-  document.getElementById('balance-control-list').innerHTML = data
-    .map((u) => {
-      const cls =
-        u.balance < 0
-          ? 'text-red-600 dark:text-red-400 font-bold'
-          : 'text-green-600 dark:text-green-400';
-      return `<li class="flex flex-wrap items-center gap-2">
+  document.getElementById('balance-control-list').innerHTML = data.map(u => {
+    const cls = u.balance < 0 ? 'text-red-600 dark:text-red-400 font-bold' : 'text-green-600 dark:text-green-400';
+    return `<li class="flex flex-wrap items-center gap-2">
       <span class="flex-1">${u.name}: <span class="${cls}">${u.balance.toFixed(2)} €</span></span>
       <input type="number" id="bal-${u.id}" class="w-20 border px-2 py-1" step="0.01" />
       <button onclick="updateBalance('${u.id}', 'add')" class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">+</button>
       <button onclick="updateBalance('${u.id}', 'subtract')" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">-</button>
     </li>`;
-    })
-    .join('');
+  }).join('');
 }
 
 async function updateBalance(id, action) {
   const val = parseFloat(document.getElementById('bal-' + id).value);
   if (isNaN(val)) return alert('Ungültiger Betrag.');
-  const res = await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/users/${id}`, { credentials: 'include' });
   const user = await res.json();
   let newBalance = user.balance;
-  if (action === 'add') newBalance += val;
-  else newBalance -= val;
+  if (action === 'add') newBalance += val; else newBalance -= val;
   const token = await getCsrfToken();
   await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
     method: 'PUT',
@@ -400,7 +309,7 @@ async function updateBalance(id, action) {
       'x-csrf-token': token,
     },
     credentials: 'include',
-    body: JSON.stringify({ balance: newBalance }),
+    body: JSON.stringify({ balance: newBalance })
   });
   alert('Guthaben aktualisiert.');
   loadUserBalances();
@@ -409,27 +318,21 @@ async function updateBalance(id, action) {
 
 // -------- Produkt für Nutzer kaufen --------
 async function loadBuyUsers() {
-  const res = await fetch(`${BACKEND_URL}/api/admin/users`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/users`, { credentials: 'include' });
   const data = await res.json();
   const select = document.getElementById('buy-user');
   if (!select) return;
-  select.innerHTML = data
-    .map((u) => `<option value="${u.id}">${u.name}</option>`)
-    .join('');
+  select.innerHTML = data.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
 }
 
 async function loadBuyProducts() {
-  const res = await fetch(`${BACKEND_URL}/api/admin/products`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${BACKEND_URL}/api/admin/products`, { credentials: 'include' });
   const data = await res.json();
   const select = document.getElementById('buy-product');
   if (!select) return;
   select.innerHTML = data
-    .filter((p) => p.available && p.stock > 0)
-    .map((p) => `<option value="${p.id}">${p.name} (${p.stock})</option>`)
+    .filter(p => p.available && p.stock > 0)
+    .map(p => `<option value="${p.id}">${p.name} (${p.stock})</option>`)
     .join('');
 }
 
@@ -447,11 +350,7 @@ async function buyForUser(e) {
       'x-csrf-token': token,
     },
     credentials: 'include',
-    body: JSON.stringify({
-      user_id: userId,
-      product_id: productId,
-      quantity: qty,
-    }),
+    body: JSON.stringify({ user_id: userId, product_id: productId, quantity: qty })
   });
   const result = await res.json();
   const msgEl = document.getElementById('buy-for-user-result');
@@ -474,8 +373,5 @@ window.addEventListener('DOMContentLoaded', () => {
   loadUserBalances();
   loadBuyUsers();
   loadBuyProducts();
-  document
-    .getElementById('buy-for-user-form')
-    ?.addEventListener('submit', buyForUser);
-  showTab('add');
+  document.getElementById('buy-for-user-form')?.addEventListener('submit', buyForUser);
 });
