@@ -143,6 +143,7 @@
       const data = await res.json();
       if (res.ok) {
         showMessage("Login erfolgreich! Weiterleitung...", true);
+        sessionStorage.setItem('firstLogin', 'true');
         setTimeout(() => window.location.href = 'dashboard.html', 1000);
       } else {
         showMessage("Login fehlgeschlagen: " + (data.error || ''));
