@@ -258,6 +258,35 @@ router.post(
   }),
 );
 
+router.get(
+  '/kolo',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { data: round } = await supabase
+      .from('buzzer_rounds')
+      .select('id')
+      .eq('active', true)
+      .maybeSingle();
+
+    if (!round) return res.status(404).json({ kolo: null });
+
+    const { data: kolo } = await supabase
+      .from('kolos')
+      .select('id, active, created_at')
+      .eq('round_id', round.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { count } = await supabase
+      .from('kolos')
+      .select('id', { count: 'exact', head: true })
+      .eq('round_id', round.id);
+
+    res.json({ kolo, number: count });
+  }),
+);
+
 router.post(
   '/kolo',
   requireAdmin,

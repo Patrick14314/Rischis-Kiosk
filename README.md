@@ -96,6 +96,7 @@ Das Buzzer-Spiel ermöglicht schnelle Musikquiz-Runden. Es nutzt Supabase für A
 ### API-Endpunkte (Auszug)
 
 - `GET /api/buzzer/round` – aktive Runde abrufen
+- `GET /api/buzzer/kolo` – aktuelles KOLO abrufen
 - `POST /api/buzzer/round` – neue Runde starten (Admin)
 - `POST /api/buzzer/round/end` – laufende Runde beenden (Admin)
 - `POST /api/buzzer/join` – aktueller Runde beitreten
