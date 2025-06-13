@@ -70,6 +70,7 @@ async function loadRound() {
 
   if (round) {
     infoEl.textContent = `Einsatz: ${round.bet} €, Limit: ${round.points_limit}`;
+    if (roundForm) roundForm.classList.add('hidden');
     if (round.joinable === false) {
       joinBtn.classList.add('hidden');
       lockBtn?.classList.add('hidden');
@@ -84,6 +85,7 @@ async function loadRound() {
     }
   } else {
     infoEl.textContent = 'Keine laufende Runde';
+    roundForm?.classList.remove('hidden');
     joinBtn.classList.add('hidden');
     endBtn?.classList.add('hidden');
     lockBtn?.classList.add('hidden');
