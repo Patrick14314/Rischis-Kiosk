@@ -61,6 +61,30 @@ Im Entwicklungsmodus sind Anfragen von allen Domains erlaubt. Wird der Server
 mit `NODE_ENV=production` gestartet, akzeptiert er nur noch Ursprünge mit der
 Top-Level-Domain `.de`.
 
+## Safari-Hinweis vermeiden
+
+Safari auf iOS blendet gelegentlich den Text
+"Wenn die Website nicht richtig funktioniert, kannst du die Datenschutzmaßnahmen
+reduzieren" ein, wenn Cookies oder API-Aufrufe als Cross‑Site eingestuft werden.
+Damit der Hinweis gar nicht erst erscheint, sollte möglichst alles als
+First‑Party wahrgenommen werden:
+
+1. **Backend und Frontend unter derselben Domain betreiben** –
+   Idealerweise laufen Frontend und Express‑Server beide unter `rischi.de`, z. B.
+   `https://rischi.de` und `https://api.rischi.de`. Wenn Supabase genutzt wird,
+   kann ein [Custom Domain](https://supabase.com/docs/guides/platform/custom-domains)
+   oder ein Reverse Proxy helfen.
+2. **Cookies korrekt konfigurieren** – In der `.env` empfiehlt es sich,
+   `COOKIE_DOMAIN=rischi.de`, `COOKIE_SECURE=true` und ein
+   `COOKIE_SAMESITE` von `lax` oder `strict` zu setzen. So behandelt Safari die
+   Cookies als First‑Party.
+3. **Externe Skripte minimieren** – Je weniger Drittanbieter‑Skripte geladen
+   werden, desto geringer ist die Wahrscheinlichkeit, dass Safari eine
+   Tracking‑Gefahr vermutet.
+
+Sind alle Cookies und API‑Calls auf dieselbe Domain ausgerichtet, verschwindet
+der Safari‑Hinweis in der Regel dauerhaft.
+
 ## Formatierung und Linting
 
 Das Projekt verwendet ESLint und Prettier zur Code-Qualität. Die folgenden Befehle stehen zur Verfügung:
