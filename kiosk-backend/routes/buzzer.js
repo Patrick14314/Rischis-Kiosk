@@ -19,6 +19,16 @@ function broadcastBuzz() {
   sseClients.forEach((client) => client.write(msg));
 }
 
+function broadcastUnlock() {
+  const msg = `event: unlock\ndata: unlock\n\n`;
+  sseClients.forEach((client) => client.write(msg));
+}
+
+function broadcastLock() {
+  const msg = `event: lock\ndata: lock\n\n`;
+  sseClients.forEach((client) => client.write(msg));
+}
+
 router.get('/events', requireAuth, (req, res) => {
   res.set({
     'Content-Type': 'text/event-stream',
@@ -277,6 +287,7 @@ router.post(
       .eq('round_id', round.id);
 
     res.json({ kolo: data });
+    broadcastUnlock();
   }),
 );
 
@@ -420,6 +431,13 @@ router.post(
     if (participant.has_buzzed || participant.has_skipped)
       return res.status(400).json({ error: 'Bereits Buzz/Skip genutzt' });
 
+    const { count: existingBuzzes } = await supabase
+      .from('buzzes')
+      .select('id', { count: 'exact', head: true })
+      .eq('kolo_id', kolo.id);
+    if (existingBuzzes > 0)
+      return res.status(400).json({ error: 'Buzzer bereits ausgelöst' });
+
     const { error } = await supabase
       .from('buzzes')
       .insert({ id: randomUUID(), kolo_id: kolo.id, user_id: userId });
@@ -431,8 +449,17 @@ router.post(
       .eq('round_id', round.id)
       .eq('user_id', userId);
 
+    const { data: firstBuzz } = await supabase
+      .from('buzzes')
+      .select('user_id')
+      .eq('kolo_id', kolo.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
+
     res.json({ buzzed: true });
     broadcastBuzz();
+    if (firstBuzz?.user_id === userId) broadcastLock();
   }),
 );
 

@@ -181,6 +181,14 @@ async function init() {
     buzzerSound.currentTime = 0;
     buzzerSound.play().catch(() => {});
   });
+  evt.addEventListener('unlock', () => {
+    document.getElementById('buzz-btn').disabled = false;
+    document.getElementById('skip-btn').disabled = false;
+  });
+  evt.addEventListener('lock', () => {
+    document.getElementById('buzz-btn').disabled = true;
+    document.getElementById('skip-btn').disabled = true;
+  });
 
   document.getElementById('join-btn').addEventListener('click', joinRound);
   document.getElementById('buzz-btn').addEventListener('click', buzz);

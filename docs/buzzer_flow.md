@@ -19,6 +19,7 @@ Diese Datei beschreibt den kompletten Ablauf des Buzzer-Spiels, wie es in "Risch
 - Ein KOLO entspricht einem Lied oder einer Frage.
 - Der Admin startet das KOLO und legt einen Eintrag in `kolos` an (`active = true`).
 - Buzz und Skip der Teilnehmer werden zurückgesetzt.
+- Über ein SSE-Event wird der Buzzer für alle Spieler wieder freigeschaltet.
 
 ## 4. Buzz-Phase
 
@@ -26,6 +27,7 @@ Diese Datei beschreibt den kompletten Ablauf des Buzzer-Spiels, wie es in "Risch
 - Buzzes werden in `kolos.buzz_order` mit Zeitstempel gespeichert.
 - Ein SQL-Trigger stellt sicher, dass nur der erste Buzz als `first = true` markiert wird.
 - Nach einem Buzz kann der Spieler weder Buzz noch Skip nutzen.
+- Nachdem der erste Buzz eingegangen ist, wird der Buzzer für alle anderen automatisch gesperrt.
 
 ## 5. Skip-Phase (optional)
 
