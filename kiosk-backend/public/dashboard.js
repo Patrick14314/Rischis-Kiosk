@@ -22,7 +22,7 @@ async function getCsrfToken() {
   }
 }
 
-async function checkUserAndRole(retries = 3) {
+async function checkUserAndRole(retries = 6) {
   try {
     // Erst prüfen, ob eine gültige Session existiert
     const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {

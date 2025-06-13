@@ -26,7 +26,7 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-async function checkUser(retries = 3) {
+async function checkUser(retries = 6) {
   try {
     const res = await fetch(`${BACKEND_URL}/api/user`, {
       credentials: 'include',
