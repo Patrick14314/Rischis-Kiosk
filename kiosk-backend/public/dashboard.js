@@ -146,15 +146,30 @@ function showLoading() {
   const overlay = document.createElement('div');
   overlay.id = 'welcome-overlay';
   overlay.className =
-    'fixed inset-0 flex items-center justify-center z-50 text-2xl font-bold bg-white/90 dark:bg-gray-800/90';
+    'fixed inset-0 flex flex-col items-center justify-center z-50 text-2xl font-bold bg-white/90 dark:bg-gray-800/90';
   overlay.style.opacity = '1';
 
   const text = document.createElement('div');
-  text.textContent = 'Loading...';
+  text.textContent = '🔄 Einen Moment...';
   overlay.appendChild(text);
+
+  const barContainer = document.createElement('div');
+  barContainer.className =
+    'welcome-bar-container w-2/3 h-2 bg-gray-300 dark:bg-gray-700 rounded mt-4 overflow-hidden';
+
+  const bar = document.createElement('div');
+  bar.className = 'welcome-bar h-full bg-green-600 dark:bg-green-500';
+  bar.style.width = '0%';
+  bar.style.transition = 'width 1s linear';
+  barContainer.appendChild(bar);
+
+  overlay.appendChild(barContainer);
 
   document.body.appendChild(overlay);
 
+  requestAnimationFrame(() => {
+    bar.style.width = '100%';
+  });
   setTimeout(() => {
     overlay.style.opacity = '0';
     overlay.addEventListener('transitionend', () => overlay.remove(), {
