@@ -23,6 +23,7 @@ async function getCsrfToken() {
 }
 
 let welcomeShown = false;
+let overlayText;
 
 async function checkUserAndRole(retries = 6) {
   try {
@@ -42,6 +43,11 @@ async function checkUserAndRole(retries = 6) {
       return;
     }
 
+    if (!welcomeShown) {
+      welcomeShown = true;
+      showWelcome();
+    }
+
     // Danach Benutzerdaten laden
     const res = await fetch(`${BACKEND_URL}/api/user`, {
       credentials: 'include',
@@ -58,10 +64,7 @@ async function checkUserAndRole(retries = 6) {
       document.getElementById('admin-btn')?.classList.remove('hidden');
     }
 
-    if (!welcomeShown) {
-      welcomeShown = true;
-      showWelcome();
-    }
+    updateWelcomeName(user.name);
   } catch (err) {
     if (err.name === 'AbortError') return;
     console.error('Fehler beim Laden des Nutzers', err);
@@ -103,9 +106,10 @@ function showWelcome() {
     'fixed inset-0 flex flex-col items-center justify-center z-50 text-2xl font-bold bg-white/90 dark:bg-gray-800/90';
   overlay.style.opacity = '1';
 
-  const text = document.createElement('div');
-  text.textContent = '🎉 Willkommen im Kiosk!';
-  overlay.appendChild(text);
+  overlayText = document.createElement('div');
+  overlayText.id = 'welcome-text';
+  overlayText.textContent = '🎉 Willkommen im Kiosk!';
+  overlay.appendChild(overlayText);
 
   const barContainer = document.createElement('div');
   barContainer.className =
@@ -130,4 +134,10 @@ function showWelcome() {
       once: true,
     });
   }, 2000);
+}
+
+function updateWelcomeName(name) {
+  if (overlayText && name) {
+    overlayText.textContent = `🎉 Willkommen, ${name}!`;
+  }
 }
