@@ -55,9 +55,6 @@ async function checkUserAndRole(retries = 6) {
     if (user.role === 'admin') {
       document.getElementById('admin-btn')?.classList.remove('hidden');
     }
-    document
-      .getElementById('nav-buttons')
-      ?.classList.remove('opacity-50', 'pointer-events-none');
   } catch (err) {
     if (err.name === 'AbortError') return;
     console.error('Fehler beim Laden des Nutzers', err);
