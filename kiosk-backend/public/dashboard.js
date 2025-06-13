@@ -26,7 +26,7 @@ async function getCsrfToken() {
   }
 }
 
-async function checkUserAndRole(retries = 6) {
+async function checkUserAndRole(retries = 10) {
   try {
     // Erst prüfen, ob eine gültige Session existiert
     const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
@@ -98,7 +98,7 @@ function setupButtons() {
   buttons.push(
     document.getElementById('kiosk-btn'),
     document.getElementById('buzzer-btn'),
-    document.getElementById('mentos-btn')
+    document.getElementById('mentos-btn'),
   );
   adminButton = document.getElementById('admin-btn');
   if (adminButton) buttons.push(adminButton);
