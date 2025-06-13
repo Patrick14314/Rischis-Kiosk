@@ -117,6 +117,7 @@ router.post(
       .from('buzzer_rounds')
       .select('id')
       .eq('active', true)
+      .limit(1)
       .maybeSingle();
 
     if (existingError) {
@@ -143,6 +144,9 @@ router.post(
       .single();
     if (error) {
       console.error('createRound insert error', error);
+      if (error.code === '23505') {
+        return res.status(400).json({ error: 'Es läuft bereits eine Runde' });
+      }
       return res.status(500).json({
         error: 'Runde konnte nicht erstellt werden',
         detail: error.message,
