@@ -86,7 +86,29 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-window.addEventListener('DOMContentLoaded', checkUserAndRole);
+async function loadCustomerOfWeek() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/customer-of-week`, {
+      credentials: 'include',
+      signal: controller.signal,
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data?.name) {
+      const el = document.getElementById('customer-week');
+      if (el) el.textContent = `\u2728 Kunde der Woche: ${data.name}`;
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Fehler beim Laden Kunde der Woche', err);
+    }
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  checkUserAndRole();
+  loadCustomerOfWeek();
+});
 
 async function logout() {
   try {
