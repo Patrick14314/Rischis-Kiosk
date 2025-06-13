@@ -86,7 +86,13 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-window.addEventListener('DOMContentLoaded', checkUserAndRole);
+window.addEventListener('DOMContentLoaded', () => {
+  if (!welcomeShown) {
+    welcomeShown = true;
+    showWelcome();
+  }
+  checkUserAndRole();
+});
 
 async function logout() {
   try {
