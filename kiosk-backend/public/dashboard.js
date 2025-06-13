@@ -8,6 +8,14 @@ const BACKEND_URL = window.location.origin;
 const controller = new AbortController();
 window.addEventListener('beforeunload', () => controller.abort());
 
+let navButtons;
+let navEnabled = false;
+function enableNav() {
+  if (navEnabled) return;
+  navEnabled = true;
+  navButtons?.classList.remove('opacity-50', 'pointer-events-none');
+}
+
 async function getCsrfToken() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
@@ -24,6 +32,9 @@ async function getCsrfToken() {
 
 async function checkUserAndRole(retries = 6) {
   try {
+    if (!navButtons) {
+      navButtons = document.getElementById('nav-buttons');
+    }
     // Erst prüfen, ob eine gültige Session existiert
     const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
       credentials: 'include',
@@ -55,10 +66,13 @@ async function checkUserAndRole(retries = 6) {
     if (user.role === 'admin') {
       document.getElementById('admin-btn')?.classList.remove('hidden');
     }
+    enableNav();
   } catch (err) {
     if (err.name === 'AbortError') return;
     console.error('Fehler beim Laden des Nutzers', err);
     window.location.href = 'index.html';
+  } finally {
+    enableNav();
   }
 }
 
@@ -71,7 +85,11 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-window.addEventListener('DOMContentLoaded', checkUserAndRole);
+window.addEventListener('DOMContentLoaded', () => {
+  navButtons = document.getElementById('nav-buttons');
+  checkUserAndRole();
+  setTimeout(enableNav, 5000);
+});
 
 async function logout() {
   try {
