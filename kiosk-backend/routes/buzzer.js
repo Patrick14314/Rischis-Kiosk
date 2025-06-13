@@ -274,6 +274,7 @@ router.get(
       .from('kolos')
       .select('id, active, created_at')
       .eq('round_id', round.id)
+      .eq('active', true)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -298,6 +299,22 @@ router.post(
       .single();
 
     if (!round) return res.status(400).json({ error: 'Keine aktive Runde' });
+
+    // Deactivate previous KOLO if it is still marked as active
+    const { data: lastKolo } = await supabase
+      .from('kolos')
+      .select('id, active')
+      .eq('round_id', round.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastKolo?.active) {
+      await supabase
+        .from('kolos')
+        .update({ active: false })
+        .eq('id', lastKolo.id);
+    }
 
     const { data, error } = await supabase
       .from('kolos')
