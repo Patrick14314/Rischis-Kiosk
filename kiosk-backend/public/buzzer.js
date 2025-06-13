@@ -94,6 +94,26 @@ async function loadRound() {
   }
 }
 
+async function loadKolo() {
+  const res = await fetch(`${BACKEND_URL}/api/buzzer/kolo`, {
+    credentials: 'include',
+  });
+  let kolo = null;
+  let number = 0;
+  if (res.status !== 404) {
+    if (!res.ok) return;
+    const data = await res.json();
+    kolo = data.kolo;
+    number = data.number;
+  }
+  const infoEl = document.getElementById('kolo-info');
+  if (kolo && kolo.active) {
+    infoEl.textContent = `Aktives KOLO #${number}`;
+  } else {
+    infoEl.textContent = 'Warte auf neues KOLO…';
+  }
+}
+
 async function loadParticipants() {
   const res = await fetch(`${BACKEND_URL}/api/buzzer/participants`, {
     credentials: 'include',
@@ -173,6 +193,7 @@ async function init() {
   await loadRound();
   await loadParticipants();
   await loadGeneralInfo();
+  await loadKolo();
 
   const evt = new EventSource(`${BACKEND_URL}/api/buzzer/events`, {
     withCredentials: true,
@@ -197,6 +218,7 @@ async function init() {
   setInterval(loadParticipants, 5000);
   setInterval(loadGeneralInfo, 5000);
   setInterval(loadRound, 5000);
+  setInterval(loadKolo, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -329,6 +351,7 @@ async function startKolo(e) {
   const msgEl = document.getElementById('admin-message');
   if (res.ok) {
     msgEl.textContent = 'KOLO gestartet';
+    await loadKolo();
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Starten';
@@ -351,6 +374,7 @@ async function endKolo(correct) {
     msgEl.textContent = 'KOLO beendet';
     await loadParticipants();
     await loadGeneralInfo();
+    await loadKolo();
   } else {
     const data = await res.json().catch(() => ({}));
     msgEl.textContent = data.error || 'Fehler beim Beenden';
