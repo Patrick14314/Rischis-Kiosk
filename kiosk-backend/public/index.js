@@ -69,6 +69,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (!res.ok) throw new Error(result.error || 'Login fehlgeschlagen');
 
     showMessage('Login erfolgreich! Weiterleitung...', true);
+    sessionStorage.setItem('firstLogin', 'true');
 
     const waitForSession = async (retries = 10) => {
       for (let i = 0; i < retries; i++) {

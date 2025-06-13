@@ -22,7 +22,7 @@ async function getCsrfToken() {
   }
 }
 
-let welcomeShown = false;
+let overlayShown = false;
 let overlayText;
 
 async function checkUserAndRole(retries = 6) {
@@ -43,9 +43,14 @@ async function checkUserAndRole(retries = 6) {
       return;
     }
 
-    if (!welcomeShown) {
-      welcomeShown = true;
-      showWelcome();
+    if (!overlayShown) {
+      overlayShown = true;
+      if (sessionStorage.getItem('firstLogin') === 'true') {
+        sessionStorage.setItem('firstLogin', 'false');
+        showWelcome();
+      } else {
+        showLoading();
+      }
     }
 
     // Danach Benutzerdaten laden
@@ -95,6 +100,7 @@ async function logout() {
   } catch (err) {
     console.error('Fehler beim Logout', err);
   } finally {
+    sessionStorage.removeItem('firstLogin');
     window.location.href = 'index.html';
   }
 }
@@ -134,6 +140,27 @@ function showWelcome() {
       once: true,
     });
   }, 2000);
+}
+
+function showLoading() {
+  const overlay = document.createElement('div');
+  overlay.id = 'welcome-overlay';
+  overlay.className =
+    'fixed inset-0 flex items-center justify-center z-50 text-2xl font-bold bg-white/90 dark:bg-gray-800/90';
+  overlay.style.opacity = '1';
+
+  const text = document.createElement('div');
+  text.textContent = 'Loading...';
+  overlay.appendChild(text);
+
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    overlay.addEventListener('transitionend', () => overlay.remove(), {
+      once: true,
+    });
+  }, 1000);
 }
 
 function updateWelcomeName(name) {
