@@ -8,6 +8,15 @@ const BACKEND_URL = window.location.origin;
 const controller = new AbortController();
 window.addEventListener('beforeunload', () => controller.abort());
 
+let navTimer;
+
+function enableNav() {
+  clearTimeout(navTimer);
+  document
+    .getElementById('nav-buttons')
+    ?.classList.remove('opacity-50', 'pointer-events-none');
+}
+
 async function getCsrfToken() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/csrf-token`, {
@@ -55,9 +64,7 @@ async function checkUserAndRole(retries = 6) {
     if (user.role === 'admin') {
       document.getElementById('admin-btn')?.classList.remove('hidden');
     }
-    document
-      .getElementById('nav-buttons')
-      ?.classList.remove('opacity-50', 'pointer-events-none');
+    enableNav();
   } catch (err) {
     if (err.name === 'AbortError') return;
     console.error('Fehler beim Laden des Nutzers', err);
@@ -74,7 +81,10 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-window.addEventListener('DOMContentLoaded', checkUserAndRole);
+window.addEventListener('DOMContentLoaded', () => {
+  navTimer = setTimeout(enableNav, 3000);
+  checkUserAndRole().finally(enableNav);
+});
 
 async function logout() {
   try {
