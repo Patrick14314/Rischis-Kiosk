@@ -22,7 +22,7 @@ async function getCsrfToken() {
   }
 }
 
-async function checkUserAndRole() {
+async function checkUserAndRole(retries = 3) {
   try {
     // Erst prüfen, ob eine gültige Session existiert
     const meRes = await fetch(`${BACKEND_URL}/api/auth/me`, {
@@ -32,6 +32,10 @@ async function checkUserAndRole() {
     const { loggedIn } = await meRes.json();
 
     if (!meRes.ok || !loggedIn) {
+      if (retries > 0) {
+        setTimeout(() => checkUserAndRole(retries - 1), 500);
+        return;
+      }
       window.location.href = 'index.html';
       return;
     }

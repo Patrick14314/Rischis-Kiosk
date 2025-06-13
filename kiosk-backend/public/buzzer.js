@@ -26,15 +26,25 @@ if (localStorage.getItem('darkMode') !== 'false') {
   document.documentElement.classList.add('dark');
 }
 
-async function checkUser() {
+async function checkUser(retries = 3) {
   try {
     const res = await fetch(`${BACKEND_URL}/api/user`, {
       credentials: 'include',
     });
-    if (!res.ok) throw new Error('not auth');
+    if (!res.ok) {
+      if (retries > 0) {
+        await new Promise((r) => setTimeout(r, 500));
+        return checkUser(retries - 1);
+      }
+      throw new Error('not auth');
+    }
     const user = await res.json();
     return user;
   } catch (err) {
+    if (retries > 0 && err.name !== 'AbortError') {
+      await new Promise((r) => setTimeout(r, 500));
+      return checkUser(retries - 1);
+    }
     window.location.href = 'index.html';
     return null;
   }
