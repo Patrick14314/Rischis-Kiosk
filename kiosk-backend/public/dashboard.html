@@ -72,6 +72,24 @@
     .dark ::placeholder {
       color: #9ca3af;
     }
+    #welcome-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.9);
+      transition: opacity 0.3s ease-in-out;
+      z-index: 50;
+    }
+    .dark #welcome-overlay {
+      background-color: rgba(31, 41, 55, 0.9);
+    }
+    .welcome-bar {
+      width: 0%;
+      transition: width 2s linear;
+    }
   </style>
 </head>
 <body class="flex items-center justify-center min-h-screen text-green-900 relative dark:text-white">
