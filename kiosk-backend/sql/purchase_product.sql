@@ -36,5 +36,9 @@ begin
   update products
     set stock = stock - p_quantity
     where id = p_product_id;
+
+  update products
+    set available = false
+    where id = p_product_id and stock <= 0;
 end;
 $$;
