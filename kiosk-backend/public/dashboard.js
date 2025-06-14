@@ -108,6 +108,7 @@ async function loadCustomerOfWeek() {
 window.addEventListener('DOMContentLoaded', () => {
   checkUserAndRole();
   loadCustomerOfWeek();
+  if (typeof startSessionCheck === 'function') startSessionCheck();
 });
 
 async function logout() {

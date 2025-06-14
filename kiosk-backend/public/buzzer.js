@@ -220,6 +220,7 @@ async function init() {
   setInterval(loadGeneralInfo, 5000);
   setInterval(loadRound, 5000);
   setInterval(loadKolo, 5000);
+  if (typeof startSessionCheck === 'function') startSessionCheck();
 }
 
 document.addEventListener('DOMContentLoaded', init);
