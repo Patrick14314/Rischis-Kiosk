@@ -238,6 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadUser();
   await loadProducts();
   await loadPurchaseHistory();
+  if (typeof startSessionCheck === 'function') startSessionCheck();
 
   document
     .getElementById('sort-history')

@@ -374,4 +374,5 @@ window.addEventListener('DOMContentLoaded', () => {
   loadBuyUsers();
   loadBuyProducts();
   document.getElementById('buy-for-user-form')?.addEventListener('submit', buyForUser);
+  if (typeof startSessionCheck === 'function') startSessionCheck();
 });
